@@ -8,7 +8,7 @@ Future<void> main() async {
         ..environment = 'development'
         ..codeVersion = '0.1.0'
         ..handleUncaughtErrors = true
-        ..includePlatformLogs = true)
+        ..includePlatformLogs = false)
       .build();
 
   await RollbarFlutter.run(config, (_rollbar) {
@@ -98,12 +98,15 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            ElevatedButton(
+            // If we ever remove Flutter 1 support, this should be updated to [ElevatedButton]
+            // ignore: deprecated_member_use
+            RaisedButton(
               onPressed: _getBatteryLevel,
               child: Text('Get Battery Level'),
             ),
             Text(_batteryLevel),
-            ElevatedButton(
+            // ignore: deprecated_member_use
+            RaisedButton(
               onPressed: _faultyMethod,
               child: Text('Call Faulty Method'),
             ),
