@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rollbar_flutter/rollbar.dart';
@@ -89,8 +91,56 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<void> _crash() async {
+    return await platform.invokeMethod('crash');
+  }
+
   @override
   Widget build(BuildContext context) {
+    var bodyChildren = <Widget>[
+      // If we ever remove Flutter 1 support, this should be updated to [ElevatedButton]
+      // ignore: deprecated_member_use
+      RaisedButton(
+        onPressed: _getBatteryLevel,
+        child: Text('Get Battery Level'),
+      ),
+      Text(_batteryLevel),
+      // ignore: deprecated_member_use
+      RaisedButton(
+        onPressed: _faultyMethod,
+        child: Text('Call Faulty Method'),
+      ),
+      Text(_faultyMsg)
+    ];
+
+    if (Platform.isIOS) {
+      // ignore: deprecated_member_use
+      bodyChildren.add(RaisedButton(
+        onPressed: _crash,
+        child: Text('Crash application'),
+      ));
+    }
+
+    bodyChildren.addAll(<Widget>[
+      Divider(),
+      Text(
+        'Times you have pushed the plus button:',
+      ),
+      Text(
+        '$_counter',
+        style: Theme.of(context).textTheme.headline4,
+      ),
+      Divider(),
+      Text(
+        'Most recent Flutter error:',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      Text(
+        _lastError,
+        style: Theme.of(context).textTheme.caption,
+      )
+    ]);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -98,38 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            // If we ever remove Flutter 1 support, this should be updated to [ElevatedButton]
-            // ignore: deprecated_member_use
-            RaisedButton(
-              onPressed: _getBatteryLevel,
-              child: Text('Get Battery Level'),
-            ),
-            Text(_batteryLevel),
-            // ignore: deprecated_member_use
-            RaisedButton(
-              onPressed: _faultyMethod,
-              child: Text('Call Faulty Method'),
-            ),
-            Text(_faultyMsg),
-            Divider(),
-            Text(
-              'Times you have pushed the plus button:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Divider(),
-            Text(
-              'Most recent Flutter error:',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            Text(
-              _lastError,
-              style: Theme.of(context).textTheme.caption,
-            )
-          ],
+          children: bodyChildren,
         ),
       ),
       floatingActionButton: FloatingActionButton(

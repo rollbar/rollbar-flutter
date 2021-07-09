@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build_android:
     runs-on: ubuntu-18.04
     name: Flutter version ${{ matrix.flutter_version }}
     strategy:
@@ -65,3 +65,33 @@ jobs:
           rollbar_flutter/pubspec.lock
           rollbar_flutter/example/pubspec.lock
 
+  build_macos:
+    runs-on: macos-latest
+    name: Flutter version ${{ matrix.flutter_version }} (iOS)
+    strategy:
+      matrix:
+        flutter_version: ['1.20.4', '2.2.3']
+    
+    steps:
+    - uses: actions/checkout@v2
+    - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
+      with:
+        flutter-version: ${{ matrix.flutter_version }}
+    - name: Show environment
+      run: |
+        env
+        which flutter
+        flutter doctor -v
+    - name: Build rollbar_flutter iOS example
+      working-directory: ./rollbar_flutter/example/
+      run: flutter build ios --no-codesign
+    - uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      # Save dependencies used
+      with:
+        name: dependencies_used_${{ matrix.flutter_version }}
+        path: |
+          rollbar_dart/pubspec.lock
+          rollbar_dart/example/pubspec.lock
+          rollbar_flutter/pubspec.lock
+          rollbar_flutter/example/pubspec.lock

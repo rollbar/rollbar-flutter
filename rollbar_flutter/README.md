@@ -62,7 +62,7 @@ Logging version-specific issues, even outside of the supported versions, is welc
 ## Platform Support
 
 * Android: Yes
-* iOS: In Development
+* iOS: Yes
 * Web: No
 * Windows: No
 * macOS: No
