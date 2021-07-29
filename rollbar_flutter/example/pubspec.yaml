@@ -1,0 +1,28 @@
+name: rollbar_flutter_example
+description: Demonstrates how to use the rollbar_flutter plugin.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  rollbar_flutter: any
+  cupertino_icons: ^1.0.0
+
+dependency_overrides:
+  rollbar_dart:
+    path: ../../rollbar_dart
+  rollbar_flutter:
+    path: ../
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
