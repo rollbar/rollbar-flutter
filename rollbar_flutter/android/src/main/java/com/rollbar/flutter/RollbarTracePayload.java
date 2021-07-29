@@ -107,9 +107,10 @@ class RollbarTracePayload extends RuntimeException {
     return data;
   }
 
-  // rollbar-java uses the "wrong" trace and trace chain order, but rollbar-dart uses the
-  // preferred one, and these traces are getting shipped to the dart side and will be included in
-  // a combined trace chain, so we must use the dart order convention.
+  // rollbar-java uses the "most recent call last" frame and trace order, but rollbar-dart uses
+  // the preferred order which is "most recent call first". These traces are getting shipped to the
+  // Dart side and will be included in a combined trace chain, so we must reverse them to match the
+  // Dart order.
   private static Body reverseTraces(Body body) {
     BodyContent content = body.getContents();
     if (content instanceof TraceChain) {

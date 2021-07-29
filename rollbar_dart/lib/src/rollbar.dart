@@ -36,62 +36,62 @@ class Rollbar {
     return (await _errorHandler).errorHandlerPort;
   }
 
-  /// Send an error as an occurrence, with DEBUG level.
+  /// Sends an error as an occurrence, with DEBUG level.
   Future<void> debug(dynamic error, StackTrace stackTrace) {
     return log(Level.debug, error, stackTrace);
   }
 
-  /// Send an error as an occurrence, with INFO level.
+  /// Sends an error as an occurrence, with INFO level.
   Future<void> info(dynamic error, StackTrace stackTrace) {
     return log(Level.info, error, stackTrace);
   }
 
-  /// Send an error as an occurrence, with WARNING level.
+  /// Sends an error as an occurrence, with WARNING level.
   Future<void> warning(dynamic error, StackTrace stackTrace) {
     return log(Level.warning, error, stackTrace);
   }
 
-  /// Send an error as an occurrence, with ERROR level.
+  /// Sends an error as an occurrence, with ERROR level.
   Future<void> error(dynamic error, StackTrace stackTrace) {
     return log(Level.error, error, stackTrace);
   }
 
-  /// Send an error as an occurrence, with CRITICAL level.
+  /// Sends an error as an occurrence, with CRITICAL level.
   Future<void> critical(dynamic error, StackTrace stackTrace) {
     return log(Level.critical, error, stackTrace);
   }
 
-  /// Send an error as an occurrence, with the provided level.
+  /// Sends an error as an occurrence, with the provided level.
   Future<void> log(Level level, dynamic error, StackTrace stackTrace) {
     return _processResponse(_coreNotifier.log(level, error, stackTrace, null));
   }
 
-  /// Send a message as an occurrence, with DEBUG level.
+  /// Sends a message as an occurrence, with DEBUG level.
   Future<void> debugMsg(String message) {
     return logMsg(Level.debug, message);
   }
 
-  /// Send a message as an occurrence, with INFO level.
+  /// Sends a message as an occurrence, with INFO level.
   Future<void> infoMsg(String message) {
     return logMsg(Level.info, message);
   }
 
-  /// Send a message as an occurrence, with WARNING level.
+  /// Sends a message as an occurrence, with WARNING level.
   Future<void> warningMsg(String message) {
     return logMsg(Level.warning, message);
   }
 
-  /// Send a message as an occurrence, with ERROR level.
+  /// Sends a message as an occurrence, with ERROR level.
   Future<void> errorMsg(String message) {
     return logMsg(Level.error, message);
   }
 
-  /// Send a message as an occurrence, with CRITICAL level.
+  /// Sends a message as an occurrence, with CRITICAL level.
   Future<void> criticalMsg(String message) {
     return logMsg(Level.critical, message);
   }
 
-  /// Send a message as an occurrence, with the provided level.
+  /// Sends a message as an occurrence, with the provided level.
   Future<void> logMsg(Level level, String message) {
     return _processResponse(_coreNotifier.log(level, null, null, message));
   }
@@ -101,7 +101,7 @@ class Rollbar {
     return _config;
   }
 
-  /// Update the configuration of this instance.
+  /// Updates the configuration of this instance.
   Future<void> configure(Config config) async {
     _config = config;
     await (await _errorHandler).configure(_config);

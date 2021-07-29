@@ -1,7 +1,7 @@
 import 'exception_info.dart';
 import 'frame.dart';
 
-/// Container class with the error or message being sent to Rollbar.
+/// Container class with the error or message to be sent to Rollbar.
 abstract class Body {
   Map<String, dynamic> toJson();
   List<TraceInfo> getTraces();

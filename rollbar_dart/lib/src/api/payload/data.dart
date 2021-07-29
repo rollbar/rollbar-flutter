@@ -2,7 +2,7 @@ import 'body.dart' show Body;
 import 'client.dart' show Client;
 import 'level.dart';
 
-/// Contains the data for the occurrence being sent to Rollbar.
+/// Contains the data for the occurrence to be sent to Rollbar.
 class Data {
   Map<String, String> notifier;
   String environment;

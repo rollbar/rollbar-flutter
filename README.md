@@ -1,6 +1,6 @@
 # rollbar-dart and rollbar-flutter
 
-This repository contains the `rollbar_dart` package and the `rollbar_flutter` Flutter plugin. 
+This repository contains the `rollbar_dart` package and the `rollbar_flutter` plugin. 
 
 For `rollbar-dart`, see its [README](rollbar_dart/README.md).
 
