@@ -33,7 +33,7 @@ See the [`example` directory](./example/) for a complete example.
 
 ## Documentation
 
-For complete usage instructions and configuration reference, see our [`rollbar-dart` SDK docs](https://docs.rollbar.com/docs/flutter#rollbar_dart).
+For complete usage instructions and configuration reference, see our [`rollbar-dart` SDK docs](https://docs.rollbar.com/docs/flutter#dart).
 
 ## Release History & Changelog
 

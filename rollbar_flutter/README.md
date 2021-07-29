@@ -65,7 +65,7 @@ Additional platforms will be prioritized based on feedback from users.
 
 ## Documentation
 
-For complete usage instructions and configuration reference, see our [`rollbar-flutter` SDK docs](https://docs.rollbar.com/docs/flutter#rollbar_flutter).
+For complete usage instructions and configuration reference, see our [`rollbar-flutter` SDK docs](https://docs.rollbar.com/docs/flutter#flutter).
 
 ## Release History & Changelog
 
