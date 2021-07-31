@@ -142,6 +142,15 @@ task spotbugsMain(type: com.github.spotbugs.snom.SpotBugsTask) {
     }
 }
 
+String flutterCompatVersion = Paths.get(flutterRoot, "version")
+        .toFile().text.trim()
+
+if (flutterCompatVersion.startsWith('1.')) {
+   android.sourceSets.test.java.srcDir file('src/testflutter1/java/')
+} else {
+   android.sourceSets.test.java.srcDir file('src/testflutter2/java/')
+}
+
 afterEvaluate {
     if (project.tasks.getByName("check")) {
         check.dependsOn('spotbugsMain')

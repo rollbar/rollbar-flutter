@@ -52,6 +52,13 @@ Future<void> main() async {
 
 See the [`example` directory](./example/) for a complete example.
 
+## Compatibility
+
+- Flutter 1: version **1.20.4** and above
+- Flutter 2: version **2.0.5** and above
+
+Logging version-specific issues, even outside of the supported versions, is welcome and they will be fixed whenever possible.
+
 ## Platform Support
 
 * Android: Yes

@@ -15,6 +15,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
+
+import com.rollbar.flutter.compatibility.CodecAdapter;
+
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -47,12 +50,7 @@ public class RollbarMethodChannelTest {
 
     ByteBuffer errorBytes = ByteBuffer.wrap(new byte[]{3, 2, 0});
 
-    when(codec.encodeErrorEnvelopeWithStacktrace(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.anyString(),
-            any(),
-            ArgumentMatchers.anyString()))
-            .thenReturn(errorBytes);
+    CodecAdapter.whenCodecInvoked(codec, errorBytes);
 
     when(codec.decodeMethodCall(ArgumentMatchers.<ByteBuffer>any()))
             .thenReturn(new MethodCall("simpleMethod", 1));
@@ -74,14 +72,13 @@ public class RollbarMethodChannelTest {
     ArgumentCaptor<String> stackTrace = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
 
-    verify(codec, times(1)).encodeErrorEnvelopeWithStacktrace(
-            anyString(),
-            message.capture(),
-            any(),
-            stackTrace.capture()
-    );
+    CodecAdapter.verifyCall(codec, times(1),
+            message,
+            stackTrace);
 
-    assertThat(stackTrace.getValue(), startsWith("com.rollbar.flutter.RollbarTracePayload:"));
+    if (CodecAdapter.canCaptureStackTrace()) {
+      assertThat(stackTrace.getValue(), startsWith("com.rollbar.flutter.RollbarTracePayload:"));
+    }
 
     String messageString = message.getValue();
     assertNotNull(messageString);

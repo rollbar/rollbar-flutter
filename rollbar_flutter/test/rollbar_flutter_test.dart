@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:rollbar_dart/rollbar.dart';
+import 'flutter1_workarounds.dart' as rbdart;
 import 'package:rollbar_flutter/rollbar.dart';
 
 import 'platform_exception_utils.dart';
@@ -16,10 +16,10 @@ void main() {
   MockSender sender;
 
   setUp(() async {
-    RollbarPlatformInfo.isAndroid = true;
+    rbdart.RollbarPlatformInfo.isAndroid = true;
     sender = MockSender();
     when(sender.send(any))
-        .thenAnswer((_invocation) => Future.value(Response()));
+        .thenAnswer((_invocation) => Future.value(rbdart.Response()));
 
     callsReceived = [];
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -29,7 +29,7 @@ void main() {
   });
 
   tearDown(() {
-    RollbarPlatformInfo.reset();
+    rbdart.RollbarPlatformInfo.reset();
     channel.setMockMethodCallHandler(null);
   });
 
@@ -117,7 +117,7 @@ Future<void> _runRollbarFlutter(
   expect(run, equals(true));
 }
 
-class MockSender extends Mock implements Sender {}
+class MockSender extends Mock implements rbdart.Sender {}
 
 MockSender createMockSender(Config c) {
   return MockSender();
