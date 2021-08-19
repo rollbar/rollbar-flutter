@@ -10,6 +10,7 @@ class Data {
   String platform;
   String language;
   String framework;
+  String codeVersion;
   Level level;
   int timestamp;
   Body body;
@@ -24,17 +25,22 @@ class Data {
       'client': client.toJson(),
       'platform': platform,
       'language': language,
-      'framework': framework,
       'level': level.name,
       'timestamp': timestamp,
       'body': body.toJson(),
-      'custom': custom,
     };
 
-    if (platformPayload != null) {
-      result['platform_payload'] = platformPayload;
-    }
+    addIfNotNull(result, 'framework', framework);
+    addIfNotNull(result, 'code_version', codeVersion);
+    addIfNotNull(result, 'custom', custom);
+    addIfNotNull(result, 'platform_payload', platformPayload);
 
     return result;
+  }
+
+  void addIfNotNull(Map<String, dynamic> result, String name, dynamic value) {
+    if (value != null) {
+      result[name] = value;
+    }
   }
 }
