@@ -22,6 +22,7 @@ void main() {
             ..environment = 'production'
             ..codeVersion = '0.23.2'
             ..handleUncaughtErrors = false
+            ..package = 'some_package_name'
             ..sender = (_) => sender)
           .build();
 
@@ -39,6 +40,11 @@ void main() {
         expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
 
+        // Project root detection currently uses the `server` element of the payload,
+        // so that's where we include it.
+        var root = getPath(payload, ['data', 'server', 'root']);
+        expect(root, equals('some_package_name'));
+
         var trace = getPath(payload, ['data', 'body', 'trace']);
 
         expect(trace['exception']['class'], equals('ArgumentError'));
@@ -47,7 +53,8 @@ void main() {
       }
     });
 
-    test('If optional fields are not set they should not be added to the payload',
+    test(
+        'If optional fields are not set they should not be added to the payload',
         () async {
       var config = (ConfigBuilder('BlaBlaAccessToken')
             ..environment = 'production'
@@ -69,6 +76,7 @@ void main() {
         expect(data, isNot(contains('framework')));
         expect(data, isNot(contains('custom')));
         expect(data, isNot(contains('platform_payload')));
+        expect(data, isNot(contains('server')));
       }
     });
 

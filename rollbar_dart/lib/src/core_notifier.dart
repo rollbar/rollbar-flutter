@@ -34,6 +34,16 @@ class CoreNotifier {
       Level level, dynamic error, StackTrace stackTrace, String message) async {
     var body = await _prepareBody(message, error, stackTrace);
 
+    var client = Client()
+      ..locale = Platform.localeName
+      ..hostname = Platform.localHostname
+      ..os = Platform.operatingSystem
+      ..osVersion = Platform.operatingSystemVersion
+      ..rootPackage = _config.package
+      ..dart = {
+        'version': Platform.version,
+      };
+
     var data = Data()
       ..body = body
       ..timestamp = DateTime.now().microsecondsSinceEpoch
@@ -42,16 +52,16 @@ class CoreNotifier {
       ..platform = Platform.operatingSystem
       ..framework = _config.framework
       ..codeVersion = _config.codeVersion
-      ..client = (Client()
-        ..locale = Platform.localeName
-        ..hostname = Platform.localHostname
-        ..os = Platform.operatingSystem
-        ..osVersion = Platform.operatingSystemVersion
-        ..dart = {
-          'version': Platform.version,
-        })
+      ..client = client
       ..environment = _config.environment
       ..notifier = {'version': NOTIFIER_VERSION, 'name': NOTIFIER_NAME};
+
+    if (client.rootPackage != null) {
+      // Root detection compatibility, currently checked under the server element
+      var server = {'root': client.rootPackage};
+
+      data.server = server;
+    }
 
     if (_transformer != null) {
       data = await _transformer.transform(error, stackTrace, data);
