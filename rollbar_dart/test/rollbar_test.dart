@@ -20,7 +20,7 @@ void main() {
       // mock as the sender factory.
       var config = (ConfigBuilder('BlaBlaAccessToken')
             ..environment = 'production'
-            ..codeVersion = '1.0.0'
+            ..codeVersion = '0.23.2'
             ..handleUncaughtErrors = false
             ..sender = (_) => sender)
           .build();
@@ -36,6 +36,7 @@ void main() {
         await rollbar.error(error, stackTrace);
         var payload = verify(await sender.send(captureAny)).captured.single;
 
+        expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
 
         var trace = getPath(payload, ['data', 'body', 'trace']);
@@ -43,6 +44,31 @@ void main() {
         expect(trace['exception']['class'], equals('ArgumentError'));
         expect(trace['frames'].length, greaterThan(1));
         expect(trace['frames'][0]['method'], equals('failingFunction'));
+      }
+    });
+
+    test('If optional fields are not set they should not be added to the payload',
+        () async {
+      var config = (ConfigBuilder('BlaBlaAccessToken')
+            ..environment = 'production'
+            ..handleUncaughtErrors = false
+            ..sender = (_) => sender)
+          .build();
+
+      rollbar = Rollbar(config);
+      await rollbar.ensureInitialized();
+
+      try {
+        failingFunction();
+      } catch (error, stackTrace) {
+        await rollbar.error(error, stackTrace);
+        var payload = verify(await sender.send(captureAny)).captured.single;
+
+        Map data = payload['data'];
+        expect(data, isNot(contains('code_version')));
+        expect(data, isNot(contains('framework')));
+        expect(data, isNot(contains('custom')));
+        expect(data, isNot(contains('platform_payload')));
       }
     });
 

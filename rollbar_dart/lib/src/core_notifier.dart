@@ -40,6 +40,8 @@ class CoreNotifier {
       ..language = 'dart'
       ..level = level
       ..platform = Platform.operatingSystem
+      ..framework = _config.framework
+      ..codeVersion = _config.codeVersion
       ..client = (Client()
         ..locale = Platform.localeName
         ..hostname = Platform.localHostname
@@ -50,8 +52,6 @@ class CoreNotifier {
         })
       ..environment = _config.environment
       ..notifier = {'version': NOTIFIER_VERSION, 'name': NOTIFIER_NAME};
-
-    data.framework = _config.framework;
 
     if (_transformer != null) {
       data = await _transformer.transform(error, stackTrace, data);
