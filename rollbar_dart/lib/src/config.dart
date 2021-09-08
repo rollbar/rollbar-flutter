@@ -10,6 +10,7 @@ class Config {
   final String environment;
   final String framework;
   final String codeVersion;
+  final String package;
   final bool handleUncaughtErrors;
   final bool includePlatformLogs;
   final Transformer Function(Config) transformer;
@@ -21,6 +22,7 @@ class Config {
       this.environment,
       this.framework,
       this.codeVersion,
+      this.package,
       this.handleUncaughtErrors,
       this.includePlatformLogs,
       this.transformer,
@@ -37,6 +39,7 @@ class Config {
       'environment': environment,
       'framework': framework,
       'codeVersion': codeVersion,
+      'package': package,
       'handleUncaughtErrors': handleUncaughtErrors,
       'includePlatformLogs': includePlatformLogs,
       'transformer': transformer,
@@ -51,6 +54,7 @@ class Config {
           ..environment = values['environment']
           ..framework = values['framework']
           ..codeVersion = values['codeVersion']
+          ..package = values['package']
           ..handleUncaughtErrors = values['handleUncaughtErrors']
           ..includePlatformLogs = values['includePlatformLogs']
           ..transformer = values['transformer']
@@ -65,6 +69,8 @@ class ConfigBuilder {
   String environment;
   String framework;
   String codeVersion;
+  String package;
+
   bool handleUncaughtErrors = false;
   bool includePlatformLogs = false;
 
@@ -86,6 +92,7 @@ class ConfigBuilder {
         environment = config.environment,
         framework = config.framework,
         codeVersion = config.codeVersion,
+        package = config.package,
         handleUncaughtErrors = config.handleUncaughtErrors,
         includePlatformLogs = config.includePlatformLogs,
         transformer = config.transformer,
@@ -95,7 +102,7 @@ class ConfigBuilder {
     var sender = this.sender;
     sender ??= _httpSender;
     return Config._(accessToken, endpoint, environment, framework, codeVersion,
-        handleUncaughtErrors, includePlatformLogs, transformer, sender);
+        package, handleUncaughtErrors, includePlatformLogs, transformer, sender);
   }
 }
 

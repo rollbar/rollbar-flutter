@@ -15,8 +15,8 @@ class Data {
   int timestamp;
   Body body;
   Map<String, Object> custom;
-
   Map platformPayload;
+  Map server;
 
   Map<String, dynamic> toJson() {
     var result = {
@@ -34,6 +34,7 @@ class Data {
     addIfNotNull(result, 'code_version', codeVersion);
     addIfNotNull(result, 'custom', custom);
     addIfNotNull(result, 'platform_payload', platformPayload);
+    addIfNotNull(result, 'server', server);
 
     return result;
   }

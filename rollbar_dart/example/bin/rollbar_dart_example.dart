@@ -5,6 +5,7 @@ void main() async {
   var config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
         ..environment = 'development'
         ..codeVersion = '0.1.0'
+        ..package = 'rollbar_dart_example'
         ..handleUncaughtErrors = true)
       .build();
 
