@@ -10,7 +10,6 @@ environment:
 dependencies: 
   http: '>=0.12.2 <0.14.0'
   stack_trace: '>=1.9.5 <1.11.0'
-  native_stack_traces: '>=0.3.7 <=0.4.0'
 
 dev_dependencies:
   pedantic: '>=1.9.2 <=1.11.0'
