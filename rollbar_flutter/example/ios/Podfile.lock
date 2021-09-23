@@ -1,0 +1,29 @@
+PODS:
+  - Flutter (1.0.0)
+  - Rollbar (1.12.14)
+  - rollbar_flutter (0.0.1):
+    - Flutter
+    - Rollbar (~> 1.12.14)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - rollbar_flutter (from `.symlinks/plugins/rollbar_flutter/ios`)
+
+SPEC REPOS:
+  trunk:
+    - Rollbar
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  rollbar_flutter:
+    :path: ".symlinks/plugins/rollbar_flutter/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  Rollbar: 58f315609433558a82af5a54d7888bb020bec561
+  rollbar_flutter: b7542ba065cdece3cef1b316c748d24d129ead51
+
+PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
+
+COCOAPODS: 1.11.2

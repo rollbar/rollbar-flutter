@@ -1,5 +1,5 @@
 name: rollbar_flutter
-description: A new flutter plugin project.
+description: Connect your Flutter applications to Rollbar for error reporting.
 version: 0.1.0
 author:
 homepage:
@@ -29,4 +29,6 @@ flutter:
     platforms:
       android:
         package: com.rollbar.flutter
+        pluginClass: RollbarFlutterPlugin
+      ios:
         pluginClass: RollbarFlutterPlugin
