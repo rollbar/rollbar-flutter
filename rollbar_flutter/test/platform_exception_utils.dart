@@ -64,13 +64,10 @@ PlatformException createAndroidPlatformException(
   var platformTrace = {
     'data': {
       'body': body,
-      'notifier': {
-        'name': 'rollbar-java',
-        'version': '0.0.1'
-      }
+      'notifier': {'name': 'rollbar-java', 'version': '0.0.1'}
     }
   };
-  
+
   var message =
       'com.rollbar.flutter.RollbarTracePayload:' + json.encode(platformTrace);
 

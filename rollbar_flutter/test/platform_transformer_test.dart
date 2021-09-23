@@ -11,14 +11,13 @@ void main() {
 
     setUp(() {
       RollbarPlatformInfo.isAndroid = true;
-      expectedMessage =
-      'PlatformException(error, "Invalid counter state: 1")';
+      expectedMessage = 'PlatformException(error, "Invalid counter state: 1")';
     });
 
     tearDown(() {
-        RollbarPlatformInfo.reset();
+      RollbarPlatformInfo.reset();
     });
-        
+
     group('Platform transformer (appendToChain: true)', () {
       PlatformTransformer transformer;
 

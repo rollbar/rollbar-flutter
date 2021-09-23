@@ -70,17 +70,15 @@ class RollbarFlutter extends Rollbar {
       await error(exception, trace);
     } on Exception catch (e) {
       logging.error(
-        'Internal error encountered while sending data to Rollbar', e);
+          'Internal error encountered while sending data to Rollbar', e);
     }
   }
 
   static Config _initConfig(Config config) {
     var builder = ConfigBuilder.from(config);
     builder.framework ??= 'flutter';
-    
-    return (builder
-      ..transformer = makePlatformTransformer
-    ).build();
+
+    return (builder..transformer = makePlatformTransformer).build();
   }
 }
 

@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-FLUTTER_BIN="$(which flutter)"
-
-dirname "$(dirname "$FLUTTER_BIN")"

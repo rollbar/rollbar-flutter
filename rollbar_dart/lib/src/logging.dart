@@ -15,7 +15,8 @@ void error(String message, dynamic error) {
 void _log(int level, String message, dynamic error) {
   var logName = 'com.rollbar.rollbar-dart';
   if (error != null) {
-    developer.log(message, level: level, name: logName, error: error.toString());
+    developer.log(message,
+        level: level, name: logName, error: error.toString());
   } else {
     developer.log(message, level: level, name: logName);
   }

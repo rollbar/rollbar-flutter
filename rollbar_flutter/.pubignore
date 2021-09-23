@@ -1,6 +1,0 @@
-# Not working yet, will be enabeld when we get emulators running in CI runners
-example/test/widget_test.dart
-# Workaround for `pub` not applying .gitignore correctly
-build
-example/build
-

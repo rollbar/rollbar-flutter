@@ -101,8 +101,17 @@ class ConfigBuilder {
   Config build() {
     var sender = this.sender;
     sender ??= _httpSender;
-    return Config._(accessToken, endpoint, environment, framework, codeVersion,
-        package, handleUncaughtErrors, includePlatformLogs, transformer, sender);
+    return Config._(
+        accessToken,
+        endpoint,
+        environment,
+        framework,
+        codeVersion,
+        package,
+        handleUncaughtErrors,
+        includePlatformLogs,
+        transformer,
+        sender);
   }
 }
 

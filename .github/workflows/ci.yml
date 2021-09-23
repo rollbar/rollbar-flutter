@@ -11,7 +11,7 @@ jobs:
     name: Flutter version ${{ matrix.flutter_version }}
     strategy:
       matrix:
-        flutter_version: ['2.0.5', '1.20.4', '2.2.3']
+        flutter_version: ['2.0.5', '1.20.4', '2.5.1']
     
     steps:
     - uses: actions/checkout@v2
@@ -21,32 +21,45 @@ jobs:
     - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
       with:
         flutter-version: ${{ matrix.flutter_version }}
-    - name: Show environment
-      run: |
-        env
-        which flutter
-        flutter doctor -v
+    - name: Cache Dart and Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ${{ env.PUB_CACHE }}
+        key: ${{ runner.os }}-deps-${{ matrix.flutter_version }}-${{ hashFiles('**/pubspec.yaml', '**/pubspec.lock', '**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-deps-${{ matrix.flutter_version }}-
+    - name: Enable pana
+      run: flutter pub global activate pana
     - name: Build rollbar_dart
       working-directory: ./rollbar_dart
       run: |
         flutter pub get &&
-        ../.github/run-flutter-analyze ${{ matrix.flutter_version }} &&
+        ../build_tools/run-flutter-analyze ${{ matrix.flutter_version }} &&
         flutter pub run test
+    - name: Run rollbar_dart Pana checks
+      working-directory: ./rollbar_dart
+      run: ../build_tools/run-pana ${{ matrix.flutter_version }}
     - name: Analyze rollbar_dart example
       working-directory: ./rollbar_dart/example
       run: |
         flutter pub get &&
-        ../../.github/run-flutter-analyze ${{ matrix.flutter_version }}
+        ../../build_tools/run-flutter-analyze ${{ matrix.flutter_version }}
     - name: Build rollbar_flutter
       working-directory: ./rollbar_flutter
       run: |
         flutter pub get &&
-        ../.github/run-flutter-analyze ${{ matrix.flutter_version }} &&
+        ../build_tools/run-flutter-analyze ${{ matrix.flutter_version }} &&
         flutter test
+    - name: Run rollbar_flutter Pana checks
+      working-directory: ./rollbar_flutter
+      run: ../build_tools/run-pana ${{ matrix.flutter_version }}
     - name: Test rollbar_flutter Android plugin
       working-directory: ./rollbar_flutter/android
       run: |
-        export FLUTTER_SDK=$(../../.github/find-flutter-sdk)
+        export FLUTTER_SDK=$(../../build_tools/find-flutter-sdk)
         echo $FLUTTER_SDK
         ./gradlew check
     - name: Build rollbar_flutter Android example
@@ -70,18 +83,21 @@ jobs:
     name: Flutter version ${{ matrix.flutter_version }} (iOS)
     strategy:
       matrix:
-        flutter_version: ['1.20.4', '2.2.3']
+        flutter_version: ['1.20.4', '2.5.1']
     
     steps:
     - uses: actions/checkout@v2
     - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
       with:
         flutter-version: ${{ matrix.flutter_version }}
-    - name: Show environment
-      run: |
-        env
-        which flutter
-        flutter doctor -v
+    - name: Cache pub packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ${{ env.PUB_CACHE }}
+        key: ${{ runner.os }}-pub-${{ matrix.flutter_version }}-${{ hashFiles('**/pubspec.yaml*') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-${{ matrix.flutter_version }}-
     - name: Build rollbar_flutter iOS example
       working-directory: ./rollbar_flutter/example/
       run: flutter build ios --no-codesign

@@ -1,0 +1,8 @@
+{
+  "convention": 1,
+  "documentation": 1,
+  "platform": 0.5,
+  "analysis": 1,
+  "dependency": 1,
+  "null-safety": 0
+}

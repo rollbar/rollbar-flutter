@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ -d "$FLUTTER_SDK" ]; then
+    echo "$FLUTTER_SDK"
+else
+    FLUTTER_BIN="$(which flutter)"
+    dirname "$(dirname "$FLUTTER_BIN")"
+fi

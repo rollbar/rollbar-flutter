@@ -36,6 +36,7 @@ ParseTraceResult _parseNativeTrace(String traceString) {
 
 class ParseTraceResult {
   Trace trace;
+
   /// The original, unparsed trace. It will only be present when the original trace
   /// might require further backend processing, eg. symbolication. Otherwise this
   /// value will be null.
