@@ -37,10 +37,14 @@
     }
 }
 
-- (void)initialize:(NSString*)instanceId isGlobalInstance:(BOOL)isGlobalInstance
-        endpoint:(NSString*)endpoint accessToken:(NSString*)accessToken
-        environment:(NSString*)environment codeVersion:(NSString*)codeVersion
-        handleUncaughtErrors:(BOOL)handleUncaughtErrors includePlatformLogs:(BOOL)includePlatformLogs {
+- (void)initialize:(NSString*)instanceId
+  isGlobalInstance:(BOOL)isGlobalInstance
+          endpoint:(NSString*)endpoint
+       accessToken:(NSString*)accessToken
+       environment:(NSString*)environment
+       codeVersion:(NSString*)codeVersion
+handleUncaughtErrors:(BOOL)handleUncaughtErrors
+includePlatformLogs:(BOOL)includePlatformLogs {
     if (!isGlobalInstance) {
         NSLog(@"Only global Rollbar instances are supported on iOS");
         return;
