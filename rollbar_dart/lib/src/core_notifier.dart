@@ -23,7 +23,7 @@ class CoreNotifier {
   final Sender _sender;
   final Transformer _transformer;
 
-  static const NOTIFIER_VERSION = '0.1.0';
+  static const NOTIFIER_VERSION = '0.1.0-beta';
   static const NOTIFIER_NAME = 'rollbar-dart';
 
   CoreNotifier(this._config)
