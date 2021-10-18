@@ -33,6 +33,14 @@ jobs:
           ${{ runner.os }}-deps-${{ matrix.flutter_version }}-
     - name: Enable pana
       run: flutter pub global activate pana
+    - name: Remove additional NDKs (Android Gradle plugin 3.5.0 workaround)
+      run: |
+        chmod +x .github/apply-ndk-workaround &&
+        .github/apply-ndk-workaround
+    - name: Show Flutter environment
+      run: |
+        which flutter
+        flutter doctor -v
     - name: Build rollbar_dart
       working-directory: ./rollbar_dart
       run: |
@@ -98,6 +106,14 @@ jobs:
         key: ${{ runner.os }}-pub-${{ matrix.flutter_version }}-${{ hashFiles('**/pubspec.yaml*') }}
         restore-keys: |
           ${{ runner.os }}-pub-${{ matrix.flutter_version }}-
+    - name: Remove additional NDKs (Android Gradle plugin 3.5.0 workaround)
+      run: |
+        chmod +x .github/apply-ndk-workaround &&
+        .github/apply-ndk-workaround
+    - name: Show Flutter environment
+      run: |
+        which flutter
+        flutter doctor -v
     - name: Build rollbar_flutter iOS example
       working-directory: ./rollbar_flutter/example/
       run: flutter build ios --no-codesign
