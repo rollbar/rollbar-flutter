@@ -21,6 +21,10 @@ jobs:
     - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
       with:
         flutter-version: ${{ matrix.flutter_version }}
+    - name: Remove additional NDKs (Android Gradle plugin 3.5.0 workaround)
+      run: |
+        chmod +x .github/apply-ndk-workaround &&
+        .github/apply-ndk-workaround
     - name: Show environment
       run: |
         env
@@ -77,6 +81,10 @@ jobs:
     - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
       with:
         flutter-version: ${{ matrix.flutter_version }}
+    - name: Remove additional NDKs (Android Gradle plugin 3.5.0 workaround)
+      run: |
+        chmod +x .github/apply-ndk-workaround &&
+        .github/apply-ndk-workaround
     - name: Show environment
       run: |
         env

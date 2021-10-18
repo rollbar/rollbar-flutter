@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# Workaround for an Android Gradle plugin bug in version 3.5.0, which fails to find an NDK if
+# there is more than 1 available.
+# To fix this we need to upgrade the Gradle plugin in our example Flutter project to 4.x, but
+# that's not compatible with Flutter 1, hence this workaround.
+
+set -e
+set -o pipefail
+
+if [ "$GITHUB_ACTIONS" == "" ]; then
+    cat <<-EOH >&2
+ERROR: This is a specific workaround for an Android Gradle plugin bug when
+running as a Github action, it should not be run in any other scenario.
+EOH
+    exit 1
+fi
+
+# This environment variable points to the default NDK, but Gradle apparently ignores it
+if [ -L "$ANDROID_NDK_ROOT" ]; then
+    ANDROID_NDK_ROOT=$(readlink "$ANDROID_NDK_ROOT")
+fi
+
+if [ ! -d "$ANDROID_NDK_ROOT" ]; then
+    echo "NDK root $ANDROID_NDK_ROOT is not a directory" >&2
+    exit 1
+fi
+
+cd "$ANDROID_NDK_ROOT"/..
+
+find . -mindepth 1 -maxdepth 1 -type d | while read l; do
+    name=$(basename "$l")
+    if ! [[ "$name" == "21."* ]]; then
+        destination=$(dirname "$l")/../ndk_$(basename "$l")
+        echo "Moving $l to $destination"
+        mv "$l" "$destination"
+    else
+        echo "Keeping $l as is"
+    fi
+done
