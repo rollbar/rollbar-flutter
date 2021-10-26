@@ -25,7 +25,7 @@ isolate_instructions: 74207f2ee000, vm_instructions: 74207f2e2000
       var result = await parseTrace(trace);
 
       expect(result.rawTrace, equals(input));
-      
+
       expect(result.trace.frames, hasLength(4));
 
       expect(

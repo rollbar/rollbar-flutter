@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+FLUTTER_VERSION="$1"
+
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+function run-pana-checks {
+    if [ "$PUB_CACHE" == "" ]; then
+        FLUTTER_SDK="$("$THIS_SCRIPT_DIR"/find-flutter-sdk)"
+        PUB_CACHE="$FLUTTER_SDK"/.pub-cache/
+    fi
+    
+    flutter pub global activate pana
+
+    mkdir -p pana-report
+
+    REPORT_PATH=pana-report/result.json
+
+    "$PUB_CACHE"/bin/pana . --no-warning -j > "$REPORT_PATH"
+
+    dart "$THIS_SCRIPT_DIR"/check-pana-report.dart "$REPORT_PATH" pana_targets.json
+}
+
+case "$FLUTTER_VERSION" in
+    1.*) echo "Skipping pana checks for Flutter ${FLUTTER_VERSION}" >&2 ;;
+    2.*) run-pana-checks ;;
+    *) echo "Unknown Flutter version ${FLUTTER_VERSION}" >&2 && exit 1 ;;
+esac
+
+

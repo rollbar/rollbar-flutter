@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   rollbar_dart: ">=0.1.0-beta <0.2.0"
-  logging: ^0.11.4
+  logging: '>=0.11.4 <1.1.0'
 
 dev_dependencies:
   flutter_test:
