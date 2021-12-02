@@ -22,7 +22,7 @@ class Rollbar {
   /// Some initialization operations are asynchronous, such as initializing
   /// the [Isolate] that handles uncaught errors. This future can be awaited
   /// to ensure all async initialization operations are complete.
-  Future<void> ensureInitialized() async {
+  Future<UncaughtErrorHandler> ensureInitialized() async {
     return _errorHandler;
   }
 
