@@ -12,13 +12,13 @@ void main() {
   const channel = MethodChannel('rollbar_flutter');
 
   TestWidgetsFlutterBinding.ensureInitialized();
-  List<MethodCall> callsReceived;
-  MockSender sender;
+  late List<MethodCall> callsReceived;
+  MockSender? sender;
 
   setUp(() async {
     rbdart.RollbarPlatformInfo.isAndroid = true;
     sender = MockSender();
-    when(sender.send(any))
+    when(sender!.send(any!))
         .thenAnswer((_invocation) => Future.value(rbdart.Response()));
 
     callsReceived = [];
@@ -82,7 +82,7 @@ void main() {
     // of the closure
     var config = (defaultConfig()
           ..handleUncaughtErrors = false
-          ..sender = ((config) => sender))
+          ..sender = ((config) => sender!) as Sender Function(Config)?)
         .build();
 
     await _runRollbarFlutter(config, (rollbar) async {
@@ -91,7 +91,7 @@ void main() {
 
       await rollbar.error(exception, StackTrace.empty);
 
-      var payload = verify(await sender.send(captureAny)).captured.single;
+      var payload = verify(await sender!.send(captureAny!)).captured.single;
 
       expect(payload['data']['framework'], equals('flutter'));
 

@@ -7,7 +7,7 @@ import 'platform_exception_utils.dart';
 
 void main() {
   group('PlatformTransformer tests', () {
-    String expectedMessage;
+    String? expectedMessage;
 
     setUp(() {
       RollbarPlatformInfo.isAndroid = true;
@@ -19,7 +19,7 @@ void main() {
     });
 
     group('Platform transformer (appendToChain: true)', () {
-      PlatformTransformer transformer;
+      late PlatformTransformer transformer;
 
       setUp(() {
         transformer = PlatformTransformer(appendToChain: true);
@@ -39,21 +39,21 @@ void main() {
         var updated =
             await transformer.transform(exception, StackTrace.empty, original);
 
-        var traces = updated.body.getTraces();
+        var traces = updated.body.getTraces()!;
         expect(traces, hasLength(2));
 
-        var rootCause = traces[0];
+        var rootCause = traces[0]!;
         expect(rootCause.frames.length, greaterThan(1));
         expect(rootCause.frames[0].method, equals('letsSeeYouParseThis'));
 
-        var dartTrace = traces[1];
+        var dartTrace = traces[1]!;
         expect(dartTrace.frames, hasLength(2));
         expect(dartTrace.frames[0].method, equals('testThis'));
         expect(dartTrace.frames[1].method, equals('what'));
 
         // The message was temporarily hijacked to transfer the platform payload, let's make sure
         // it's been restored
-        expect(dartTrace.exception.message, equals(expectedMessage));
+        expect(dartTrace.exception!.message, equals(expectedMessage));
       });
 
       test(
@@ -76,28 +76,28 @@ void main() {
         var updated =
             await transformer.transform(exception, StackTrace.empty, original);
 
-        var traces = updated.body.getTraces();
+        var traces = updated.body.getTraces()!;
         expect(traces, hasLength(3));
 
-        var rootCause = traces[0];
+        var rootCause = traces[0]!;
         expect(rootCause.frames.length, greaterThan(1));
         expect(rootCause.frames[0].method, equals('thisWillBeRethrown'));
 
-        var rethrownTrace = traces[1];
+        var rethrownTrace = traces[1]!;
         expect(rethrownTrace.frames, hasLength(2));
         expect(rethrownTrace.frames[0].method, equals('processError'));
         expect(rethrownTrace.frames[1].method, equals('catchAndThrow'));
 
-        var dartTrace = traces[2];
+        var dartTrace = traces[2]!;
         expect(dartTrace.frames, hasLength(1));
         expect(dartTrace.frames[0].method, equals('onTheDartSide'));
 
-        expect(dartTrace.exception.message, equals(expectedMessage));
+        expect(dartTrace.exception!.message, equals(expectedMessage));
       });
     });
 
     group('Platform transformer (appendToChain: false)', () {
-      PlatformTransformer transformer;
+      late PlatformTransformer transformer;
 
       setUp(() {
         transformer = PlatformTransformer(appendToChain: false);
@@ -117,19 +117,19 @@ void main() {
         var updated =
             await transformer.transform(exception, StackTrace.empty, original);
 
-        var traces = updated.body.getTraces();
+        var traces = updated.body.getTraces()!;
         expect(traces, hasLength(1));
 
-        var dartTrace = traces[0];
+        var dartTrace = traces[0]!;
         expect(dartTrace.frames, hasLength(1));
         expect(dartTrace.frames[0].method, equals('thisFails'));
 
-        expect(dartTrace.exception.message, equals(expectedMessage));
+        expect(dartTrace.exception!.message, equals(expectedMessage));
 
         expect(updated.platformPayload, isNotNull);
-        expect(updated.platformPayload['data']['notifier']['name'],
+        expect(updated.platformPayload!['data']['notifier']['name'],
             equals('rollbar-java'));
-        var trace = updated.platformPayload['data']['body']['trace'];
+        var trace = updated.platformPayload!['data']['body']['trace'];
         expect(trace['frames'].length, equals(2));
         expect(trace['frames'][0]['method'], equals('toBeAttached'));
       });
@@ -154,20 +154,20 @@ void main() {
         var updated =
             await transformer.transform(exception, StackTrace.empty, original);
 
-        var traces = updated.body.getTraces();
+        var traces = updated.body.getTraces()!;
         expect(traces, hasLength(1));
 
-        var dartTrace = traces[0];
+        var dartTrace = traces[0]!;
         expect(dartTrace.frames, hasLength(1));
         expect(dartTrace.frames[0].method, equals('attachedFailureChain'));
 
-        expect(dartTrace.exception.message, equals(expectedMessage));
+        expect(dartTrace.exception!.message, equals(expectedMessage));
 
         expect(updated.platformPayload, isNotNull);
-        expect(updated.platformPayload['data']['notifier']['name'],
+        expect(updated.platformPayload!['data']['notifier']['name'],
             equals('rollbar-java'));
 
-        var chain = updated.platformPayload['data']['body']['trace_chain'];
+        var chain = updated.platformPayload!['data']['body']['trace_chain'];
         expect(chain.length, equals(2));
 
         var topTrace = chain[0];
