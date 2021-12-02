@@ -33,9 +33,9 @@ void main() {
       [(v) => TraceInfo.fromMap(v), (v) => Body.fromMap(v)].forEach((builder) {
         var recovered = builder(jsonDecode(asJson)) as TraceInfo;
 
-        expect(recovered.exception.clazz, equals('TestException'));
+        expect(recovered.exception!.clazz, equals('TestException'));
         expect(
-            recovered.exception.message, equals('Attempted to test some code'));
+            recovered.exception!.message, equals('Attempted to test some code'));
         expect(recovered.frames.length, equals(2));
         expect(recovered.rawTrace, equals('stack frame 1 2 3'));
       });
@@ -73,12 +73,12 @@ void main() {
       [(v) => TraceChain.fromMap(v), (v) => Body.fromMap(v)].forEach((builder) {
         var recovered = builder(jsonDecode(asJson)) as TraceChain;
 
-        expect(recovered.traces.length, equals(2));
-        expect(recovered.traces[0].frames.length, equals(2));
-        expect(recovered.traces[0].frames[0].method, equals('inAChain'));
+        expect(recovered.traces!.length, equals(2));
+        expect(recovered.traces![0]!.frames.length, equals(2));
+        expect(recovered.traces![0]!.frames[0].method, equals('inAChain'));
 
-        expect(recovered.traces[1].frames.length, equals(1));
-        expect(recovered.traces[1].frames[0].method, equals('_AnotherMethod'));
+        expect(recovered.traces![1]!.frames.length, equals(1));
+        expect(recovered.traces![1]!.frames[0].method, equals('_AnotherMethod'));
       });
     });
 

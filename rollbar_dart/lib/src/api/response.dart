@@ -1,8 +1,8 @@
 /// Represents the response from the Rollbar API.
 class Response {
-  int err;
-  String message;
-  Result result;
+  int? err;
+  String? message;
+  Result? result;
 
   bool isError() {
     return err != null && err != 0;
@@ -10,5 +10,5 @@ class Response {
 }
 
 class Result {
-  String uuid;
+  String? uuid;
 }

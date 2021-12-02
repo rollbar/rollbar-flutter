@@ -32,7 +32,7 @@ class Rollbar {
   /// ```dart
   /// Isolate.current.addErrorListener(await rollbar.errorHandler);
   /// ```
-  Future<SendPort> get errorHandler async {
+  Future<SendPort?>? get errorHandler async {
     return (await _errorHandler).errorHandlerPort;
   }
 

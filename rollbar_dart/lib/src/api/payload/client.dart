@@ -1,15 +1,15 @@
 class Client {
-  String locale;
+  String? locale;
 
-  String hostname;
+  String? hostname;
 
-  String os;
+  String? os;
 
-  String osVersion;
+  String? osVersion;
 
-  String rootPackage;
+  String? rootPackage;
 
-  Map<String, String> dart;
+  Map<String, String>? dart;
 
   /// Converts the object into a Json encodable map.
   ///

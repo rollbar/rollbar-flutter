@@ -10,8 +10,8 @@ import 'client_server_utils.dart';
 
 void main() {
   group('UncaughtErrorHandler tests', () {
-    RawTextSocket _server;
-    UncaughtErrorHandler _handler;
+    late RawTextSocket _server;
+    late UncaughtErrorHandler _handler;
 
     setUp(() async {
       _server = await RawTextSocket.build();
@@ -29,11 +29,11 @@ void main() {
       try {
         await throwyMethodA();
       } catch (error, trace) {
-        errorPort.send([error.toString(), trace.toString()]);
+        errorPort!.send([error.toString(), trace.toString()]);
       }
 
       var payloadJson =
-          await _server.messages.first.timeout(Duration(milliseconds: 500));
+          await (_server.messages.first.timeout(Duration(milliseconds: 500)) as FutureOr<String>);
       var payload = json.decode(payloadJson);
 
       var data = payload['data'];
@@ -53,7 +53,7 @@ void main() {
       var isolate = await Isolate.spawn(secondIsolateMethod, errorPort);
       try {
         var payloadJson =
-            await _server.messages.first.timeout(Duration(milliseconds: 500));
+            await (_server.messages.first.timeout(Duration(milliseconds: 500)) as FutureOr<String>);
         var payload = json.decode(payloadJson);
 
         var data = payload['data'];
@@ -97,8 +97,8 @@ Future<UncaughtErrorHandler> _createErrorHandler(String endpoint) async {
   return await UncaughtErrorHandler.build(config);
 }
 
-Future<void> secondIsolateMethod(SendPort errorPort) async {
-  Isolate.current.addErrorListener(errorPort);
+Future<void> secondIsolateMethod(SendPort? errorPort) async {
+  Isolate.current.addErrorListener(errorPort!);
   // No try catch here, our handler should take care of it
   await inDifferentIsolate();
 }

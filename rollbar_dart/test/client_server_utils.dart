@@ -9,8 +9,8 @@ import 'package:rollbar_dart/src/api/response.dart';
 const PREFIX = 'http://raw:';
 
 Sender createTextSender(Config c) {
-  if (c.endpoint.startsWith(PREFIX)) {
-    var port = int.parse(c.endpoint.substring(PREFIX.length));
+  if (c.endpoint!.startsWith(PREFIX)) {
+    var port = int.parse(c.endpoint!.substring(PREFIX.length));
     return RawTextSender(port);
   } else {
     throw Exception('Invalid endpoint ${c.endpoint}');
@@ -20,15 +20,15 @@ Sender createTextSender(Config c) {
 /// Useful class to do some basic tests across isolates, without setting up a full blown
 /// HTTP server. It accepts and collects raw text over a TCP socket, 1 message per line.
 class RawTextSocket {
-  Isolate _isolate;
-  int _port;
-  ReceivePort _receivePort;
+  late Isolate _isolate;
+  int? _port;
+  late ReceivePort _receivePort;
 
   RawTextSocket._();
 
   String get endpoint => '$PREFIX$port';
 
-  Future<int> _start() async {
+  Future<int?> _start() async {
     _receivePort = ReceivePort();
 
     var tcpInfoPort = ReceivePort();
@@ -36,13 +36,13 @@ class RawTextSocket {
     _isolate = await Isolate.spawn(
         _server, [tcpInfoPort.sendPort, _receivePort.sendPort]);
 
-    int port = await tcpInfoPort.first;
+    int? port = await (tcpInfoPort.first as FutureOr<int?>);
     tcpInfoPort.close();
 
     return port;
   }
 
-  int get port {
+  int? get port {
     return _port;
   }
 
@@ -50,12 +50,12 @@ class RawTextSocket {
   /// do something like
   /// `var message = await server.messages.first.timeout(Duration(milliseconds: 500));`
   /// ...with an appropriate timeout for the scenario being tested.
-  Stream<String> get messages {
-    return _receivePort.map((v) => v as String);
+  Stream<String?> get messages {
+    return _receivePort.map((v) => v as String?);
   }
 
   Future<void> close() async {
-    final socket = await Socket.connect('localhost', port);
+    final socket = await Socket.connect('localhost', port!);
     try {
       socket.add('close\n'.codeUnits);
     } finally {

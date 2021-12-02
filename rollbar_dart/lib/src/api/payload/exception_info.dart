@@ -1,8 +1,8 @@
 /// Contains all the error details except the stack trace.
 class ExceptionInfo {
-  String clazz;
-  String message;
-  String description;
+  String? clazz;
+  String? message;
+  String? description;
 
   Map<String, dynamic> toJson() {
     var result = {'class': clazz, 'message': message};

@@ -9,12 +9,12 @@ import 'package:test/test.dart';
 
 void main() {
   group('Rollbar notifier tests', () {
-    Rollbar rollbar;
-    Sender sender;
+    late Rollbar rollbar;
+    late Sender sender;
 
     setUp(() async {
       sender = MockSender();
-      when(sender.send(any))
+      when(sender.send(any!))
           .thenAnswer((_invocation) => Future.value(Response()));
       // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
       // mock as the sender factory.
@@ -35,7 +35,7 @@ void main() {
         failingFunction();
       } catch (error, stackTrace) {
         await rollbar.error(error, stackTrace);
-        var payload = verify(await sender.send(captureAny)).captured.single;
+        var payload = verify(await sender.send(captureAny!)).captured.single;
 
         expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
@@ -69,9 +69,9 @@ void main() {
         failingFunction();
       } catch (error, stackTrace) {
         await rollbar.error(error, stackTrace);
-        var payload = verify(await sender.send(captureAny)).captured.single;
+        var payload = verify(await sender.send(captureAny!)).captured.single;
 
-        Map data = payload['data'];
+        Map? data = payload['data'];
         expect(data, isNot(contains('code_version')));
         expect(data, isNot(contains('framework')));
         expect(data, isNot(contains('custom')));
@@ -94,7 +94,7 @@ void main() {
       await rollbar.error(
           ExpandableException(['a', 'b', 'c']), StackTrace.empty);
 
-      var payload = verify(await sender.send(captureAny)).captured.single;
+      var payload = verify(await sender.send(captureAny!)).captured.single;
 
       var body = getPath(payload, ['data', 'body']);
       expect(body, contains('trace_chain'));
@@ -111,10 +111,10 @@ void failingFunction() {
 
 class ExpandableTransformer implements Transformer {
   @override
-  Future<Data> transform(dynamic error, StackTrace trace, Data data) async {
+  Future<Data> transform(dynamic error, StackTrace? trace, Data data) async {
     // Simulates for example what we'd do with a PlatformException in Flutter
     if (error is ExpandableException) {
-      var traceChain = error.messages.map((message) {
+      List<TraceInfo?> traceChain = error.messages.map((message) {
         return TraceInfo()
           ..frames = []
           ..exception = (ExceptionInfo()
@@ -122,7 +122,7 @@ class ExpandableTransformer implements Transformer {
             ..message = message);
       }).toList();
 
-      traceChain.addAll(data.body.getTraces());
+      traceChain.addAll(data.body.getTraces()!);
       data.body = TraceChain()..traces = traceChain;
     }
     return data;
@@ -141,18 +141,18 @@ class ExpandableException implements Exception {
 
 class MockSender extends Mock implements Sender {}
 
-dynamic getPath(Map<String, dynamic> source, List<String> path) {
+dynamic getPath(Map<String, dynamic>? source, List<String> path) {
   // We're in a test, let the bounds checker handle the edge case of an empty path
   for (var i = 0;; ++i) {
     var key = path[i];
 
     expect(source, contains(key));
-    var value = source[key];
+    var value = source![key];
 
     if (i == path.length - 1) {
       return value;
     } else {
-      source = value as Map<String, dynamic>;
+      source = value as Map<String, dynamic>?;
     }
   }
 }

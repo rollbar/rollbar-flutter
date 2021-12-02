@@ -5,8 +5,8 @@ import 'api/response.dart';
 
 /// Default HTTP [Sender] implementation.
 class HttpSender implements Sender {
-  final String _accessToken;
-  final String _endpoint;
+  final String? _accessToken;
+  final String? _endpoint;
 
   HttpSender(this._endpoint, this._accessToken);
 
@@ -16,13 +16,13 @@ class HttpSender implements Sender {
     final headers = <String, String>{
       'User-Agent': 'rollbar-dart',
       'Content-Type': 'application/json',
-      'X-Rollbar-Access-Token': _accessToken,
+      'X-Rollbar-Access-Token': _accessToken!,
     };
 
     var requestBody = json.encode(payload);
 
     var response =
-        http.post(Uri.parse(_endpoint), headers: headers, body: requestBody);
+        http.post(Uri.parse(_endpoint!), headers: headers, body: requestBody);
 
     return toRollbarResponse(response);
   }

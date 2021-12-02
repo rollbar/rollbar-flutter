@@ -5,15 +5,15 @@ import 'sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
 class Config {
-  final String accessToken;
-  final String endpoint;
-  final String environment;
-  final String framework;
-  final String codeVersion;
-  final String package;
-  final bool handleUncaughtErrors;
-  final bool includePlatformLogs;
-  final Transformer Function(Config) transformer;
+  final String? accessToken;
+  final String? endpoint;
+  final String? environment;
+  final String? framework;
+  final String? codeVersion;
+  final String? package;
+  final bool? handleUncaughtErrors;
+  final bool? includePlatformLogs;
+  final Transformer Function(Config)? transformer;
   final Sender Function(Config) sender;
 
   Config._(
@@ -64,25 +64,25 @@ class Config {
 }
 
 class ConfigBuilder {
-  final String accessToken;
-  String endpoint = 'https://api.rollbar.com/api/1/item/';
-  String environment;
-  String framework;
-  String codeVersion;
-  String package;
+  final String? accessToken;
+  String? endpoint = 'https://api.rollbar.com/api/1/item/';
+  String? environment;
+  String? framework;
+  String? codeVersion;
+  String? package;
 
-  bool handleUncaughtErrors = false;
-  bool includePlatformLogs = false;
+  bool? handleUncaughtErrors = false;
+  bool? includePlatformLogs = false;
 
   /// If [handleUncaughtErrors] is enabled, the transformer function *must* be a static
   /// or free function, and cannot be a closure or instance function, since it will need
   /// to be passed to an error handler isolate as a message.
-  Transformer Function(Config) transformer;
+  Transformer Function(Config)? transformer;
 
   /// If [handleUncaughtErrors] is enabled, the sender factory *must* be a static
   /// or free function, and cannot be a closure or instance function, since it will need
   /// to be passed to an error handler isolate as a message.
-  Sender Function(Config) sender;
+  Sender Function(Config)? sender;
 
   ConfigBuilder(this.accessToken);
 

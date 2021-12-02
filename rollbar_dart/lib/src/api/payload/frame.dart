@@ -1,10 +1,10 @@
 /// Contains the information of a single frame in a stack trace.
 class Frame {
-  int colno;
-  int lineno;
-  String method;
-  String filename;
-  String className;
+  int? colno;
+  int? lineno;
+  String? method;
+  String? filename;
+  String? className;
 
   Map<String, dynamic> toJson() {
     var result = <String, dynamic>{};
@@ -29,10 +29,10 @@ class Frame {
   static Frame fromMap(Map attributes) {
     var result = Frame();
     if (attributes.containsKey('colno')) {
-      result.colno = attributes['colno'] as int;
+      result.colno = attributes['colno'] as int?;
     }
     if (attributes.containsKey('lineno')) {
-      result.lineno = attributes['lineno'] as int;
+      result.lineno = attributes['lineno'] as int?;
     }
     if (attributes.containsKey('method')) {
       result.method = attributes['method'];

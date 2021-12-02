@@ -4,19 +4,19 @@ import 'level.dart';
 
 /// Contains the data for the occurrence to be sent to Rollbar.
 class Data {
-  Map<String, String> notifier;
-  String environment;
-  Client client;
-  String platform;
-  String language;
-  String framework;
-  String codeVersion;
-  Level level;
-  int timestamp;
-  Body body;
-  Map<String, Object> custom;
-  Map platformPayload;
-  Map server;
+  Map<String, String>? notifier;
+  String? environment;
+  late Client client;
+  String? platform;
+  String? language;
+  String? framework;
+  String? codeVersion;
+  Level? level;
+  int? timestamp;
+  late Body body;
+  Map<String, Object>? custom;
+  Map? platformPayload;
+  Map? server;
 
   Map<String, dynamic> toJson() {
     var result = {

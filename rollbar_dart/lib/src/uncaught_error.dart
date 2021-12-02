@@ -13,7 +13,7 @@ import 'api/payload/level.dart';
 class UncaughtErrorHandler {
   Config _config;
 
-  Future<SendPort> _errorPort;
+  Future<SendPort?>? _errorPort;
 
   UncaughtErrorHandler._(this._config) {
     _errorPort = _getErrorMessageHandler(_config);
@@ -22,15 +22,15 @@ class UncaughtErrorHandler {
   static Future<UncaughtErrorHandler> build(Config config) async {
     var handler = UncaughtErrorHandler._(config);
 
-    if (config.handleUncaughtErrors) {
-      var errorPort = await handler._errorPort;
+    if (config.handleUncaughtErrors!) {
+      var errorPort = await (handler._errorPort as FutureOr<SendPort>);
       Isolate.current.addErrorListener(errorPort);
     }
 
     return handler;
   }
 
-  Future<SendPort> get errorHandlerPort {
+  Future<SendPort?>? get errorHandlerPort {
     return _errorPort;
   }
 
@@ -44,8 +44,8 @@ class UncaughtErrorHandler {
     }
   }
 
-  Future<SendPort> _getErrorMessageHandler(Config config) async {
-    if (config.handleUncaughtErrors) {
+  Future<SendPort?> _getErrorMessageHandler(Config config) async {
+    if (config.handleUncaughtErrors!) {
       var receivePort = ReceivePort();
       await Isolate.spawn(_handleError, receivePort.sendPort);
       var errorPort = await receivePort.first;
@@ -64,7 +64,7 @@ class UncaughtErrorHandler {
 
       sendPort.send(port.sendPort);
 
-      CoreNotifier rollbarCore;
+      CoreNotifier? rollbarCore;
 
       await for (var msg in port) {
         try {
@@ -90,7 +90,7 @@ class UncaughtErrorHandler {
     }
   }
 
-  static StackTrace _getTrace(dynamic trace) {
+  static StackTrace? _getTrace(dynamic trace) {
     if (trace is StackTrace) {
       return trace;
     } else if (trace is String) {
@@ -115,7 +115,7 @@ class UncaughtErrorHandler {
   static dynamic _tryParseError(String error) {
     var match = _exceptionClassPattern.firstMatch(error);
     if (match != null) {
-      var exceptionPart = match.group(0);
+      var exceptionPart = match.group(0)!;
 
       // `length - 1` to remove colon
       var clazz = exceptionPart.substring(0, exceptionPart.length - 1).trim();

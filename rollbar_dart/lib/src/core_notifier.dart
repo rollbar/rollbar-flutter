@@ -20,8 +20,8 @@ import 'sender.dart';
 /// - Send the occurrence payload to Rollbar via a [Sender].
 class CoreNotifier {
   final Config _config;
-  final Sender _sender;
-  final Transformer _transformer;
+  final Sender? _sender;
+  final Transformer? _transformer;
 
   static const NOTIFIER_VERSION = '0.1.0-beta';
   static const NOTIFIER_NAME = 'rollbar-dart';
@@ -31,7 +31,7 @@ class CoreNotifier {
         _transformer = _make(_config, _config.transformer);
 
   Future<Response> log(
-      Level level, dynamic error, StackTrace stackTrace, String message) async {
+      Level level, dynamic error, StackTrace? stackTrace, String? message) async {
     var body = await _prepareBody(message, error, stackTrace);
 
     var client = Client()
@@ -64,18 +64,18 @@ class CoreNotifier {
     }
 
     if (_transformer != null) {
-      data = await _transformer.transform(error, stackTrace, data);
+      data = await _transformer!.transform(error, stackTrace, data);
     }
 
     var payload = Payload()
       ..accessToken = _config.accessToken
       ..data = data;
 
-    return await _sender.send(payload.toJson());
+    return await _sender!.send(payload.toJson());
   }
 
   Future<Body> _prepareBody(
-      String message, dynamic error, StackTrace stackTrace) async {
+      String? message, dynamic error, StackTrace? stackTrace) async {
     if (error != null) {
       return await _prepareTracePayload(error, stackTrace, message);
     } else {
@@ -84,7 +84,7 @@ class CoreNotifier {
   }
 
   Future<TraceInfo> _prepareTracePayload(
-      dynamic error, StackTrace trace, String description) async {
+      dynamic error, StackTrace? trace, String? description) async {
     var traceInfo = TraceInfo()
       ..exception = _getExceptionInfo(error, description);
 
@@ -106,7 +106,7 @@ class CoreNotifier {
     return traceInfo;
   }
 
-  static ExceptionInfo _getExceptionInfo(dynamic error, String description) {
+  static ExceptionInfo _getExceptionInfo(dynamic error, String? description) {
     ExceptionInfo result;
     if (error is ExceptionInfo) {
       result = error;
@@ -121,7 +121,7 @@ class CoreNotifier {
     return result;
   }
 
-  static T _make<T>(Config config, T Function(Config) factoryFunction) {
+  static T? _make<T>(Config config, T Function(Config)? factoryFunction) {
     if (factoryFunction == null) {
       return null;
     } else {

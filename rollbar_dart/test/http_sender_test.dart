@@ -18,7 +18,7 @@ void main() {
 
       expect(rollbarResponse.err, equals(0));
       expect(rollbarResponse.result, isNotNull);
-      expect(rollbarResponse.result.uuid,
+      expect(rollbarResponse.result!.uuid,
           equals('67ce3d7bfab14fd99218ae5c985071e7'));
     });
 
