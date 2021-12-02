@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
 import 'flutter1_workarounds.dart' as rbdart;
 import 'package:rollbar_flutter/rollbar.dart';
 
@@ -82,7 +83,7 @@ void main() {
     // of the closure
     var config = (defaultConfig()
           ..handleUncaughtErrors = false
-          ..sender = ((config) => sender!) as Sender Function(Config)?)
+          ..sender = ((config) => sender!))
         .build();
 
     await _runRollbarFlutter(config, (rollbar) async {
