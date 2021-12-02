@@ -5,9 +5,6 @@ homepage: https://www.rollbar.com
 documentation: https://docs.rollbar.com/docs/flutter#flutter
 repository: https://github.com/rollbar/rollbar-flutter
 
-# !!! the following line is only needed for the local SDK development:
-publish_to: none 
-
 environment:
   sdk: '>=2.12.0 <3.0.0'
   flutter: '>=1.20.0'
@@ -15,17 +12,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  logging: ^1.0.2
+  rollbar_dart: '>=0.2.0-beta <0.2.0'
 
-  # !!! the following line is needed to publish this package:
-  #rollbar_dart: '>=0.2.0-beta <0.2.0'
-
-  # !!! the following 2 lines are only needed for the local SDK development,
-  # !!! replace them with the line commented out above:
+dependency_overrides:
   rollbar_dart:
     path: ../rollbar_dart
-
-  logging: ^1.0.2
-
+ 
 dev_dependencies:
   flutter_test:
     sdk: flutter
