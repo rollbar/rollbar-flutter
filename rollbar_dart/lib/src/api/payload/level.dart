@@ -16,7 +16,8 @@ extension LevelExtension on Level? {
         return 'error';
       case Level.critical:
         return 'critical';
+      default:
+        return null;
     }
-    return null;
   }
 }

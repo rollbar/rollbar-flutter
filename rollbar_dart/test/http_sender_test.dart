@@ -2,11 +2,15 @@ import 'package:http/http.dart' as http;
 import 'package:rollbar_dart/src/http_sender.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 
+import 'http_sender_test.mocks.dart';
+
+@GenerateMocks([http.Response])
 void main() {
   group('Response conversion', () {
     test('Can convert successful API response', () async {
-      var response = MockHttpResponse();
+      var response = MockResponse();
       when(response.body).thenReturn('''{
     "err": 0,
     "result": {
@@ -23,7 +27,7 @@ void main() {
     });
 
     test('Can convert error API response', () async {
-      var response = MockHttpResponse();
+      var response = MockResponse();
       when(response.body).thenReturn('''{
     "err": 1,
     "message": "invalid token"
@@ -36,5 +40,3 @@ void main() {
     });
   });
 }
-
-class MockHttpResponse extends Mock implements http.Response {}

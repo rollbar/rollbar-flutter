@@ -33,8 +33,9 @@ void main() {
       }
 
       var payloadJson =
-          await (_server.messages.first.timeout(Duration(milliseconds: 500)) as FutureOr<String>);
-      var payload = json.decode(payloadJson);
+          await (_server.messages.first.timeout(Duration(milliseconds: 500)));
+      expect(payloadJson != null, equals(true));
+      var payload = json.decode(payloadJson!);
 
       var data = payload['data'];
       expect(data['language'], equals('dart'));
@@ -53,8 +54,9 @@ void main() {
       var isolate = await Isolate.spawn(secondIsolateMethod, errorPort);
       try {
         var payloadJson =
-            await (_server.messages.first.timeout(Duration(milliseconds: 500)) as FutureOr<String>);
-        var payload = json.decode(payloadJson);
+            await (_server.messages.first.timeout(Duration(milliseconds: 500)));
+        expect(payloadJson != null, equals(true));
+        var payload = json.decode(payloadJson!);
 
         var data = payload['data'];
         expect(data['language'], equals('dart'));

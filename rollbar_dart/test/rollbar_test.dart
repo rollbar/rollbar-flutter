@@ -1,5 +1,6 @@
 import 'package:mockito/mockito.dart';
 import 'package:rollbar_dart/rollbar.dart';
+import 'package:rollbar_dart/src/sender.dart';
 import 'package:rollbar_dart/src/api/payload/body.dart';
 import 'package:rollbar_dart/src/api/payload/data.dart';
 import 'package:rollbar_dart/src/api/payload/exception_info.dart';
@@ -14,8 +15,7 @@ void main() {
 
     setUp(() async {
       sender = MockSender();
-      when(sender.send(any!))
-          .thenAnswer((_invocation) => Future.value(Response()));
+      when(sender.send(any)).thenAnswer((_) async => Response());
       // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
       // mock as the sender factory.
       var config = (ConfigBuilder('BlaBlaAccessToken')
@@ -35,7 +35,7 @@ void main() {
         failingFunction();
       } catch (error, stackTrace) {
         await rollbar.error(error, stackTrace);
-        var payload = verify(await sender.send(captureAny!)).captured.single;
+        var payload = verify(sender.send(captureAny)).captured.single;
 
         expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
@@ -69,7 +69,7 @@ void main() {
         failingFunction();
       } catch (error, stackTrace) {
         await rollbar.error(error, stackTrace);
-        var payload = verify(await sender.send(captureAny!)).captured.single;
+        var payload = verify(await sender.send(captureAny)).captured.single;
 
         Map? data = payload['data'];
         expect(data, isNot(contains('code_version')));
@@ -94,7 +94,7 @@ void main() {
       await rollbar.error(
           ExpandableException(['a', 'b', 'c']), StackTrace.empty);
 
-      var payload = verify(await sender.send(captureAny!)).captured.single;
+      var payload = verify(await sender.send(captureAny)).captured.single;
 
       var body = getPath(payload, ['data', 'body']);
       expect(body, contains('trace_chain'));
@@ -139,7 +139,13 @@ class ExpandableException implements Exception {
   }
 }
 
-class MockSender extends Mock implements Sender {}
+class MockSender extends Mock implements Sender {
+  @override
+  Future<Response?> send(Map<String, dynamic>? payload) {
+    return super.noSuchMethod(Invocation.method(#send, [payload]),
+        returnValue: Future<Response?>.value(Response()));
+  }
+}
 
 dynamic getPath(Map<String, dynamic>? source, List<String> path) {
   // We're in a test, let the bounds checker handle the edge case of an empty path

@@ -23,15 +23,15 @@ class CoreNotifier {
   final Sender? _sender;
   final Transformer? _transformer;
 
-  static const NOTIFIER_VERSION = '0.1.0-beta';
+  static const NOTIFIER_VERSION = '0.2.0-beta';
   static const NOTIFIER_NAME = 'rollbar-dart';
 
   CoreNotifier(this._config)
       : _sender = _make(_config, _config.sender),
         _transformer = _make(_config, _config.transformer);
 
-  Future<Response> log(
-      Level level, dynamic error, StackTrace? stackTrace, String? message) async {
+  Future<Response?> log(Level level, dynamic error, StackTrace? stackTrace,
+      String? message) async {
     var body = await _prepareBody(message, error, stackTrace);
 
     var client = Client()

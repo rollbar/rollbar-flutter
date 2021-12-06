@@ -116,10 +116,12 @@ class Rollbar {
     }
   }
 
-  static Future<void> _processResponse(Future<Response> rollbarAction) async {
+  static Future<void> _processResponse(Future<Response?> rollbarAction) async {
     try {
       var response = await rollbarAction;
-      if (response.isError()) {
+      if (response == null) {
+        logging.error('No response while sending data to Rollbar', null);
+      } else if (response.isError()) {
         logging.error('Error while sending data to Rollbar', response.message);
       }
     } on Exception catch (e) {

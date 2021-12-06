@@ -1,12 +1,12 @@
-import 'package:rollbar_dart/src/http_sender.dart';
+import 'http_sender.dart';
 
 import 'transformer.dart';
 import 'sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
 class Config {
-  final String? accessToken;
-  final String? endpoint;
+  final String accessToken;
+  final String endpoint;
   final String? environment;
   final String? framework;
   final String? codeVersion;
@@ -64,8 +64,8 @@ class Config {
 }
 
 class ConfigBuilder {
-  final String? accessToken;
-  String? endpoint = 'https://api.rollbar.com/api/1/item/';
+  final String accessToken;
+  String endpoint = 'https://api.rollbar.com/api/1/item/';
   String? environment;
   String? framework;
   String? codeVersion;

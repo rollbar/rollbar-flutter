@@ -9,8 +9,8 @@ import 'package:rollbar_dart/src/api/response.dart';
 const PREFIX = 'http://raw:';
 
 Sender createTextSender(Config c) {
-  if (c.endpoint!.startsWith(PREFIX)) {
-    var port = int.parse(c.endpoint!.substring(PREFIX.length));
+  if (c.endpoint.startsWith(PREFIX)) {
+    var port = int.parse(c.endpoint.substring(PREFIX.length));
     return RawTextSender(port);
   } else {
     throw Exception('Invalid endpoint ${c.endpoint}');
@@ -36,7 +36,7 @@ class RawTextSocket {
     _isolate = await Isolate.spawn(
         _server, [tcpInfoPort.sendPort, _receivePort.sendPort]);
 
-    int? port = await (tcpInfoPort.first as FutureOr<int?>);
+    var port = await (tcpInfoPort.first);
     tcpInfoPort.close();
 
     return port;
@@ -113,7 +113,11 @@ class RawTextSender implements Sender {
   RawTextSender(this.port);
 
   @override
-  Future<Response> send(Map<String, dynamic> payload) async {
+  Future<Response?> send(Map<String, dynamic>? payload) async {
+    if (payload == null) {
+      return null;
+    }
+
     final socket = await Socket.connect('localhost', port);
     log('Client connected with port ${socket.port}');
     try {

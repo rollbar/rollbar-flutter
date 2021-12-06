@@ -19,7 +19,7 @@ void main() {
   setUp(() async {
     rbdart.RollbarPlatformInfo.isAndroid = true;
     sender = MockSender();
-    when(sender!.send(any!))
+    when(sender!.send(any))
         .thenAnswer((_invocation) => Future.value(rbdart.Response()));
 
     callsReceived = [];
@@ -92,7 +92,7 @@ void main() {
 
       await rollbar.error(exception, StackTrace.empty);
 
-      var payload = verify(await sender!.send(captureAny!)).captured.single;
+      var payload = verify(await sender!.send(any)).captured.single;
 
       expect(payload['data']['framework'], equals('flutter'));
 

@@ -13,7 +13,7 @@ import 'api/payload/level.dart';
 class UncaughtErrorHandler {
   Config _config;
 
-  Future<SendPort?>? _errorPort;
+  late Future<SendPort?> _errorPort;
 
   UncaughtErrorHandler._(this._config) {
     _errorPort = _getErrorMessageHandler(_config);
@@ -23,14 +23,16 @@ class UncaughtErrorHandler {
     var handler = UncaughtErrorHandler._(config);
 
     if (config.handleUncaughtErrors!) {
-      var errorPort = await (handler._errorPort as FutureOr<SendPort>);
-      Isolate.current.addErrorListener(errorPort);
+      var errorPort = await (handler._errorPort);
+      if (errorPort != null) {
+        Isolate.current.addErrorListener(errorPort);
+      }
     }
 
     return handler;
   }
 
-  Future<SendPort?>? get errorHandlerPort {
+  Future<SendPort?> get errorHandlerPort {
     return _errorPort;
   }
 
