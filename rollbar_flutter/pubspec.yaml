@@ -23,7 +23,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   pedantic: ^1.11.1
-  mockito: ^5.0.16
+  build_runner: ^1.11.0
+  mockito: '>=5.0.0 <6.0.0'
 
 flutter:
   plugin:

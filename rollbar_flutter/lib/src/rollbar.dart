@@ -35,7 +35,10 @@ class RollbarFlutter extends Rollbar {
           }
         };
 
-        var errorHandler = await (rollbar.errorHandler as FutureOr<SendPort>);
+        var errorHandler = await (rollbar.errorHandler as Future<SendPort?>);
+        if (errorHandler == null) {
+          return;
+        }
         Isolate.current.addErrorListener(errorHandler);
 
         await rollbar._initializePlatformInstance();
