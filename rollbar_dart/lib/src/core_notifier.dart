@@ -23,8 +23,10 @@ class CoreNotifier {
   final Sender? _sender;
   final Transformer? _transformer;
 
-  static const NOTIFIER_VERSION = '0.2.0-beta';
-  static const NOTIFIER_NAME = 'rollbar-dart';
+  // NOTIFIER_VERSION to be updated with each new release:
+  static const notifierVersion = '0.2.0-beta';
+
+  static const notifierName = 'rollbar-dart';
 
   CoreNotifier(this._config)
       : _sender = _make(_config, _config.sender),
@@ -54,7 +56,7 @@ class CoreNotifier {
       ..codeVersion = _config.codeVersion
       ..client = client
       ..environment = _config.environment
-      ..notifier = {'version': NOTIFIER_VERSION, 'name': NOTIFIER_NAME};
+      ..notifier = {'version': notifierVersion, 'name': notifierName};
 
     if (client.rootPackage != null) {
       // Root detection compatibility, currently checked under the server element

@@ -10,7 +10,7 @@ void main() {
       // Dart tests run from the current package directory, so we can just read pubspec.yaml
       var pubspecYaml = await File('pubspec.yaml').readAsString();
       var pubspec = Pubspec.parse(pubspecYaml);
-      expect(CoreNotifier.NOTIFIER_VERSION, equals(pubspec.version.toString()));
+      expect(CoreNotifier.notifierVersion, equals(pubspec.version.toString()));
     });
   });
 }
