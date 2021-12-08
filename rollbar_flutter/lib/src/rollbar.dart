@@ -70,7 +70,7 @@ class RollbarFlutter extends Rollbar {
 
   Future<void> _unhandledError(dynamic exception, StackTrace trace) async {
     try {
-      await error(exception, trace);
+      error(exception, trace);
     } on Exception catch (e) {
       logging.error(
           'Internal error encountered while sending data to Rollbar', e);

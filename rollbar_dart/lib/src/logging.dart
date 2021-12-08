@@ -1,5 +1,7 @@
 import 'dart:developer' as developer;
 
+// internal SDK logging (for the SDK use only!!!):
+
 void info(String message, dynamic error) {
   _log(800, message, error);
 }
