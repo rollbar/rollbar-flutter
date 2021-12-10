@@ -2,4 +2,4 @@ local.properties
 **/pana-report
 **/.pubignore
 
-.DS_Store
+**/.DS_Store
