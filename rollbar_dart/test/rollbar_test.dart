@@ -1,12 +1,7 @@
-import 'package:mockito/mockito.dart';
-import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/sender.dart';
-import 'package:rollbar_dart/src/api/payload/body.dart';
-import 'package:rollbar_dart/src/api/payload/data.dart';
-import 'package:rollbar_dart/src/api/payload/exception_info.dart';
-import 'package:rollbar_dart/src/api/response.dart';
-import 'package:rollbar_dart/src/transformer.dart';
 import 'package:test/test.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:rollbar_dart/rollbar.dart';
 
 void main() {
   group('Rollbar notifier tests', () {
