@@ -3,7 +3,7 @@ import 'dart:async';
 
 import 'config.dart';
 import 'core_notifier.dart';
-import 'logging.dart' as logging;
+import 'logging.dart';
 import 'api/payload/exception_info.dart';
 import 'api/payload/level.dart';
 
@@ -78,17 +78,17 @@ class UncaughtErrorHandler {
               var trace = _getTrace(msg[1]);
               await rollbarCore.log(Level.error, error, trace, null);
             } else {
-              logging.warning(
+              Logging.warning(
                   'An error has been reported to the uncaught error handler before the Rollbar instance was configured',
                   error);
             }
           }
         } on Exception catch (e) {
-          logging.error('Failed to process rollbar error message', e);
+          Logging.error('Failed to process rollbar error message', e);
         }
       }
     } on Exception catch (e) {
-      logging.error('The rollbar uncaught error handler has crashed', e);
+      Logging.error('The rollbar uncaught error handler has crashed', e);
     }
   }
 

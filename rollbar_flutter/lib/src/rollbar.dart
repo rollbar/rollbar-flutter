@@ -4,9 +4,9 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/logging.dart' as logging;
+//import 'package:rollbar_dart/src/logging.dart' as logging;
 
-export 'package:rollbar_dart/rollbar.dart' show Config, ConfigBuilder;
+//export 'package:rollbar_dart/rollbar.dart' show Config, ConfigBuilder;
 
 import 'platform_transformer.dart';
 
@@ -70,9 +70,9 @@ class RollbarFlutter extends Rollbar {
 
   Future<void> _unhandledError(dynamic exception, StackTrace trace) async {
     try {
-      error(exception, trace);
+      await super.error(exception, trace);
     } on Exception catch (e) {
-      logging.error(
+      Logging.error(
           'Internal error encountered while sending data to Rollbar', e);
     }
   }

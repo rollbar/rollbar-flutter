@@ -4,7 +4,7 @@ import 'dart:isolate';
 import 'config.dart';
 import 'core_notifier.dart';
 import 'uncaught_error.dart';
-import 'logging.dart' as logging;
+import 'logging.dart';
 import 'api/response.dart';
 import 'api/payload/level.dart';
 
@@ -111,7 +111,7 @@ class Rollbar {
     try {
       return await action;
     } on Exception catch (e) {
-      logging.error('Internal error encountered while initializing Rollbar', e);
+      Logging.error('Internal error encountered while initializing Rollbar', e);
       rethrow;
     }
   }
@@ -120,12 +120,12 @@ class Rollbar {
     try {
       var response = await rollbarAction;
       if (response == null) {
-        logging.error('No response while sending data to Rollbar', null);
+        Logging.error('No response while sending data to Rollbar', null);
       } else if (response.isError()) {
-        logging.error('Error while sending data to Rollbar', response.message);
+        Logging.error('Error while sending data to Rollbar', response.message);
       }
     } on Exception catch (e) {
-      logging.error(
+      Logging.error(
           'Internal error encountered while sending data to Rollbar', e);
       rethrow;
     }
