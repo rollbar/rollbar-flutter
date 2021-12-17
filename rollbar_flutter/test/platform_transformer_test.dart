@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/platform.dart';
+//import 'package:rollbar_dart/src/platform.dart';
 import 'package:rollbar_flutter/src/platform_transformer.dart';
 
 import 'platform_exception_utils.dart';

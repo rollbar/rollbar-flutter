@@ -4,9 +4,6 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rollbar_dart/rollbar.dart';
-//import 'package:rollbar_dart/src/logging.dart' as logging;
-
-//export 'package:rollbar_dart/rollbar.dart' show Config, ConfigBuilder;
 
 import 'platform_transformer.dart';
 
