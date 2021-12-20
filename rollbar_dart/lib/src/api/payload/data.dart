@@ -4,7 +4,7 @@ import 'level.dart';
 
 /// Contains the data for the occurrence to be sent to Rollbar.
 class Data {
-  Map<String, String>? notifier;
+  late Map<String, String> notifier;
   String? environment;
   late Client client;
   String? platform;
