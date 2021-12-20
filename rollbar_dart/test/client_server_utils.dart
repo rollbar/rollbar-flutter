@@ -36,7 +36,7 @@ class RawTextSocket {
     _isolate = await Isolate.spawn(
         _server, [tcpInfoPort.sendPort, _receivePort.sendPort]);
 
-    var port = await (tcpInfoPort.first);
+    var port = await tcpInfoPort.first;
     tcpInfoPort.close();
 
     return port;

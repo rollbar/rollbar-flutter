@@ -23,7 +23,7 @@ class UncaughtErrorHandler {
     var handler = UncaughtErrorHandler._(config);
 
     if (config.handleUncaughtErrors!) {
-      var errorPort = await (handler._errorPort);
+      var errorPort = await handler._errorPort;
       if (errorPort != null) {
         Isolate.current.addErrorListener(errorPort);
       }
