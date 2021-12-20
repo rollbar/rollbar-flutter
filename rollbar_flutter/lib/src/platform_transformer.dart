@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:rollbar_dart/rollbar.dart'
-    show Body, TraceInfo, Data, RollbarPlatformInfo, TraceChain, Transformer;
+    show Body, Data, RollbarPlatformInfo, TraceChain, TraceInfo, Transformer;
 
 /// This trasformer inspects some platform specific exception types, which
 /// carry additional occurrence details in their exception messages.
