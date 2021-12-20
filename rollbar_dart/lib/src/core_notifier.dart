@@ -23,7 +23,7 @@ class CoreNotifier {
   final Sender? _sender;
   final Transformer? _transformer;
 
-  // NOTIFIER_VERSION to be updated with each new release:
+  // notifierVersion to be updated with each new release:
   static const notifierVersion = '0.2.0-beta';
 
   static const notifierName = 'rollbar-dart';
