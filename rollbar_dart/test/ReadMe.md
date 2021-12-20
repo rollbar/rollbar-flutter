@@ -3,7 +3,7 @@ https://pub.dev/documentation/mockito/latest/
 
 # Notes
 
-## Usefull Imports
+## Useful Imports
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
