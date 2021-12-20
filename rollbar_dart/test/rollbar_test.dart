@@ -30,7 +30,7 @@ void main() {
         failingFunction();
       } catch (error, stackTrace) {
         await rollbar.error(error, stackTrace);
-        var payload = verify(sender.send(captureAny)).captured.single;
+        var payload = verify(await sender.send(captureAny)).captured.single;
 
         expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
