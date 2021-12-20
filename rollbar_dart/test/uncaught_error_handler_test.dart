@@ -54,7 +54,7 @@ void main() {
       var isolate = await Isolate.spawn(secondIsolateMethod, errorPort);
       try {
         var payloadJson =
-            await (_server.messages.first.timeout(Duration(milliseconds: 500)));
+            await _server.messages.first.timeout(Duration(milliseconds: 500));
         expect(payloadJson != null, equals(true));
         var payload = json.decode(payloadJson!);
 
