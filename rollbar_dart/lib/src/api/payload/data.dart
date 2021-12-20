@@ -8,7 +8,7 @@ class Data {
   String? environment;
   late Client client;
   String? platform;
-  String? language;
+  late String language;
   String? framework;
   String? codeVersion;
   Level? level;
