@@ -1,21 +1,16 @@
-import 'package:mockito/mockito.dart';
-import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/api/payload/body.dart';
-import 'package:rollbar_dart/src/api/payload/data.dart';
-import 'package:rollbar_dart/src/api/payload/exception_info.dart';
-import 'package:rollbar_dart/src/api/response.dart';
-import 'package:rollbar_dart/src/transformer.dart';
 import 'package:test/test.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:rollbar_dart/rollbar.dart';
 
 void main() {
   group('Rollbar notifier tests', () {
-    Rollbar rollbar;
-    Sender sender;
+    late Rollbar rollbar;
+    late Sender sender;
 
     setUp(() async {
       sender = MockSender();
-      when(sender.send(any))
-          .thenAnswer((_invocation) => Future.value(Response()));
+      when(sender.send(any)).thenAnswer((_) async => Response());
       // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
       // mock as the sender factory.
       var config = (ConfigBuilder('BlaBlaAccessToken')
@@ -71,7 +66,7 @@ void main() {
         await rollbar.error(error, stackTrace);
         var payload = verify(await sender.send(captureAny)).captured.single;
 
-        Map data = payload['data'];
+        Map? data = payload['data'];
         expect(data, isNot(contains('code_version')));
         expect(data, isNot(contains('framework')));
         expect(data, isNot(contains('custom')));
@@ -111,10 +106,10 @@ void failingFunction() {
 
 class ExpandableTransformer implements Transformer {
   @override
-  Future<Data> transform(dynamic error, StackTrace trace, Data data) async {
+  Future<Data> transform(dynamic error, StackTrace? trace, Data data) async {
     // Simulates for example what we'd do with a PlatformException in Flutter
     if (error is ExpandableException) {
-      var traceChain = error.messages.map((message) {
+      List<TraceInfo?> traceChain = error.messages.map((message) {
         return TraceInfo()
           ..frames = []
           ..exception = (ExceptionInfo()
@@ -122,7 +117,7 @@ class ExpandableTransformer implements Transformer {
             ..message = message);
       }).toList();
 
-      traceChain.addAll(data.body.getTraces());
+      traceChain.addAll(data.body.getTraces()!);
       data.body = TraceChain()..traces = traceChain;
     }
     return data;
@@ -139,20 +134,26 @@ class ExpandableException implements Exception {
   }
 }
 
-class MockSender extends Mock implements Sender {}
+class MockSender extends Mock implements Sender {
+  @override
+  Future<Response?> send(Map<String, dynamic>? payload) {
+    return super.noSuchMethod(Invocation.method(#send, [payload]),
+        returnValue: Future<Response?>.value(Response()));
+  }
+}
 
-dynamic getPath(Map<String, dynamic> source, List<String> path) {
+dynamic getPath(Map<String, dynamic>? source, List<String> path) {
   // We're in a test, let the bounds checker handle the edge case of an empty path
   for (var i = 0;; ++i) {
     var key = path[i];
 
     expect(source, contains(key));
-    var value = source[key];
+    var value = source![key];
 
     if (i == path.length - 1) {
       return value;
     } else {
-      source = value as Map<String, dynamic>;
+      source = value as Map<String, dynamic>?;
     }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'sender.dart';
 import 'api/response.dart';
+import 'sender.dart';
 
 /// Default HTTP [Sender] implementation.
 class HttpSender implements Sender {
@@ -12,7 +12,11 @@ class HttpSender implements Sender {
 
   /// Sends the provided payload as the body of POST request to the configured endpoint.
   @override
-  Future<Response> send(Map<String, dynamic> payload) async {
+  Future<Response?> send(Map<String, dynamic>? payload) async {
+    if (payload == null) {
+      return null;
+    }
+
     final headers = <String, String>{
       'User-Agent': 'rollbar-dart',
       'Content-Type': 'application/json',
@@ -30,6 +34,7 @@ class HttpSender implements Sender {
 
 Future<Response> toRollbarResponse(Future<http.Response> response) async {
   Map data = json.decode((await response).body);
+
   var result = Response();
   if (data.containsKey('err')) {
     result.err = data['err'].toInt();

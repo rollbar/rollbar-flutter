@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
 import 'flutter1_workarounds.dart' as rbdart;
 import 'package:rollbar_flutter/rollbar.dart';
 
@@ -12,14 +13,13 @@ void main() {
   const channel = MethodChannel('rollbar_flutter');
 
   TestWidgetsFlutterBinding.ensureInitialized();
-  List<MethodCall> callsReceived;
-  MockSender sender;
+  late List<MethodCall> callsReceived;
+  late MockSender sender;
 
   setUp(() async {
     rbdart.RollbarPlatformInfo.isAndroid = true;
     sender = MockSender();
-    when(sender.send(any))
-        .thenAnswer((_invocation) => Future.value(rbdart.Response()));
+    when(sender.send(any)).thenAnswer((_) async => Response());
 
     callsReceived = [];
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -117,7 +117,13 @@ Future<void> _runRollbarFlutter(
   expect(run, equals(true));
 }
 
-class MockSender extends Mock implements rbdart.Sender {}
+class MockSender extends Mock implements rbdart.Sender {
+  @override
+  Future<Response?> send(Map<String, dynamic>? payload) {
+    return super.noSuchMethod(Invocation.method(#send, [payload]),
+        returnValue: Future<Response?>.value(Response()));
+  }
+}
 
 MockSender createMockSender(Config c) {
   return MockSender();

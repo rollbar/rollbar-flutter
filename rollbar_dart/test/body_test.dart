@@ -30,15 +30,18 @@ void main() {
 
       var asJson = jsonEncode(traceInfo.toJson());
 
-      [(v) => TraceInfo.fromMap(v), (v) => Body.fromMap(v)].forEach((builder) {
+      for (var builder in [
+        (v) => TraceInfo.fromMap(v),
+        (v) => Body.fromMap(v)
+      ]) {
         var recovered = builder(jsonDecode(asJson)) as TraceInfo;
 
-        expect(recovered.exception.clazz, equals('TestException'));
-        expect(
-            recovered.exception.message, equals('Attempted to test some code'));
+        expect(recovered.exception!.clazz, equals('TestException'));
+        expect(recovered.exception!.message,
+            equals('Attempted to test some code'));
         expect(recovered.frames.length, equals(2));
         expect(recovered.rawTrace, equals('stack frame 1 2 3'));
-      });
+      }
     });
 
     test('TraceChain json roundtrip serialization test', () {
@@ -70,16 +73,20 @@ void main() {
       var chain = TraceChain()..traces = [traceInfo1, traceInfo2];
       var asJson = jsonEncode(chain.toJson());
 
-      [(v) => TraceChain.fromMap(v), (v) => Body.fromMap(v)].forEach((builder) {
+      for (var builder in [
+        (v) => TraceChain.fromMap(v),
+        (v) => Body.fromMap(v)
+      ]) {
         var recovered = builder(jsonDecode(asJson)) as TraceChain;
 
-        expect(recovered.traces.length, equals(2));
-        expect(recovered.traces[0].frames.length, equals(2));
-        expect(recovered.traces[0].frames[0].method, equals('inAChain'));
+        expect(recovered.traces!.length, equals(2));
+        expect(recovered.traces![0]!.frames.length, equals(2));
+        expect(recovered.traces![0]!.frames[0].method, equals('inAChain'));
 
-        expect(recovered.traces[1].frames.length, equals(1));
-        expect(recovered.traces[1].frames[0].method, equals('_AnotherMethod'));
-      });
+        expect(recovered.traces![1]!.frames.length, equals(1));
+        expect(
+            recovered.traces![1]!.frames[0].method, equals('_AnotherMethod'));
+      }
     });
 
     test('Message json roundtrip serialization test', () {
@@ -87,11 +94,11 @@ void main() {
 
       var asJson = jsonEncode(message.toJson());
 
-      [(v) => Message.fromMap(v), (v) => Body.fromMap(v)].forEach((builder) {
+      for (var builder in [(v) => Message.fromMap(v), (v) => Body.fromMap(v)]) {
         var recovered = builder(jsonDecode(asJson)) as Message;
 
         expect(recovered.body, equals('This is a test body'));
-      });
+      }
     });
   });
 }

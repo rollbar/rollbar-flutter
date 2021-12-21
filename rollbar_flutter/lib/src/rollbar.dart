@@ -4,9 +4,6 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/logging.dart' as logging;
-
-export 'package:rollbar_dart/rollbar.dart' show Config, ConfigBuilder;
 
 import 'platform_transformer.dart';
 
@@ -21,7 +18,7 @@ class RollbarFlutter extends Rollbar {
 
   static Future<void> run(
       Config config, FutureOr<void> Function(RollbarFlutter) action) async {
-    if (config.handleUncaughtErrors) {
+    if (config.handleUncaughtErrors!) {
       var rollbar = RollbarFlutter._(config);
 
       await runZonedGuarded(() async {
@@ -29,13 +26,16 @@ class RollbarFlutter extends Rollbar {
 
         var previousOnError = FlutterError.onError;
         FlutterError.onError = (FlutterErrorDetails details) async {
-          await rollbar._unhandledError(details.exception, details.stack);
+          await rollbar._unhandledError(details.exception, details.stack!);
           if (previousOnError != null) {
             previousOnError.call(details);
           }
         };
 
-        var errorHandler = await rollbar.errorHandler;
+        var errorHandler = await (rollbar.errorHandler as Future<SendPort?>);
+        if (errorHandler == null) {
+          return;
+        }
         Isolate.current.addErrorListener(errorHandler);
 
         await rollbar._initializePlatformInstance();
@@ -67,9 +67,9 @@ class RollbarFlutter extends Rollbar {
 
   Future<void> _unhandledError(dynamic exception, StackTrace trace) async {
     try {
-      await error(exception, trace);
+      await super.error(exception, trace);
     } on Exception catch (e) {
-      logging.error(
+      Logging.error(
           'Internal error encountered while sending data to Rollbar', e);
     }
   }

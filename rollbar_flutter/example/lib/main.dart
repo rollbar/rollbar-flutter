@@ -2,13 +2,15 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/rollbar.dart';
 
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
   var config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
         ..environment = 'development'
-        ..codeVersion = '0.1.0'
+        ..codeVersion = '0.2.0'
         ..package = 'rollbar_flutter_example'
         ..handleUncaughtErrors = true
         ..includePlatformLogs = false)
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key = null, required this.title}) : super(key: key);
 
   final String title;
 

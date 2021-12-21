@@ -1,25 +1,32 @@
 name: rollbar_flutter
 description: Connect your Flutter applications to Rollbar for error reporting.
-version: 0.1.0-beta
+version: 0.2.0-beta
 homepage: https://www.rollbar.com
 documentation: https://docs.rollbar.com/docs/flutter#flutter
 repository: https://github.com/rollbar/rollbar-flutter
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.20.0"
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: '>=1.20.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  rollbar_dart: ">=0.1.0-beta <0.2.0"
-  logging: '>=0.11.4 <1.1.0'
+  logging: ^1.0.2
+  rollbar_dart: '>=0.2.0-beta <0.2.0'
 
+dependency_overrides:
+  rollbar_dart:
+    path: ../rollbar_dart
+ 
 dev_dependencies:
+  lints: ^1.0.1
+  flutter_lints: ^1.0.4
   flutter_test:
     sdk: flutter
-  pedantic: '>=1.9.0 <=1.11.0'
-  mockito: '>=4.1.0 <=5.0.7'
+  pedantic: ^1.11.1
+  build_runner: ^1.11.0
+  mockito: '>=5.0.0 <6.0.0'
 
 flutter:
   plugin:

@@ -1,10 +1,10 @@
 /// The level of an occurrence.
 enum Level { debug, info, warning, error, critical }
 
-extension LevelExtension on Level {
+extension LevelExtension on Level? {
   // The 'foundation' library, which contains `describeEnum`, is part of flutter,
   // so we don't want to add it as a dependency in rollbar-dart.
-  String get name {
+  String? get name {
     switch (this) {
       case Level.debug:
         return 'debug';
@@ -16,7 +16,8 @@ extension LevelExtension on Level {
         return 'error';
       case Level.critical:
         return 'critical';
+      default:
+        return null;
     }
-    return null;
   }
 }

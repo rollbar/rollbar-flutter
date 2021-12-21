@@ -4,7 +4,7 @@ import 'dart:isolate';
 import 'config.dart';
 import 'core_notifier.dart';
 import 'uncaught_error.dart';
-import 'logging.dart' as logging;
+import 'logging.dart';
 import 'api/response.dart';
 import 'api/payload/level.dart';
 
@@ -22,7 +22,7 @@ class Rollbar {
   /// Some initialization operations are asynchronous, such as initializing
   /// the [Isolate] that handles uncaught errors. This future can be awaited
   /// to ensure all async initialization operations are complete.
-  Future<void> ensureInitialized() async {
+  Future<UncaughtErrorHandler> ensureInitialized() async {
     return _errorHandler;
   }
 
@@ -32,7 +32,7 @@ class Rollbar {
   /// ```dart
   /// Isolate.current.addErrorListener(await rollbar.errorHandler);
   /// ```
-  Future<SendPort> get errorHandler async {
+  Future<SendPort?>? get errorHandler async {
     return (await _errorHandler).errorHandlerPort;
   }
 
@@ -111,19 +111,21 @@ class Rollbar {
     try {
       return await action;
     } on Exception catch (e) {
-      logging.error('Internal error encountered while initializing Rollbar', e);
+      Logging.error('Internal error encountered while initializing Rollbar', e);
       rethrow;
     }
   }
 
-  static Future<void> _processResponse(Future<Response> rollbarAction) async {
+  static Future<void> _processResponse(Future<Response?> rollbarAction) async {
     try {
       var response = await rollbarAction;
-      if (response.isError()) {
-        logging.error('Error while sending data to Rollbar', response.message);
+      if (response == null) {
+        Logging.error('No response while sending data to Rollbar', null);
+      } else if (response.isError()) {
+        Logging.error('Error while sending data to Rollbar', response.message);
       }
     } on Exception catch (e) {
-      logging.error(
+      Logging.error(
           'Internal error encountered while sending data to Rollbar', e);
       rethrow;
     }

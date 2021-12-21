@@ -4,13 +4,13 @@ import 'frame.dart';
 /// Container class with the error or message to be sent to Rollbar.
 abstract class Body {
   Map<String, dynamic> toJson();
-  List<TraceInfo> getTraces();
+  List<TraceInfo?>? getTraces();
 
   static Body empty() {
     return Message()..body = '';
   }
 
-  static Body fromMap(Map attributes) {
+  static Body? fromMap(Map attributes) {
     if (attributes.containsKey('trace')) {
       return TraceInfo.fromMap(attributes);
     } else if (attributes.containsKey('message')) {
@@ -23,9 +23,9 @@ abstract class Body {
 
 /// An individual error with its corresponding stack trace if available.
 class TraceInfo implements Body {
-  List<Frame> frames;
-  ExceptionInfo exception;
-  String rawTrace;
+  late List<Frame> frames;
+  ExceptionInfo? exception;
+  String? rawTrace;
 
   TraceInfo() {
     frames = [];
@@ -45,7 +45,7 @@ class TraceInfo implements Body {
     };
 
     if (exception != null) {
-      traceInfo['trace']['exception'] = exception.toJson();
+      traceInfo['trace']['exception'] = exception!.toJson();
     }
 
     if (rawTrace != null) {
@@ -55,7 +55,7 @@ class TraceInfo implements Body {
     return traceInfo;
   }
 
-  static TraceInfo fromMap(Map attributes) {
+  static TraceInfo? fromMap(Map attributes) {
     if (!attributes.containsKey('trace')) {
       return null;
     }
@@ -87,13 +87,13 @@ class TraceInfo implements Body {
 /// A chain of multiple errors, where the first one on the list represents the
 /// root cause of the error.
 class TraceChain implements Body {
-  List<TraceInfo> traces;
+  List<TraceInfo?>? traces;
 
   @override
   Map<String, dynamic> toJson() {
     return {
-      'trace_chain': traces.map((v) {
-        return v.toJson()['trace'];
+      'trace_chain': traces!.map((v) {
+        return v!.toJson()['trace'];
       }).toList()
     };
   }
@@ -107,21 +107,21 @@ class TraceChain implements Body {
   }
 
   @override
-  List<TraceInfo> getTraces() {
+  List<TraceInfo?>? getTraces() {
     return traces;
   }
 }
 
 /// A text message to be sent to Rollbar.
 class Message implements Body {
-  String body;
+  String? body;
 
   @override
   List<TraceInfo> getTraces() {
     return [];
   }
 
-  static Message fromMap(Map attributes) {
+  static Message? fromMap(Map attributes) {
     if (!attributes.containsKey('message')) {
       return null;
     }

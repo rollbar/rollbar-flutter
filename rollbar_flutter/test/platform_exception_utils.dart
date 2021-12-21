@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 PlatformException createAndroidPlatformException(
-    {String topFrameMethod,
+    {String? topFrameMethod,
     bool includeLineNumber = true,
     bool createChain = false}) {
   var topTrace = <String, dynamic>{
