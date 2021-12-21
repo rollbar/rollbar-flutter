@@ -2,7 +2,7 @@ import 'package:rollbar_dart/rollbar.dart';
 
 /// Command line application example using rollbar-dart.
 void main() async {
-  var config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
+  var config = (ConfigBuilder('17965fa5041749b6bf7095a190001ded')
         ..environment = 'development'
         ..codeVersion = '0.1.0'
         ..package = 'rollbar_dart_example'
