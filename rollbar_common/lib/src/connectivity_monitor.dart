@@ -1,61 +1,142 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:convert';
 
-/// Service aiding in optimizing network operations.
-/// [ConnectivityMonitor] is designed to work as a singleton.
-class ConnectivityMonitor {
-  static ConnectivityMonitor? _singleton;
+import 'package:meta/meta.dart';
 
-  /// Hides default constructor.
-  ConnectivityMonitor._();
+class ConnectivityState {
+  final bool connectivityOn;
 
-  /// Constructs/returns a singleton instance of [ConnectivityMonitor].
-  ///
-  /// [ConnectivityMonitor] is designed to work as a singleton.
-  factory ConnectivityMonitor.singleton() {
-    _singleton ??= ConnectivityMonitor._();
-    return _singleton!;
+  const ConnectivityState({
+    required this.connectivityOn,
+  });
+
+  ConnectivityState copyWith({
+    bool? connectivityOn,
+  }) {
+    return ConnectivityState(
+      connectivityOn: connectivityOn ?? this.connectivityOn,
+    );
   }
 
-  /// Connectivity status.
-  bool get connected => _connected;
-  bool _connected = false;
+  Map<String, dynamic> toMap() {
+    return {
+      'connectivityOn': connectivityOn,
+    };
+  }
 
-  // Checks/updates connectivity status.
-  Future<void> checkConnectivity() async {
-    var hasActiveNetInterface = await hasActiveNetworkInterface();
-    if (hasActiveNetInterface == null) {
-      // we can not judje the connectivity statis based on unknown
-      // active interfaces status, hence, let's consider it as connected:
-      _connected = true;
-    } else {
-      _connected = hasActiveNetInterface;
+  factory ConnectivityState.fromMap(Map<String, dynamic> map) {
+    return ConnectivityState(
+      connectivityOn: map['connectivityOn'] ?? false,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory ConnectivityState.fromJson(String source) =>
+      ConnectivityState.fromMap(json.decode(source));
+
+  @override
+  String toString() => 'ConnectivityState(connectivityOn: $connectivityOn)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is ConnectivityState && other.connectivityOn == connectivityOn;
+  }
+
+  @override
+  int get hashCode => connectivityOn.hashCode;
+}
+
+abstract class ConnectivityMonitor {
+  ConnectivityState get connectivityState;
+
+  Stream<ConnectivityState> get connectivityStateChangeStream;
+
+  void overrideAsOn();
+
+  void overrideAsOff();
+
+  void disableOverride();
+
+  void initialize();
+
+  void disposeConnectivityStateChangeStream();
+}
+
+abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
+  bool _connectivityOn = false;
+
+  @protected
+  bool get connectivityOn => _connectivityOn;
+
+  @protected
+  set connectivityOn(value) {
+    _connectivityOn = value;
+    if (!_activeOverride && _connectivityStateStreamController.hasListener) {
+      _connectivityStateStreamController.sink
+          .add(ConnectivityState(connectivityOn: value));
     }
   }
 
-  /// Tests on availability of an active network interface.
-  FutureOr<bool?> hasActiveNetworkInterface() async {
-    if (!NetworkInterface.listSupported) {
-      return null; // we don't really know one way or another...
-    }
+  bool _activeOverride = false;
 
-    var netInterfaces = await NetworkInterface.list(
-        includeLoopback: false, includeLinkLocal: false);
-    for (var ni in netInterfaces) {
-      if (ni.addresses.isNotEmpty) {
-        return true;
-      }
-    }
-    return false;
+  bool _connectivityOverride = false;
+
+  late final StreamController<ConnectivityState>
+      _connectivityStateStreamController;
+
+  ConnectivityMonitorBase(
+      {required StreamController<ConnectivityState>
+          connectivityStateStreamController}) {
+    _connectivityStateStreamController = connectivityStateStreamController;
   }
 
-  /// Tests Internet connectivity to Rollbar.com.
-  FutureOr<bool> hasInternetConnectionToRollbar() async {
-    try {
-      final result = await InternetAddress.lookup('rollbar.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } on SocketException catch (_) {
-      return false;
+  @override
+  Stream<ConnectivityState> get connectivityStateChangeStream =>
+      _connectivityStateStreamController.stream;
+
+  @override
+  void initialize() {}
+
+  @override
+  void disposeConnectivityStateChangeStream() {
+    _connectivityStateStreamController.close();
+  }
+
+  @override
+  void overrideAsOn() {
+    _overrideState(true);
+  }
+
+  @override
+  void overrideAsOff() {
+    _overrideState(false);
+  }
+
+  void _overrideState(bool isConnected) {
+    _connectivityOverride = isConnected;
+    _activeOverride = true;
+    if (_connectivityStateStreamController.hasListener) {
+      _connectivityStateStreamController.sink
+          .add(ConnectivityState(connectivityOn: isConnected));
     }
+  }
+
+  @override
+  void disableOverride() {
+    _activeOverride = false;
+    if (_connectivityStateStreamController.hasListener) {
+      _connectivityStateStreamController.sink
+          .add(ConnectivityState(connectivityOn: _connectivityOn));
+    }
+  }
+
+  @override
+  ConnectivityState get connectivityState {
+    return ConnectivityState(
+        connectivityOn:
+            _activeOverride ? _connectivityOverride : connectivityOn);
   }
 }
