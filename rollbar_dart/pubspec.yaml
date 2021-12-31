@@ -10,7 +10,13 @@ environment:
 
 dependencies: 
   http: '>=0.12.2 <0.14.0'
+  meta: ^1.7.0
   stack_trace: '>=1.9.5 <1.11.0'
+  rollbar_common: '>=0.2.0-beta <1.0.0'
+
+dependency_overrides:
+  rollbar_common:
+    path: ../rollbar_common
 
 dev_dependencies:
   lints: ^1.0.1

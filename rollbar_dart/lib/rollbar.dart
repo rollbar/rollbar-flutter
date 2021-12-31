@@ -13,3 +13,4 @@ export 'src/api/payload/body.dart' show Body, TraceInfo, TraceChain;
 export 'src/api/payload/frame.dart' show Frame;
 export 'src/api/payload/exception_info.dart' show ExceptionInfo;
 export 'src/api/response.dart' show Response;
+export 'src/connectivity_monitor.dart';
