@@ -1,7 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+
+import 'package:rollbar_dart/rollbar_dart.dart' as rdart;
+
+import 'package:rollbar_flutter/src/_internal/module.dart';
 
 /// Service aiding in optimizing network operations.
 /// [ConnectivityMonitor] is designed to work as a singleton.
@@ -55,92 +58,51 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 ///   }
 /// }
 ///
-class ConnectivityMonitor {
-  static final ConnectivityMonitor _singleton = ConnectivityMonitor._();
+///
+///
+///
+////// Service aiding in optimizing network operations.
+/// [ConnectivityMonitor] is designed to work as a singleton.
+class ConnectivityMonitor extends rdart.ConnectivityMonitor {
+  late final Connectivity _connectivity;
+  late final StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
-  /// Hides default constructor.
-  ConnectivityMonitor._();
-
-  /// Constructs/returns the service's singleton instance of [ConnectivityMonitor].
-  ///
-  /// [ConnectivityMonitor] is designed to work as a singleton.
-  factory ConnectivityMonitor.singleton() {
-    return _singleton;
+  ConnectivityMonitor() {
+    _connectivity = Connectivity();
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
+        (result) => _processConnectivityEvent(result),
+        onDone: () => _processConnectivityStreamCompletion(),
+        onError: (error, stackTrace) =>
+            _processConnectivityDetectionError(error, stackTrace));
   }
 
-  // Accessor to the service instance of [ConnectivityMonitor].
-  static ConnectivityMonitor get instance => _singleton;
-
-  final _connectivity = Connectivity();
-  final _controller = StreamController<bool>.broadcast();
-  bool _connectivityOn = false;
-  Stream<bool> get eventStream => _controller.stream;
-
-  void initialize() {
-    _connectivity
-        .checkConnectivity()
-        .then((value) => _checkStatus(value))
-        .onError((error, stackTrace) => null);
-    // try {
-    //   ConnectivityResult result = await _connectivity.checkConnectivity();
-    //   _checkStatus(result);
-    //   _connectivity.onConnectivityChanged.listen((result) {
-    //     _checkStatus(result);
-    //   });
-    // } catch (e) {
-    //   _checkStatus(ConnectivityResult.none);
-    // }
-  }
-
-  void _checkStatus(ConnectivityResult result) {
-    bool isOnline = false;
-    InternetAddress.lookup('example.com')
-        .then((value) =>
-            isOnline = value.isNotEmpty && value[0].rawAddress.isNotEmpty)
-        .onError((error, stackTrace) => isOnline = false)
-        .whenComplete(() => {});
-    _connectivityOn = isOnline;
-    if (_activeOverride != true) {
-      _controller.sink.add(isOnline); //({result: isOnline});
+  void _processConnectivityEvent(ConnectivityResult connectivityResult) {
+    switch (connectivityResult) {
+      case ConnectivityResult.none:
+        connectivityOn = false;
+        break;
+      case ConnectivityResult.ethernet:
+      case ConnectivityResult.wifi:
+      case ConnectivityResult.mobile:
+      default:
+        connectivityOn = true;
+        break;
     }
-
-    // try {
-    //   final result = await InternetAddress.lookup('example.com');
-    //   isOnline = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    // } on SocketException catch (_) {
-    //   isOnline = false;
-    // }
-    // _connectivityOn = isOnline;
-    // if (_activeOverride != true) {
-    //   _controller.sink.add(isOnline); //({result: isOnline});
-    // }
   }
 
-  void disposeStream() => _controller.close();
-
-  bool _activeOverride = false;
-  bool _connectivityOverride = false;
-
-  void overrideAsOn() {
-    _overrideState(true);
+  void _processConnectivityDetectionError(Object error, StackTrace stackTrace) {
+    ModuleLogger.moduleLogger
+        .warning('Connectivity Detection Error:', error, stackTrace);
   }
 
-  void overrideAsOff() {
-    _overrideState(false);
+  void _processConnectivityStreamCompletion() {
+    ModuleLogger.moduleLogger
+        .info('Connectivity Detection Event Stream completed!');
   }
 
-  void _overrideState(bool isConnected) {
-    _connectivityOverride = isConnected;
-    _activeOverride = true;
-    _controller.sink.add(isConnected);
-  }
-
-  void disableOverride() {
-    _activeOverride = false;
-    _controller.sink.add(_connectivityOn);
-  }
-
-  bool get connectivityOn {
-    return _activeOverride ? _connectivityOverride : _connectivityOn;
+  @override
+  void disposeOnConnectivityChanged() {
+    _connectivitySubscription.cancel();
+    super.disposeOnConnectivityChanged();
   }
 }

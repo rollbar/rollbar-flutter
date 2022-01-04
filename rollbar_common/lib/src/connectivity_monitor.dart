@@ -52,7 +52,7 @@ class ConnectivityState {
 abstract class ConnectivityMonitor {
   ConnectivityState get connectivityState;
 
-  Stream<ConnectivityState> get connectivityStateChangeStream;
+  Stream<ConnectivityState> get onConnectivityChanged;
 
   void overrideAsOn();
 
@@ -62,7 +62,7 @@ abstract class ConnectivityMonitor {
 
   void initialize();
 
-  void disposeConnectivityStateChangeStream();
+  void disposeOnConnectivityChanged();
 }
 
 abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
@@ -94,14 +94,14 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
   }
 
   @override
-  Stream<ConnectivityState> get connectivityStateChangeStream =>
+  Stream<ConnectivityState> get onConnectivityChanged =>
       _connectivityStateStreamController.stream;
 
   @override
   void initialize() {}
 
   @override
-  void disposeConnectivityStateChangeStream() {
+  void disposeOnConnectivityChanged() {
     _connectivityStateStreamController.close();
   }
 

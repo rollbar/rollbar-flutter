@@ -1,12 +1,12 @@
-import 'dart:ffi';
-import 'dart:io';
+//import 'dart:ffi';
+//import 'dart:io';
 
 import 'package:test/test.dart';
 
 import 'package:rollbar_dart/src/connectivity_monitor.dart';
 
 void main() {
-  group('Common connectivity monitor:', () {
+  group('Connectivity monitor (Dart):', () {
     setUp(() {
       // Additional setup goes here.
     });
@@ -30,7 +30,7 @@ void main() {
       int onCount = 0;
 
       var cm = ConnectivityMonitor();
-      cm.connectivityStateChangeStream.listen(
+      cm.onConnectivityChanged.listen(
           (state) => {state.connectivityOn ? onCount++ : offCount++},
           onDone: () => {expect(onCount + offCount, 3)});
 
@@ -38,7 +38,7 @@ void main() {
       cm.overrideAsOff();
       cm.overrideAsOn();
 
-      cm.disposeConnectivityStateChangeStream();
+      cm.disposeOnConnectivityChanged();
     });
   });
 }
