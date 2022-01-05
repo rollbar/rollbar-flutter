@@ -21,7 +21,7 @@ class MockConnectivityPlatform extends Mock
     implements ConnectivityPlatform {
   static const totalConnectivitySimulations = 20;
   final _interval = const Duration(seconds: 1);
-  late final _timer;
+  late final Timer _timer;
   ConnectivityResult _currentConnectivity = ConnectivityResult.none;
   final _connectivityStreamController =
       StreamController<ConnectivityResult>.broadcast();
