@@ -4,29 +4,32 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 
 class ConnectivityState {
+  late final DateTime timestamp;
   final bool connectivityOn;
 
-  const ConnectivityState({
-    required this.connectivityOn,
-  });
+  ConnectivityState(this.connectivityOn, [DateTime? timestamp]) {
+    this.timestamp = timestamp ?? DateTime.now();
+  }
 
   ConnectivityState copyWith({
+    DateTime? timestamp,
     bool? connectivityOn,
   }) {
     return ConnectivityState(
-      connectivityOn: connectivityOn ?? this.connectivityOn,
-    );
+        connectivityOn ?? this.connectivityOn, timestamp ?? DateTime.now());
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'timestamp': timestamp.millisecondsSinceEpoch,
       'connectivityOn': connectivityOn,
     };
   }
 
   factory ConnectivityState.fromMap(Map<String, dynamic> map) {
     return ConnectivityState(
-      connectivityOn: map['connectivityOn'] ?? false,
+      map['connectivityOn'] ?? false,
+      DateTime.fromMillisecondsSinceEpoch(map['timestamp']),
     );
   }
 
@@ -36,17 +39,20 @@ class ConnectivityState {
       ConnectivityState.fromMap(json.decode(source));
 
   @override
-  String toString() => 'ConnectivityState(connectivityOn: $connectivityOn)';
+  String toString() =>
+      'ConnectivityState(connectivityOn: $connectivityOn, timestamp: $timestamp)';
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is ConnectivityState && other.connectivityOn == connectivityOn;
+    return other is ConnectivityState &&
+        other.timestamp == timestamp &&
+        other.connectivityOn == connectivityOn;
   }
 
   @override
-  int get hashCode => connectivityOn.hashCode;
+  int get hashCode => timestamp.hashCode ^ connectivityOn.hashCode;
 }
 
 abstract class ConnectivityMonitor {
@@ -79,8 +85,7 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
 
     _connectivityOn = value;
     if (!_activeOverride && _connectivityStateStreamController.hasListener) {
-      _connectivityStateStreamController.sink
-          .add(ConnectivityState(connectivityOn: value));
+      _connectivityStateStreamController.sink.add(ConnectivityState(value));
     }
   }
 
@@ -124,7 +129,7 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
     _activeOverride = true;
     if (_connectivityStateStreamController.hasListener) {
       _connectivityStateStreamController.sink
-          .add(ConnectivityState(connectivityOn: isConnected));
+          .add(ConnectivityState(isConnected));
     }
   }
 
@@ -133,14 +138,13 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
     _activeOverride = false;
     if (_connectivityStateStreamController.hasListener) {
       _connectivityStateStreamController.sink
-          .add(ConnectivityState(connectivityOn: _connectivityOn));
+          .add(ConnectivityState(_connectivityOn));
     }
   }
 
   @override
   ConnectivityState get connectivityState {
     return ConnectivityState(
-        connectivityOn:
-            _activeOverride ? _connectivityOverride : connectivityOn);
+        _activeOverride ? _connectivityOverride : connectivityOn);
   }
 }
