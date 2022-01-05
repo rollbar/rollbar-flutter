@@ -72,7 +72,11 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
   bool get connectivityOn => _connectivityOn;
 
   @protected
-  set connectivityOn(value) {
+  set connectivityOn(bool value) {
+    if (value == _connectivityOn) {
+      return; // not a change really...
+    }
+
     _connectivityOn = value;
     if (!_activeOverride && _connectivityStateStreamController.hasListener) {
       _connectivityStateStreamController.sink

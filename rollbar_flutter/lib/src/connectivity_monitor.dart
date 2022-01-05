@@ -105,4 +105,15 @@ class ConnectivityMonitor extends rdart.ConnectivityMonitor {
     _connectivitySubscription.cancel();
     super.disposeOnConnectivityChanged();
   }
+
+  @override
+  Future<void> checkConnectivity() async {
+    ConnectivityResult result = await _connectivity.checkConnectivity();
+    if (result == ConnectivityResult.none) {
+      connectivityOn = false;
+      return;
+    }
+
+    connectivityOn = await super.hasInternetConnectionToRollbar();
+  }
 }
