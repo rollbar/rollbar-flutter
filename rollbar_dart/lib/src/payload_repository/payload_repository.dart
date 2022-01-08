@@ -86,6 +86,15 @@ class PayloadRepository {
     }
   }
 
+  void _deletePayloadRecordsOlderThan(DateTime expirationTime) {
+    final sqlStatement = _db.prepare('''
+      DELETE FROM "${PayloadRecordsTable.tblName}" 
+      WHERE "${PayloadRecordsTable.colCreatedAt}" <= ?
+      ''');
+    sqlStatement.execute([(expirationTime.millisecondsSinceEpoch / 1000)]);
+    sqlStatement.dispose();
+  }
+
   void _insertDestination(Destination destination) {
     final sqlStatement = _db.prepare('''
       INSERT INTO "${DestinationsTable.tblName}" (
