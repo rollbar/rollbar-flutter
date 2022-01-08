@@ -35,21 +35,24 @@ class PayloadRepository {
   }
 
   Future<Set<Destination>> getDestinations() async {
-    return <Destination>{};
+    return _selectAllDestinations();
   }
 
   Future<Set<PayloadRecord>> getPayloadRecords() async {
-    return <PayloadRecord>{};
+    return _selectAllPayloadRecords();
   }
 
   Future<Set<PayloadRecord>> getPayloadRecordsForDestination(
       Destination destination) async {
+    if (destination.id != null) {
+      return _selectPayloadRecordsWithDestinationID(destination.id!);
+    }
     return <PayloadRecord>{};
   }
 
   Future<Set<PayloadRecord>> getPayloadRecordsWithDestinationID(
       int destinationID) async {
-    return <PayloadRecord>{};
+    return _selectPayloadRecordsWithDestinationID(destinationID);
   }
 
   void _setupTables() {
@@ -155,6 +158,19 @@ class PayloadRepository {
       destinations.add(_createDestination(row));
     }
     return destinations.first;
+  }
+
+  Set<PayloadRecord> _selectAllPayloadRecords() {
+    final ResultSet resultSet = _db.select('''
+    SELECT * 
+    FROM "${PayloadRecordsTable.tblName}"
+    ''', []);
+
+    final Set<PayloadRecord> payloadRecords = <PayloadRecord>{};
+    for (final row in resultSet) {
+      payloadRecords.add(_createPayloadRecord(row));
+    }
+    return payloadRecords;
   }
 
   Set<PayloadRecord> _selectPayloadRecordsWithDestinationID(int destinationID) {
