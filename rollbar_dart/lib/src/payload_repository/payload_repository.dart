@@ -66,15 +66,15 @@ class PayloadRepository {
       )
       ''',
       '''
-      CREATE TABLE IF NOT EXISTS "payload_records" (
-        "id"	INTEGER,
-        "config_json"	TEXT NOT NULL,
-        "payload_json"	TEXT NOT NULL,
-        "created_at_utc_unix_epoch_sec"	INTEGER NOT NULL,
-        "destination_id"	INTEGER,
-        PRIMARY KEY("id" AUTOINCREMENT),
-        FOREIGN KEY("destination_id")
-          REFERENCES "destinations"("id")
+      CREATE TABLE IF NOT EXISTS "${PayloadRecordsTable.tblName}" (
+        "${PayloadRecordsTable.colId}"	INTEGER,
+        "${PayloadRecordsTable.colConfigJson}"	TEXT NOT NULL,
+        "${PayloadRecordsTable.colPayloadJson}"	TEXT NOT NULL,
+        "${PayloadRecordsTable.colCreatedAt}"	INTEGER NOT NULL,
+        "${PayloadRecordsTable.colDestinationKey}"	INTEGER,
+        PRIMARY KEY("${PayloadRecordsTable.colId}" AUTOINCREMENT),
+        FOREIGN KEY("${PayloadRecordsTable.colDestinationKey}")
+          REFERENCES "${DestinationsTable.tblName}"("${DestinationsTable.colId}")
           ON UPDATE CASCADE
           ON DELETE CASCADE
       )
@@ -88,8 +88,10 @@ class PayloadRepository {
 
   void _insertDestination(Destination destination) {
     final sqlStatement = _db.prepare('''
-      INSERT INTO "${DestinationsTable.tblName}"
-      ("${DestinationsTable.colEndpoint}", "${DestinationsTable.colAccessToken}")
+      INSERT INTO "${DestinationsTable.tblName}" (
+        "${DestinationsTable.colEndpoint}", 
+        "${DestinationsTable.colAccessToken}"
+        )
       VALUES (?)
       ''');
     sqlStatement.execute([destination.endpoint, destination.accessToken]);
@@ -98,8 +100,12 @@ class PayloadRepository {
 
   void _insertPayloadRecord(PayloadRecord payloadRecord) {
     final sqlStatement = _db.prepare('''
-        INSERT INTO "payload_records" 
-        ("config_json", "payload_json", "destination_id", "created_at_utc_unix_epoch_sec") 
+        INSERT INTO "${PayloadRecordsTable.tblName}" (
+          "${PayloadRecordsTable.colConfigJson}", 
+          "${PayloadRecordsTable.colPayloadJson}", 
+          "${PayloadRecordsTable.colDestinationKey}", 
+          "${PayloadRecordsTable.colCreatedAt}"
+          ) 
         VALUES (?)
         ''');
 
@@ -145,8 +151,8 @@ class PayloadRepository {
   Set<PayloadRecord> _selectPayloadRecordsWithDestinationID(int destinationID) {
     final ResultSet resultSet = _db.select('''
     SELECT * 
-    FROM "payload_records"
-    WHERE "destination_id" = ?
+    FROM "${PayloadRecordsTable.tblName}"
+    WHERE "${PayloadRecordsTable.colDestinationKey}" = ?
     ''', [destinationID]);
 
     final Set<PayloadRecord> payloadRecords = <PayloadRecord>{};
@@ -165,12 +171,12 @@ class PayloadRepository {
 
   static PayloadRecord _createPayloadRecord(Row dataRow) {
     return PayloadRecord(
-        id: dataRow['id'],
+        id: dataRow[PayloadRecordsTable.colId],
         timestamp: DateTime.fromMillisecondsSinceEpoch(
-            dataRow['created_at_utc_unix_epoch_sec'] * 1000),
-        configJson: dataRow['config_json'],
-        payloadJson: dataRow['payload_json'],
-        destinationID: dataRow['destination_id']);
+            dataRow[PayloadRecordsTable.colCreatedAt] * 1000),
+        configJson: dataRow[PayloadRecordsTable.colConfigJson],
+        payloadJson: dataRow[PayloadRecordsTable.colPayloadJson],
+        destinationID: dataRow[PayloadRecordsTable.colDestinationKey]);
   }
 }
 
@@ -180,4 +186,14 @@ class DestinationsTable {
   static const String colId = 'id';
   static const String colEndpoint = 'endpoint';
   static const String colAccessToken = 'access_token';
+}
+
+class PayloadRecordsTable {
+  static const String tblName = 'payload_records';
+
+  static const String colId = 'id';
+  static const String colConfigJson = 'config_json';
+  static const String colPayloadJson = 'payload_json';
+  static const String colCreatedAt = 'created_at_utc_unix_epoch_sec';
+  static const String colDestinationKey = 'destination_id';
 }
