@@ -11,6 +11,8 @@ void main() {
       // Additional setup goes here.
     });
 
+    tearDown(() {});
+
     test('Test active network interface', () async {
       var cm = ConnectivityMonitor();
       // here we assume that the tests are always ran on a dev machine or

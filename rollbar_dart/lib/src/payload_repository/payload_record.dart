@@ -1,18 +1,44 @@
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 class PayloadRecord {
-  final int? id;
-  final DateTime timestamp;
-  final String configJson;
-  final String payloadJson;
-  final int destinationID;
-  PayloadRecord({
-    required this.id,
-    required this.timestamp,
-    required this.configJson,
-    required this.payloadJson,
-    required this.destinationID,
-  });
+  int? _id;
+  late final DateTime timestamp;
+  late final String configJson;
+  late final String payloadJson;
+  late final int destinationID;
+
+  PayloadRecord.create(
+      {required String configJson,
+      required String payloadJson,
+      required int destinationID})
+      : this(
+            timestamp: DateTime.now().toUtc(),
+            configJson: configJson,
+            payloadJson: payloadJson,
+            destinationID: destinationID,
+            id: null);
+
+  PayloadRecord(
+      {required DateTime timestamp,
+      required String configJson,
+      required String payloadJson,
+      required int destinationID,
+      required int? id}) {
+    this.timestamp = timestamp;
+    this.configJson = configJson;
+    this.payloadJson = payloadJson;
+    this.destinationID = destinationID;
+    this._id = id;
+  }
+
+  int? get id => _id;
+
+  @protected
+  void assignID(int value) {
+    _id = value;
+  }
 
   PayloadRecord copyWith({
     int? id,
@@ -22,11 +48,11 @@ class PayloadRecord {
     int? destinationID,
   }) {
     return PayloadRecord(
-      id: id ?? this.id,
       timestamp: timestamp ?? this.timestamp,
       configJson: configJson ?? this.configJson,
       payloadJson: payloadJson ?? this.payloadJson,
       destinationID: destinationID ?? this.destinationID,
+      id: id,
     );
   }
 
@@ -63,21 +89,21 @@ class PayloadRecord {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is PayloadRecord &&
-      other.id == id &&
-      other.timestamp == timestamp &&
-      other.configJson == configJson &&
-      other.payloadJson == payloadJson &&
-      other.destinationID == destinationID;
+        other.id == id &&
+        other.timestamp == timestamp &&
+        other.configJson == configJson &&
+        other.payloadJson == payloadJson &&
+        other.destinationID == destinationID;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      timestamp.hashCode ^
-      configJson.hashCode ^
-      payloadJson.hashCode ^
-      destinationID.hashCode;
+        timestamp.hashCode ^
+        configJson.hashCode ^
+        payloadJson.hashCode ^
+        destinationID.hashCode;
   }
 }

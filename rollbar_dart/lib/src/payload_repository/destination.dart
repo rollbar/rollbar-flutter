@@ -1,14 +1,37 @@
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 class Destination {
-  final int? id;
-  final String endpoint;
-  final String accessToken;
-  Destination({
-    required this.id,
-    required this.endpoint,
-    required this.accessToken,
-  });
+  int? _id;
+  late final String endpoint;
+  late final String accessToken;
+  // Destination({
+  //   required this._id,
+  //   required this.endpoint,
+  //   required this.accessToken,
+  // });
+
+  Destination.create({
+    required String endpoint,
+    required String accessToken,
+  }) : this(endpoint: endpoint, accessToken: accessToken, id: null);
+
+  Destination(
+      {required String endpoint,
+      required String accessToken,
+      required int? id}) {
+    this.endpoint = endpoint;
+    this.accessToken = accessToken;
+    this._id = id;
+  }
+
+  int? get id => _id;
+
+  @protected
+  void assignID(int value) {
+    _id = value;
+  }
 
   Destination copyWith({
     int? id,
@@ -16,15 +39,15 @@ class Destination {
     String? accessToken,
   }) {
     return Destination(
-      id: id ?? this.id,
       endpoint: endpoint ?? this.endpoint,
       accessToken: accessToken ?? this.accessToken,
+      id: id,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      '_id': _id,
       'endpoint': endpoint,
       'accessToken': accessToken,
     };
@@ -32,7 +55,7 @@ class Destination {
 
   factory Destination.fromMap(Map<String, dynamic> map) {
     return Destination(
-      id: map['id']?.toInt() ?? 0,
+      id: map['id']?.toInt(),
       endpoint: map['endpoint'] ?? '',
       accessToken: map['accessToken'] ?? '',
     );
@@ -45,18 +68,18 @@ class Destination {
 
   @override
   String toString() =>
-      'Destination(id: $id, endpoint: $endpoint, accessToken: $accessToken)';
+      'Destination(_id: $_id, endpoint: $endpoint, accessToken: $accessToken)';
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
     return other is Destination &&
-        other.id == id &&
+        other._id == _id &&
         other.endpoint == endpoint &&
         other.accessToken == accessToken;
   }
 
   @override
-  int get hashCode => id.hashCode ^ endpoint.hashCode ^ accessToken.hashCode;
+  int get hashCode => _id.hashCode ^ endpoint.hashCode ^ accessToken.hashCode;
 }
