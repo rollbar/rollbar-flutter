@@ -12,6 +12,7 @@ class PayloadRepository {
 
   static Future<PayloadRepository> create(bool persistent) async {
     var dataAccess = DbDataAccess().initialize(asPersistent: persistent);
+    dataAccess.deleteUnusedDestinations();
     return PayloadRepository(dataAccess);
   }
 

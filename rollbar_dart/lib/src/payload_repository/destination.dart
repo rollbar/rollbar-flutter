@@ -15,16 +15,10 @@ class Destination {
   Destination.create({
     required String endpoint,
     required String accessToken,
-  }) : this(endpoint: endpoint, accessToken: accessToken, id: null);
+  }) : this(endpoint: endpoint, accessToken: accessToken);
 
-  Destination(
-      {required String endpoint,
-      required String accessToken,
-      required int? id}) {
-    this.endpoint = endpoint;
-    this.accessToken = accessToken;
-    _id = id;
-  }
+  Destination({required this.endpoint, required this.accessToken, int? id})
+      : _id = id;
 
   int? get id => _id;
 

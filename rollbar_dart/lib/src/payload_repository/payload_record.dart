@@ -17,21 +17,15 @@ class PayloadRecord {
             timestamp: DateTime.now().toUtc(),
             configJson: configJson,
             payloadJson: payloadJson,
-            destinationID: destinationID,
-            id: null);
+            destinationID: destinationID);
 
   PayloadRecord(
-      {required DateTime timestamp,
-      required String configJson,
-      required String payloadJson,
-      required int destinationID,
-      required int? id}) {
-    this.timestamp = timestamp;
-    this.configJson = configJson;
-    this.payloadJson = payloadJson;
-    this.destinationID = destinationID;
-    _id = id;
-  }
+      {required this.timestamp,
+      required this.configJson,
+      required this.payloadJson,
+      required this.destinationID,
+      int? id})
+      : _id = id;
 
   int? get id => _id;
 
