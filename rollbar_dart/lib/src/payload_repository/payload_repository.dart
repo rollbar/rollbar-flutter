@@ -29,7 +29,6 @@ class PayloadRepository {
 
   Future<int> addDestination(Destination destination) async {
     final int id = _dataAccess.insertDestination(destination);
-    destination.assignID(id);
     return id;
   }
 

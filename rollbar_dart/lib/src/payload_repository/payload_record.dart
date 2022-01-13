@@ -30,13 +30,13 @@ class PayloadRecord {
     this.configJson = configJson;
     this.payloadJson = payloadJson;
     this.destinationID = destinationID;
-    this._id = id;
+    _id = id;
   }
 
   int? get id => _id;
 
   @protected
-  void assignID(int value) {
+  void assignID(int? value) {
     _id = value;
   }
 

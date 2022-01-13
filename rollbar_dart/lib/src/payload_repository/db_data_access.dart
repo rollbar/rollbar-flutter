@@ -39,7 +39,7 @@ class DbDataAccess {
         "${PayloadRecordsTable.colConfigJson}"	TEXT NOT NULL,
         "${PayloadRecordsTable.colPayloadJson}"	TEXT NOT NULL,
         "${PayloadRecordsTable.colCreatedAt}"	INTEGER NOT NULL,
-        "${PayloadRecordsTable.colDestinationKey}"	INTEGER,
+        "${PayloadRecordsTable.colDestinationKey}"	INTEGER NOT NULL,
         FOREIGN KEY("${PayloadRecordsTable.colDestinationKey}")
           REFERENCES "${DestinationsTable.tblName}"("${DestinationsTable.colId}")
           ON UPDATE CASCADE
@@ -70,6 +70,40 @@ class DbDataAccess {
     sqlStatement.dispose();
   }
 
+  void deleteDestination(Destination destination) {
+    if (destination.id != null) {
+      deleteDestinationWithID(destination.id!);
+      // ignore: invalid_use_of_protected_member
+      destination.assignID(null);
+    }
+  }
+
+  void deleteDestinationWithID(int destinationID) {
+    final sqlStatement = db.prepare('''
+      DELETE FROM "${DestinationsTable.tblName}" 
+      WHERE "${PayloadRecordsTable.colId}" = ?
+      ''');
+    sqlStatement.execute([destinationID]);
+    sqlStatement.dispose();
+  }
+
+  void deletePayloadRecord(PayloadRecord record) {
+    if (record.id != null) {
+      deletePayloadRecordWithID(record.id!);
+      // ignore: invalid_use_of_protected_member
+      record.assignID(null);
+    }
+  }
+
+  void deletePayloadRecordWithID(int recordID) {
+    final sqlStatement = db.prepare('''
+      DELETE FROM "${PayloadRecordsTable.tblName}" 
+      WHERE "${PayloadRecordsTable.colId}" = ?
+      ''');
+    sqlStatement.execute([recordID]);
+    sqlStatement.dispose();
+  }
+
   void deletePayloadRecordsOlderThan(DateTime utcExpirationTime) {
     final sqlStatement = db.prepare('''
       DELETE FROM "${PayloadRecordsTable.tblName}" 
@@ -91,7 +125,9 @@ class DbDataAccess {
     sqlStatement.execute([destination.endpoint, destination.accessToken]);
     sqlStatement.dispose();
 
-    return db.lastInsertRowId;
+    // ignore: invalid_use_of_protected_member
+    destination.assignID(db.lastInsertRowId);
+    return destination.id!;
   }
 
   int insertPayloadRecord(PayloadRecord payloadRecord) {
@@ -114,7 +150,9 @@ class DbDataAccess {
     ]);
     sqlStatement.dispose();
 
-    return db.lastInsertRowId;
+    // ignore: invalid_use_of_protected_member
+    payloadRecord.assignID(db.lastInsertRowId);
+    return payloadRecord.id!;
   }
 
   Set<Destination> selectAllDestinations() {
