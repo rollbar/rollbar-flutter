@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:core';
 
 import 'destination.dart';
@@ -39,6 +38,10 @@ class PayloadRepository {
     return id;
   }
 
+  void removeUnusedDestinations() {
+    _dataAccess.deleteUnusedDestinations();
+  }
+
   Set<PayloadRecord> getPayloadRecords() {
     return _dataAccess.selectAllPayloadRecords();
   }
@@ -54,6 +57,22 @@ class PayloadRepository {
     return _dataAccess.selectPayloadRecordsWithDestinationID(destinationID);
   }
 
+  int addPayloadRecord(PayloadRecord payloadRecord) {
+    return _dataAccess.insertPayloadRecord(payloadRecord);
+  }
+
+  void removePayloadRecord(PayloadRecord record) {
+    _dataAccess.deletePayloadRecord(record);
+  }
+
+  void removePayloadRecordWithID(int recordID) {
+    _dataAccess.deleteDestinationWithID(recordID);
+  }
+
+  void removePayloadRecordsOlderThan(DateTime utcExpirationTime) {
+    _dataAccess.deletePayloadRecordsOlderThan(utcExpirationTime);
+  }
+
   // Async factory methods:
   /////////////////////////
 
@@ -62,11 +81,11 @@ class PayloadRepository {
   }
 
   static Future<PayloadRepository> createInMemoryAsync() async {
-    return create(false);
+    return createInMemory();
   }
 
   static Future<PayloadRepository> createPersistentAsync() async {
-    return create(true);
+    return createPersistent();
   }
 
   // Async entities manipulation methods:
@@ -78,6 +97,10 @@ class PayloadRepository {
 
   Future<int> addDestinationAsync(Destination destination) async {
     return addDestination(destination);
+  }
+
+  Future<void> removeUnusedDestinationsAsync() async {
+    removeUnusedDestinations();
   }
 
   Future<Set<PayloadRecord>> getPayloadRecordsAsync() async {
@@ -92,5 +115,22 @@ class PayloadRepository {
   Future<Set<PayloadRecord>> getPayloadRecordsWithDestinationIDAsync(
       int destinationID) async {
     return getPayloadRecordsWithDestinationID(destinationID);
+  }
+
+  Future<int> addPayloadRecordAsync(PayloadRecord payloadRecord) async {
+    return addPayloadRecord(payloadRecord);
+  }
+
+  Future<void> removePayloadRecordAsync(PayloadRecord record) async {
+    removePayloadRecord(record);
+  }
+
+  Future<void> removePayloadRecordWithIDAsync(int recordID) async {
+    removePayloadRecordWithID(recordID);
+  }
+
+  Future<void> removePayloadRecordsOlderThanAsync(
+      DateTime utcExpirationTime) async {
+    removePayloadRecordsOlderThan(utcExpirationTime);
   }
 }

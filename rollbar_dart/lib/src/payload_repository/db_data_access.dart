@@ -189,6 +189,26 @@ class DbDataAccess {
     return destinations.first;
   }
 
+  int? findDestinationID(
+      {required String endpoint, required String accessToken}) {
+    final ResultSet resultSet = db.select('''
+    SELECT "${DestinationsTable.colId}"
+    FROM "${DestinationsTable.tblName}"
+    WHERE "${DestinationsTable.colEndpoint}" = ? AND "${DestinationsTable.colAccessToken}" = ?
+    ''', [endpoint, accessToken]);
+
+    if (resultSet.isEmpty) {
+      return null;
+    } else if (resultSet.length > 1) {
+      //TODO: we may want to trace this here as an odd problem...
+      return null;
+    } else {
+      for (final row in resultSet) {
+        return row[DestinationsTable.colId];
+      }
+    }
+  }
+
   Set<PayloadRecord> selectAllPayloadRecords() {
     final ResultSet resultSet = db.select('''
     SELECT * 
