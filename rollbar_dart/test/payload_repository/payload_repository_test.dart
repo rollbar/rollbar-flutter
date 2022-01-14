@@ -22,16 +22,18 @@ void main() {
       var dbFile = File(DbDataAccess.dbFileName);
       expect(dbFile.existsSync(), false);
 
-      await PayloadRepository.createInMemory()
+      await PayloadRepository.createInMemoryAsync()
           .then((value) => expect(dbFile.existsSync(), false));
 
-      await PayloadRepository.createPersistent()
+      await PayloadRepository.createPersistentAsync()
           .then((value) => expect(dbFile.existsSync(), true));
     });
 
     test('Persistent vs non-persistent repository...', () async {
-      final repo = await PayloadRepository.createInMemory();
-      await repo.getDestinations().then((value) => expect(value.length, 0));
+      final repo = await PayloadRepository.createInMemoryAsync();
+      await repo
+          .getDestinationsAsync()
+          .then((value) => expect(value.length, 0));
 
       var destination =
           Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
