@@ -6,11 +6,6 @@ class Destination {
   int? _id;
   late final String endpoint;
   late final String accessToken;
-  // Destination({
-  //   required this._id,
-  //   required this.endpoint,
-  //   required this.accessToken,
-  // });
 
   Destination.create({
     required String endpoint,

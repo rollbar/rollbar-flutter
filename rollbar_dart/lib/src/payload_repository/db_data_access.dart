@@ -7,9 +7,6 @@ class DbDataAccess {
   static const String dbFileName = 'rollbar_payloads.db';
 
   late final Database db;
-  // DbDataAccess({
-  //   required this.db,
-  // });
 
   DbDataAccess initialize({required bool asPersistent}) {
     if (asPersistent) {
