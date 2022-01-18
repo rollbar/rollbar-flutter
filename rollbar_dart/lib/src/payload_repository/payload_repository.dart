@@ -1,5 +1,7 @@
 import 'dart:core';
 
+import 'package:sqlite3/sqlite3.dart';
+
 import 'destination.dart';
 import 'payload_record.dart';
 import 'db_data_access.dart';
@@ -30,7 +32,11 @@ class PayloadRepository {
   /////////////////////////////////
 
   Set<Destination> getDestinations() {
-    return _dataAccess.selectAllDestinations();
+    final Set<Destination> destinations = <Destination>{};
+    for (final row in _dataAccess.selectAllDestinations()) {
+      destinations.add(_createDestination(row));
+    }
+    return destinations;
   }
 
   int addDestination(Destination destination) {
@@ -43,21 +49,46 @@ class PayloadRepository {
   }
 
   Set<PayloadRecord> getPayloadRecords() {
-    return _dataAccess.selectAllPayloadRecords();
+    final recordRows = _dataAccess.selectAllPayloadRecords();
+    final Map<int, Destination> destinations = <int, Destination>{};
+    for (final destination in getDestinations()) {
+      destinations[destination.id!] = destination;
+    }
+    final Set<PayloadRecord> records = <PayloadRecord>{};
+    for (final row in recordRows) {
+      records.add(_createPayloadRecord(
+          row, destinations[row[PayloadRecordsTable.colDestinationKey]]!));
+    }
+    return records;
   }
 
   Set<PayloadRecord> getPayloadRecordsForDestination(Destination destination) {
-    if (destination.id != null) {
-      return _dataAccess.selectPayloadRecordsWithDestinationID(destination.id!);
+    final Set<PayloadRecord> records = <PayloadRecord>{};
+    if (destination.id == null) {
+      _dataAccess.insertDestination(destination);
     }
-    return <PayloadRecord>{};
+    for (final row
+        in _dataAccess.selectPayloadRecordsWithDestinationID(destination.id!)) {
+      records.add(_createPayloadRecord(row, destination));
+    }
+    return records;
   }
 
   Set<PayloadRecord> getPayloadRecordsWithDestinationID(int destinationID) {
-    return _dataAccess.selectPayloadRecordsWithDestinationID(destinationID);
+    final Set<PayloadRecord> records = <PayloadRecord>{};
+    final destinationRow = _dataAccess.selectDestination(destinationID);
+    if (destinationRow == null) {
+      return records;
+    }
+
+    var destination = _createDestination(destinationRow);
+    return getPayloadRecordsForDestination(destination);
   }
 
   int addPayloadRecord(PayloadRecord payloadRecord) {
+    if (payloadRecord.destination.id == null) {
+      _dataAccess.insertDestination(payloadRecord.destination);
+    }
     return _dataAccess.insertPayloadRecord(payloadRecord);
   }
 
@@ -132,5 +163,26 @@ class PayloadRepository {
   Future<void> removePayloadRecordsOlderThanAsync(
       DateTime utcExpirationTime) async {
     removePayloadRecordsOlderThan(utcExpirationTime);
+  }
+
+  // Private methods:
+  ///////////////////
+
+  static Destination _createDestination(Row dataRow) {
+    return Destination(
+        id: dataRow[DestinationsTable.colId],
+        endpoint: dataRow[DestinationsTable.colEndpoint],
+        accessToken: dataRow[DestinationsTable.colAccessToken]);
+  }
+
+  static PayloadRecord _createPayloadRecord(
+      Row dataRow, Destination destination) {
+    return PayloadRecord(
+        id: dataRow[PayloadRecordsTable.colId],
+        timestamp: DateTime.fromMillisecondsSinceEpoch(
+            (dataRow[PayloadRecordsTable.colCreatedAt] * 1000).toInt()),
+        configJson: dataRow[PayloadRecordsTable.colConfigJson],
+        payloadJson: dataRow[PayloadRecordsTable.colPayloadJson],
+        destination: destination);
   }
 }

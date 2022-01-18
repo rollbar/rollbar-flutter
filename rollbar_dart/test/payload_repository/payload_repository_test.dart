@@ -98,7 +98,7 @@ void main() {
       final record11 = PayloadRecord.create(
           configJson: 'CONFIG1',
           payloadJson: 'PAYLOAD1',
-          destinationID: destination1.id ?? 0);
+          destination: destination1);
       id = await repo.addPayloadRecordAsync(record11);
       expect(id, 1);
       expect((await repo.getPayloadRecordsAsync()).length, ++recordsCount);
@@ -111,7 +111,7 @@ void main() {
       final record12 = PayloadRecord.create(
           configJson: 'CONFIG1',
           payloadJson: 'PAYLOAD1',
-          destinationID: destination1.id ?? 0);
+          destination: destination1);
       id = await repo.addPayloadRecordAsync(record12);
       expect(id, 2);
       expect((await repo.getPayloadRecordsAsync()).length, ++recordsCount);
@@ -124,7 +124,7 @@ void main() {
       final record21 = PayloadRecord.create(
           configJson: 'CONFIG2',
           payloadJson: 'PAYLOAD21',
-          destinationID: destination2.id ?? 0);
+          destination: destination2);
       id = await repo.addPayloadRecordAsync(record21);
       expect(id, 3);
       expect((await repo.getPayloadRecordsAsync()).length, ++recordsCount);
@@ -137,7 +137,7 @@ void main() {
       final record22 = PayloadRecord.create(
           configJson: 'CONFIG2',
           payloadJson: 'PAYLOAD22',
-          destinationID: destination2.id ?? 0);
+          destination: destination2);
       id = await repo.addPayloadRecordAsync(record22);
       expect(id, 4);
       expect((await repo.getPayloadRecordsAsync()).length, ++recordsCount);

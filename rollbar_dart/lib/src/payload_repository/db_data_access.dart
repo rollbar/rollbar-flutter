@@ -144,7 +144,7 @@ class DbDataAccess {
     sqlStatement.execute([
       payloadRecord.configJson,
       payloadRecord.payloadJson,
-      payloadRecord.destinationID,
+      payloadRecord.destination.id,
       payloadRecord.timestamp.millisecondsSinceEpoch / 1000
       //'strftime("%s","now")' //unixepoch time, read it by selecting: datetime(date_column,'unixepoch')
     ]);
@@ -155,7 +155,7 @@ class DbDataAccess {
     return payloadRecord.id!;
   }
 
-  Set<Destination> selectAllDestinations() {
+  Iterable<Row> selectAllDestinations() {
     final ResultSet resultSet = db.select('''
     SELECT 
     "${DestinationsTable.colId}", 
@@ -164,15 +164,10 @@ class DbDataAccess {
     FROM 
     "${DestinationsTable.tblName}"
     ''');
-
-    final Set<Destination> destinations = <Destination>{};
-    for (final row in resultSet) {
-      destinations.add(_createDestination(row));
-    }
-    return destinations;
+    return resultSet;
   }
 
-  Destination? selectDestination(int id) {
+  Row? selectDestination(int id) {
     final ResultSet resultSet = db.select('''
     SELECT "${DestinationsTable.colId}", "${DestinationsTable.colEndpoint}", "${DestinationsTable.colAccessToken}"
     FROM "${DestinationsTable.tblName}"
@@ -181,12 +176,11 @@ class DbDataAccess {
     if (resultSet.isEmpty) {
       return null;
     }
-
-    final Set<Destination> destinations = <Destination>{};
-    for (final row in resultSet) {
-      destinations.add(_createDestination(row));
+    if (resultSet.isEmpty) {
+      return null;
+    } else {
+      return resultSet.first;
     }
-    return destinations.first;
   }
 
   int? findDestinationID(
@@ -209,48 +203,21 @@ class DbDataAccess {
     }
   }
 
-  Set<PayloadRecord> selectAllPayloadRecords() {
+  Iterable<Row> selectAllPayloadRecords() {
     final ResultSet resultSet = db.select('''
     SELECT * 
     FROM "${PayloadRecordsTable.tblName}"
     ''', []);
-
-    final Set<PayloadRecord> payloadRecords = <PayloadRecord>{};
-    for (final row in resultSet) {
-      payloadRecords.add(_createPayloadRecord(row));
-    }
-    return payloadRecords;
+    return resultSet;
   }
 
-  Set<PayloadRecord> selectPayloadRecordsWithDestinationID(int destinationID) {
+  Iterable<Row> selectPayloadRecordsWithDestinationID(int destinationID) {
     final ResultSet resultSet = db.select('''
     SELECT * 
     FROM "${PayloadRecordsTable.tblName}"
     WHERE "${PayloadRecordsTable.colDestinationKey}" = ?
     ''', [destinationID]);
-
-    final Set<PayloadRecord> payloadRecords = <PayloadRecord>{};
-    for (final row in resultSet) {
-      payloadRecords.add(_createPayloadRecord(row));
-    }
-    return payloadRecords;
-  }
-
-  static Destination _createDestination(Row dataRow) {
-    return Destination(
-        id: dataRow[DestinationsTable.colId],
-        endpoint: dataRow[DestinationsTable.colEndpoint],
-        accessToken: dataRow[DestinationsTable.colAccessToken]);
-  }
-
-  static PayloadRecord _createPayloadRecord(Row dataRow) {
-    return PayloadRecord(
-        id: dataRow[PayloadRecordsTable.colId],
-        timestamp: DateTime.fromMillisecondsSinceEpoch(
-            (dataRow[PayloadRecordsTable.colCreatedAt] * 1000).toInt()),
-        configJson: dataRow[PayloadRecordsTable.colConfigJson],
-        payloadJson: dataRow[PayloadRecordsTable.colPayloadJson],
-        destinationID: dataRow[PayloadRecordsTable.colDestinationKey]);
+    return resultSet;
   }
 }
 

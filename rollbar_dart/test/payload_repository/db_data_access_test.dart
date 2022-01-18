@@ -94,7 +94,7 @@ void main() {
       final record11 = PayloadRecord.create(
           configJson: 'CONFIG1',
           payloadJson: 'PAYLOAD1',
-          destinationID: destination1.id ?? 0);
+          destination: destination1);
       id = dbAccess.insertPayloadRecord(record11);
       expect(id, 1);
       expect(dbAccess.selectAllPayloadRecords().length, ++recordsCount);
@@ -107,7 +107,7 @@ void main() {
       final record12 = PayloadRecord.create(
           configJson: 'CONFIG1',
           payloadJson: 'PAYLOAD1',
-          destinationID: destination1.id ?? 0);
+          destination: destination1);
       id = dbAccess.insertPayloadRecord(record12);
       expect(id, 2);
       expect(dbAccess.selectAllPayloadRecords().length, ++recordsCount);
@@ -120,7 +120,7 @@ void main() {
       final record21 = PayloadRecord.create(
           configJson: 'CONFIG2',
           payloadJson: 'PAYLOAD21',
-          destinationID: destination2.id ?? 0);
+          destination: destination2);
       id = dbAccess.insertPayloadRecord(record21);
       expect(id, 3);
       expect(dbAccess.selectAllPayloadRecords().length, ++recordsCount);
@@ -133,7 +133,7 @@ void main() {
       final record22 = PayloadRecord.create(
           configJson: 'CONFIG2',
           payloadJson: 'PAYLOAD22',
-          destinationID: destination2.id ?? 0);
+          destination: destination2);
       id = dbAccess.insertPayloadRecord(record22);
       expect(id, 4);
       expect(dbAccess.selectAllPayloadRecords().length, ++recordsCount);

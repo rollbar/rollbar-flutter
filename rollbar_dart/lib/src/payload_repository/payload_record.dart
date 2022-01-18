@@ -1,29 +1,31 @@
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
 
 class PayloadRecord {
   int? _id;
   late final DateTime timestamp;
   late final String configJson;
   late final String payloadJson;
-  late final int destinationID;
+
+  late final Destination destination;
 
   PayloadRecord.create(
       {required String configJson,
       required String payloadJson,
-      required int destinationID})
+      required Destination destination})
       : this(
             timestamp: DateTime.now().toUtc(),
             configJson: configJson,
             payloadJson: payloadJson,
-            destinationID: destinationID);
+            destination: destination);
 
   PayloadRecord(
       {required this.timestamp,
       required this.configJson,
       required this.payloadJson,
-      required this.destinationID,
+      required this.destination,
       int? id})
       : _id = id;
 
@@ -34,18 +36,20 @@ class PayloadRecord {
     _id = value;
   }
 
+  //int? get destinationID => destination.id;
+
   PayloadRecord copyWith({
     int? id,
     DateTime? timestamp,
     String? configJson,
     String? payloadJson,
-    int? destinationID,
+    Destination? destination,
   }) {
     return PayloadRecord(
       timestamp: timestamp ?? this.timestamp,
       configJson: configJson ?? this.configJson,
       payloadJson: payloadJson ?? this.payloadJson,
-      destinationID: destinationID ?? this.destinationID,
+      destination: destination ?? this.destination,
       id: id,
     );
   }
@@ -56,7 +60,7 @@ class PayloadRecord {
       'timestamp': timestamp.millisecondsSinceEpoch,
       'configJson': configJson,
       'payloadJson': payloadJson,
-      'destinationID': destinationID,
+      'destination': destination.toMap(),
     };
   }
 
@@ -66,7 +70,7 @@ class PayloadRecord {
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp']),
       configJson: map['configJson'] ?? '',
       payloadJson: map['payloadJson'] ?? '',
-      destinationID: map['destinationID']?.toInt() ?? 0,
+      destination: Destination.fromMap(map['destination']),
     );
   }
 
@@ -77,7 +81,7 @@ class PayloadRecord {
 
   @override
   String toString() {
-    return 'PayloadRecord(id: $id, timestamp: $timestamp, configJson: $configJson, payloadJson: $payloadJson, destinationID: $destinationID)';
+    return 'PayloadRecord(id: $id, timestamp: $timestamp, configJson: $configJson, payloadJson: $payloadJson, destination: $destination)';
   }
 
   @override
@@ -89,7 +93,7 @@ class PayloadRecord {
         other.timestamp == timestamp &&
         other.configJson == configJson &&
         other.payloadJson == payloadJson &&
-        other.destinationID == destinationID;
+        other.destination.id == destination.id;
   }
 
   @override
@@ -98,6 +102,6 @@ class PayloadRecord {
         timestamp.hashCode ^
         configJson.hashCode ^
         payloadJson.hashCode ^
-        destinationID.hashCode;
+        destination.hashCode;
   }
 }
