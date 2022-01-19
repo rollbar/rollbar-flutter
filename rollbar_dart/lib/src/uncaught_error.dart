@@ -1,6 +1,8 @@
 import 'dart:isolate';
 import 'dart:async';
 
+import 'package:rollbar_dart/rollbar_dart.dart';
+
 import 'config.dart';
 import 'core_notifier.dart';
 import 'logging.dart';
@@ -71,6 +73,8 @@ class UncaughtErrorHandler {
       await for (var msg in port) {
         try {
           if (msg is Map<String, dynamic>) {
+            await RollbarInfrastructure.instance
+                .initialize(withPersistentPayloadStore: true);
             rollbarCore = CoreNotifier(Config.fromMap(msg));
           } else {
             var error = _getError(msg[0]);

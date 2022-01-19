@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 import 'client_server_utils.dart';
 
-void main() {
+Future<void> main() async {
   group('UncaughtErrorHandler tests', () {
     late RawTextSocket _server;
     late UncaughtErrorHandler _handler;

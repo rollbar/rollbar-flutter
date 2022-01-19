@@ -13,7 +13,7 @@ import 'payload_repository/payload_repository.dart';
 class RollbarInfrastructure {
   late final SendPort _sendPort;
   late final ReceivePort _receivePort; // = ReceivePort();
-  late final StreamQueue<dynamic> _processorEvents;
+  //late final StreamQueue<dynamic> _processorEvents;
   //late final PayloadRepository _payloadRepository;
 
   RollbarInfrastructure._() {
@@ -24,7 +24,7 @@ class RollbarInfrastructure {
     // Convert the ReceivePort into a StreamQueue to receive messages from the
     // spawned isolate using a pull-based interface. Events are stored in this
     // queue until they are accessed by `events.next`.
-    _processorEvents = StreamQueue<dynamic>(_receivePort);
+    //_processorEvents = StreamQueue<dynamic>(_receivePort);
 
     // The first message from the spawned isolate is a SendPort. This port is
     // used to communicate with the spawned isolate.
@@ -38,7 +38,7 @@ class RollbarInfrastructure {
 
     // The first message from the spawned isolate is a SendPort. This port is
     // used to communicate with the spawned isolate.
-    _sendPort = await _processorEvents.next; //await _receivePort.first;
+    _sendPort = await _receivePort.first;
     ModuleLogger.moduleLogger.info('Send port: $_sendPort');
     _sendPort.send(withPersistentPayloadStore);
     return _sendPort;
@@ -48,7 +48,7 @@ class RollbarInfrastructure {
     // Send a signal to the spawned isolate indicating that it should exit:
     _sendPort.send(null);
     // Dispose the StreamQueue.
-    await _processorEvents.cancel();
+    //await _processorEvents.cancel();
   }
 
   static final RollbarInfrastructure instance = RollbarInfrastructure._();
