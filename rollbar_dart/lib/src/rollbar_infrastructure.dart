@@ -4,19 +4,22 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:async/async.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
 
 import '_internal/module.dart';
 import 'payload_repository/payload_repository.dart';
 
 class RollbarInfrastructure {
-  final _receivePort = ReceivePort();
-  late final StreamQueue<dynamic> _processorEvents;
   late final SendPort _sendPort;
-  late final PayloadRepository _payloadRepository;
+  late final ReceivePort _receivePort; // = ReceivePort();
+  late final StreamQueue<dynamic> _processorEvents;
+  //late final PayloadRepository _payloadRepository;
 
   RollbarInfrastructure._() {
-    Isolate.spawn(_processWorkItemsInBackground, _receivePort.sendPort);
+    _receivePort = ReceivePort();
+    Isolate.spawn(_processWorkItemsInBackground, _receivePort.sendPort,
+        debugName: 'RollbarInfrastructureIsolate');
 
     // Convert the ReceivePort into a StreamQueue to receive messages from the
     // spawned isolate using a pull-based interface. Events are stored in this
@@ -25,11 +28,20 @@ class RollbarInfrastructure {
 
     // The first message from the spawned isolate is a SendPort. This port is
     // used to communicate with the spawned isolate.
-    _processorEvents.next.then((value) => _sendPort = value);
+    //_processorEvents.next.then((value) => _sendPort = value);
+    //_receivePort.first.then((value) => _sendPort = value);
   }
 
-  void initialize({bool withPersistentPayloadStore = false}) {
-    _payloadRepository = PayloadRepository.create(withPersistentPayloadStore);
+  Future<SendPort> initialize({bool withPersistentPayloadStore = false}) async {
+    // ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
+    //     PayloadRepository.create(withPersistentPayloadStore));
+
+    // The first message from the spawned isolate is a SendPort. This port is
+    // used to communicate with the spawned isolate.
+    _sendPort = await _processorEvents.next; //await _receivePort.first;
+    ModuleLogger.moduleLogger.info('Send port: $_sendPort');
+    _sendPort.send(withPersistentPayloadStore);
+    return _sendPort;
   }
 
   Future<void> dispose() async {
@@ -45,13 +57,13 @@ class RollbarInfrastructure {
     _sendPort.send(record);
   }
 
-  Future<void> _processWorkItemsInBackground(SendPort p) async {
+  static Future<void> _processWorkItemsInBackground(SendPort sendPort) async {
     ModuleLogger.moduleLogger.info('Infrastructure isolate started.');
 
     // Send a SendPort to the main isolate (RollbarInfrastructure)
     // so that it can send JSON strings to this isolate:
     final commandPort = ReceivePort();
-    p.send(commandPort.sendPort);
+    sendPort.send(commandPort.sendPort);
 
     // Wait for messages from the main isolate.
     await for (final message in commandPort) {
@@ -59,8 +71,17 @@ class RollbarInfrastructure {
       // handle it properly, compile a response and send it back via
       // the SendPort p if needed:
       // For example,
-      if (message is PayloadRecord) {
-        _payloadRepository.addPayloadRecord(message);
+      if (message is bool) {
+        if (ServiceLocator.instance.registrationsCount == 0) {
+          ServiceLocator.instance
+              .register<PayloadRepository, PayloadRepository>(
+                  PayloadRepository.create(message));
+        }
+      } else if (message is PayloadRecord) {
+        //_payloadRepository.addPayloadRecord(message);
+        ServiceLocator.instance
+            .tryResolve<PayloadRepository>()
+            ?.addPayloadRecord(message);
       } else if (message is String) {
         // Read and decode the file.
         //final contents = await File(message).readAsString();

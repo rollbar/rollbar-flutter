@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -9,6 +11,9 @@ void main() {
     late Sender sender;
 
     setUp(() async {
+      await RollbarInfrastructure.instance
+          .initialize(withPersistentPayloadStore: true);
+
       sender = MockSender();
       when(sender.send(any)).thenAnswer((_) async => Response());
       // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
@@ -23,6 +28,10 @@ void main() {
 
       rollbar = Rollbar(config);
       await rollbar.ensureInitialized();
+    });
+
+    tearDown(() {
+      RollbarInfrastructure.instance.dispose();
     });
 
     test('When reporting single error it should send json payload', () async {

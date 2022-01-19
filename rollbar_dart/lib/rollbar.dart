@@ -1,11 +1,12 @@
 library rollbar;
 
-export 'src/logging.dart';
-export 'src/rollbar.dart';
 export 'src/config.dart';
+export 'src/logging.dart';
+export 'src/platform.dart' show RollbarPlatformInfo;
+export 'src/rollbar.dart';
+export 'src/rollbar_infrastructure.dart';
 export 'src/sender.dart';
 export 'src/transformer.dart';
-export 'src/platform.dart' show RollbarPlatformInfo;
 
 export 'src/api/payload/payload.dart' show Payload;
 export 'src/api/payload/level.dart' show Level;

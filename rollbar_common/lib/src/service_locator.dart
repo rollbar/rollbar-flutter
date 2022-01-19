@@ -59,7 +59,7 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
       default:
         throw AssertionError('''
           $runtimeType can not transition from $_state to $state. 
-          Make sure you register all expcted singleton type objects 
+          Make sure you register all expected singleton type objects 
           before attemting to query for them.
           Once you start querying for the pre-registered types, 
           you can not add any new registration! 

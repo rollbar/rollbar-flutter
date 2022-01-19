@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:rollbar_dart/rollbar_dart.dart';
 import 'package:rollbar_dart/src/trace.dart';
 import 'package:rollbar_dart/src/transformer.dart';
 
@@ -22,6 +23,7 @@ class CoreNotifier {
   final Config _config;
   final Sender? _sender;
   final Transformer? _transformer;
+  final Destination _destination;
 
   // notifierVersion to be updated with each new release:
   static const notifierVersion = '0.2.0-beta';
@@ -30,7 +32,9 @@ class CoreNotifier {
 
   CoreNotifier(this._config)
       : _sender = _make(_config, _config.sender),
-        _transformer = _make(_config, _config.transformer);
+        _transformer = _make(_config, _config.transformer),
+        _destination = Destination(
+            endpoint: _config.endpoint, accessToken: _config.accessToken);
 
   Future<Response?> log(Level level, dynamic error, StackTrace? stackTrace,
       String? message) async {
@@ -73,6 +77,12 @@ class CoreNotifier {
       ..accessToken = _config.accessToken
       ..data = data;
 
+    //TODO: integrating with RollbarInfrastructure:
+    final PayloadRecord payloadRecord = PayloadRecord.create(
+        configJson: _config.toString(),
+        payloadJson: payload.toJson().toString(),
+        destination: _destination);
+    RollbarInfrastructure.instance.process(record: payloadRecord);
     return await _sender!.send(payload.toJson());
   }
 
