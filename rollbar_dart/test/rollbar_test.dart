@@ -5,8 +5,7 @@ import 'package:rollbar_dart/rollbar.dart';
 
 Future<void> main() async {
   late Rollbar rollbar;
-  late Sender sender = MockSender();
-  when(sender.send(any)).thenAnswer((_) async => Response());
+  late Sender sender;
   // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
   // mock as the sender factory.
   var config = (ConfigBuilder('BlaBlaAccessToken')
@@ -14,16 +13,22 @@ Future<void> main() async {
         ..codeVersion = '0.23.2'
         ..handleUncaughtErrors = false
         ..package = 'some_package_name'
-        ..persistPayloads = true
-        ..sender = (_) => sender)
+        ..persistPayloads = true)
       .build();
-
   await RollbarInfrastructure.instance.initialize(rollbarConfig: config);
 
   group('Rollbar notifier tests', () {
     setUp(() async {
       sender = MockSender();
       when(sender.send(any)).thenAnswer((_) async => Response());
+      var config = (ConfigBuilder('BlaBlaAccessToken')
+            ..environment = 'production'
+            ..codeVersion = '0.23.2'
+            ..handleUncaughtErrors = false
+            ..package = 'some_package_name'
+            ..persistPayloads = true
+            ..sender = (_) => sender)
+          .build();
       rollbar = Rollbar(config);
       await rollbar.ensureInitialized();
     });

@@ -11,11 +11,10 @@ import '_internal/module.dart';
 import 'payload_repository/payload_repository.dart';
 
 class RollbarInfrastructure {
+  final ReceivePort _receivePort = ReceivePort();
   late final SendPort _sendPort;
-  late final ReceivePort _receivePort;
 
   RollbarInfrastructure._() {
-    _receivePort = ReceivePort();
     Isolate.spawn(_processWorkItemsInBackground, _receivePort.sendPort,
         debugName: 'RollbarInfrastructureIsolate');
   }
