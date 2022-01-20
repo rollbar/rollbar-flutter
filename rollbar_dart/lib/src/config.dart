@@ -11,6 +11,7 @@ class Config {
   final String? framework;
   final String? codeVersion;
   final String? package;
+  final bool? persistPayloads;
   final bool? handleUncaughtErrors;
   final bool? includePlatformLogs;
   final Transformer Function(Config)? transformer;
@@ -23,6 +24,7 @@ class Config {
       this.framework,
       this.codeVersion,
       this.package,
+      this.persistPayloads,
       this.handleUncaughtErrors,
       this.includePlatformLogs,
       this.transformer,
@@ -40,6 +42,7 @@ class Config {
       'framework': framework,
       'codeVersion': codeVersion,
       'package': package,
+      'persistPayloads': persistPayloads,
       'handleUncaughtErrors': handleUncaughtErrors,
       'includePlatformLogs': includePlatformLogs,
       'transformer': transformer,
@@ -55,6 +58,7 @@ class Config {
           ..framework = values['framework']
           ..codeVersion = values['codeVersion']
           ..package = values['package']
+          ..persistPayloads = values['persistPayloads']
           ..handleUncaughtErrors = values['handleUncaughtErrors']
           ..includePlatformLogs = values['includePlatformLogs']
           ..transformer = values['transformer']
@@ -71,6 +75,7 @@ class ConfigBuilder {
   String? codeVersion;
   String? package;
 
+  bool? persistPayloads = false;
   bool? handleUncaughtErrors = false;
   bool? includePlatformLogs = false;
 
@@ -93,6 +98,7 @@ class ConfigBuilder {
         framework = config.framework,
         codeVersion = config.codeVersion,
         package = config.package,
+        persistPayloads = config.persistPayloads,
         handleUncaughtErrors = config.handleUncaughtErrors,
         includePlatformLogs = config.includePlatformLogs,
         transformer = config.transformer,
@@ -108,6 +114,7 @@ class ConfigBuilder {
         framework,
         codeVersion,
         package,
+        persistPayloads,
         handleUncaughtErrors,
         includePlatformLogs,
         transformer,

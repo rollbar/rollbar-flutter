@@ -12,43 +12,24 @@ import 'payload_repository/payload_repository.dart';
 
 class RollbarInfrastructure {
   late final SendPort _sendPort;
-  late final ReceivePort _receivePort; // = ReceivePort();
-  //late final StreamQueue<dynamic> _processorEvents;
-  //late final PayloadRepository _payloadRepository;
+  late final ReceivePort _receivePort;
 
   RollbarInfrastructure._() {
     _receivePort = ReceivePort();
     Isolate.spawn(_processWorkItemsInBackground, _receivePort.sendPort,
         debugName: 'RollbarInfrastructureIsolate');
-
-    // Convert the ReceivePort into a StreamQueue to receive messages from the
-    // spawned isolate using a pull-based interface. Events are stored in this
-    // queue until they are accessed by `events.next`.
-    //_processorEvents = StreamQueue<dynamic>(_receivePort);
-
-    // The first message from the spawned isolate is a SendPort. This port is
-    // used to communicate with the spawned isolate.
-    //_processorEvents.next.then((value) => _sendPort = value);
-    //_receivePort.first.then((value) => _sendPort = value);
   }
 
-  Future<SendPort> initialize({bool withPersistentPayloadStore = false}) async {
-    // ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
-    //     PayloadRepository.create(withPersistentPayloadStore));
-
-    // The first message from the spawned isolate is a SendPort. This port is
-    // used to communicate with the spawned isolate.
+  Future<SendPort> initialize({required Config rollbarConfig}) async {
     _sendPort = await _receivePort.first;
     ModuleLogger.moduleLogger.info('Send port: $_sendPort');
-    _sendPort.send(withPersistentPayloadStore);
+    _sendPort.send(rollbarConfig);
     return _sendPort;
   }
 
   Future<void> dispose() async {
     // Send a signal to the spawned isolate indicating that it should exit:
     _sendPort.send(null);
-    // Dispose the StreamQueue.
-    //await _processorEvents.cancel();
   }
 
   static final RollbarInfrastructure instance = RollbarInfrastructure._();
@@ -71,11 +52,11 @@ class RollbarInfrastructure {
       // handle it properly, compile a response and send it back via
       // the SendPort p if needed:
       // For example,
-      if (message is bool) {
+      if (message is Config) {
         if (ServiceLocator.instance.registrationsCount == 0) {
           ServiceLocator.instance
               .register<PayloadRepository, PayloadRepository>(
-                  PayloadRepository.create(message));
+                  PayloadRepository.create(message.persistPayloads ?? false));
         }
       } else if (message is PayloadRecord) {
         //_payloadRepository.addPayloadRecord(message);

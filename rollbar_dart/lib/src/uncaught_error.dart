@@ -73,9 +73,10 @@ class UncaughtErrorHandler {
       await for (var msg in port) {
         try {
           if (msg is Map<String, dynamic>) {
+            final rollbarConfig = Config.fromMap(msg);
             await RollbarInfrastructure.instance
-                .initialize(withPersistentPayloadStore: true);
-            rollbarCore = CoreNotifier(Config.fromMap(msg));
+                .initialize(rollbarConfig: rollbarConfig);
+            rollbarCore = CoreNotifier(rollbarConfig);
           } else {
             var error = _getError(msg[0]);
             if (rollbarCore != null) {

@@ -1,31 +1,29 @@
-import 'dart:io';
-
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:rollbar_dart/rollbar.dart';
 
 Future<void> main() async {
-  await RollbarInfrastructure.instance
-      .initialize(withPersistentPayloadStore: true);
+  late Rollbar rollbar;
+  late Sender sender = MockSender();
+  when(sender.send(any)).thenAnswer((_) async => Response());
+  // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
+  // mock as the sender factory.
+  var config = (ConfigBuilder('BlaBlaAccessToken')
+        ..environment = 'production'
+        ..codeVersion = '0.23.2'
+        ..handleUncaughtErrors = false
+        ..package = 'some_package_name'
+        ..persistPayloads = true
+        ..sender = (_) => sender)
+      .build();
+
+  await RollbarInfrastructure.instance.initialize(rollbarConfig: config);
 
   group('Rollbar notifier tests', () {
-    late Rollbar rollbar;
-    late Sender sender;
-
     setUp(() async {
       sender = MockSender();
       when(sender.send(any)).thenAnswer((_) async => Response());
-      // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
-      // mock as the sender factory.
-      var config = (ConfigBuilder('BlaBlaAccessToken')
-            ..environment = 'production'
-            ..codeVersion = '0.23.2'
-            ..handleUncaughtErrors = false
-            ..package = 'some_package_name'
-            ..sender = (_) => sender)
-          .build();
-
       rollbar = Rollbar(config);
       await rollbar.ensureInitialized();
     });
