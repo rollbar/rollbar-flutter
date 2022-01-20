@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' show Platform;
 
 import 'package:rollbar_dart/rollbar_dart.dart';
@@ -79,8 +80,9 @@ class CoreNotifier {
 
     //TODO: integrating with RollbarInfrastructure:
     final PayloadRecord payloadRecord = PayloadRecord.create(
-        configJson: _config.toString(),
-        payloadJson: payload.toJson().toString(),
+        configJson: json.encode(_config.toJson()), // _config.toString(),
+        payloadJson:
+            json.encode(payload.toJson()), // payload.toJson().toString(),
         destination: _destination);
     RollbarInfrastructure.instance.process(record: payloadRecord);
     return await _sender!.send(payload.toJson());

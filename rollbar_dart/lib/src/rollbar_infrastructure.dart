@@ -8,6 +8,7 @@ import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
 
 import '_internal/module.dart';
+import 'http_sender.dart';
 import 'payload_repository/payload_repository.dart';
 
 class RollbarInfrastructure {
@@ -42,32 +43,15 @@ class RollbarInfrastructure {
 
     // Send a SendPort to the main isolate (RollbarInfrastructure)
     // so that it can send JSON strings to this isolate:
-    final commandPort = ReceivePort();
-    sendPort.send(commandPort.sendPort);
+    final receivePort = ReceivePort();
+    sendPort.send(receivePort.sendPort);
 
     // Wait for messages from the main isolate.
-    await for (final message in commandPort) {
-      // cast the message to one of the expected message types,
-      // handle it properly, compile a response and send it back via
-      // the SendPort p if needed:
-      // For example,
+    await for (final message in receivePort) {
       if (message is Config) {
-        if (ServiceLocator.instance.registrationsCount == 0) {
-          ServiceLocator.instance
-              .register<PayloadRepository, PayloadRepository>(
-                  PayloadRepository.create(message.persistPayloads ?? false));
-        }
+        _processConfig(message);
       } else if (message is PayloadRecord) {
-        //_payloadRepository.addPayloadRecord(message);
-        ServiceLocator.instance
-            .tryResolve<PayloadRepository>()
-            ?.addPayloadRecord(message);
-      } else if (message is String) {
-        // Read and decode the file.
-        //final contents = await File(message).readAsString();
-
-        // Send the result to the main isolate.
-        //p.send(jsonDecode(contents));
+        _processPayloadRecord(message);
       } else if (message == null) {
         // Exit if the main isolate sends a null message, indicating there are no
         // more files to read and parse.
@@ -77,5 +61,20 @@ class RollbarInfrastructure {
 
     ModuleLogger.moduleLogger.info('Infrastructure isolate finished.');
     Isolate.exit();
+  }
+
+  static void _processConfig(Config config) {
+    if (ServiceLocator.instance.registrationsCount == 0) {
+      ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
+          PayloadRepository.create(config.persistPayloads ?? false));
+      ServiceLocator.instance.register<Sender, HttpSender>(
+          HttpSender(config.endpoint, config.accessToken));
+    }
+  }
+
+  static void _processPayloadRecord(PayloadRecord payloadRecord) {
+    ServiceLocator.instance
+        .tryResolve<PayloadRepository>()
+        ?.addPayloadRecord(payloadRecord);
   }
 }

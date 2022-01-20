@@ -65,6 +65,22 @@ class Config {
           ..sender = values['sender'])
         .build();
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'accessToken': accessToken,
+      'endpoint': endpoint,
+      'environment': environment,
+      'framework': framework,
+      'codeVersion': codeVersion,
+      'package': package,
+      'persistPayloads': persistPayloads,
+      'handleUncaughtErrors': handleUncaughtErrors,
+      'includePlatformLogs': includePlatformLogs //,
+      // 'transformer': transformer,
+      // 'sender': sender
+    };
+  }
 }
 
 class ConfigBuilder {
