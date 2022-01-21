@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:sqlite3/sqlite3.dart';
 
 import 'package:rollbar_dart/src/payload_repository/destination.dart';
@@ -10,7 +12,7 @@ class DbDataAccess {
 
   DbDataAccess initialize({required bool asPersistent}) {
     if (asPersistent) {
-      db = sqlite3.open(dbFileName);
+      db = sqlite3.open(dbFileName); //, mutex: true);
     } else {
       db = sqlite3.openInMemory();
     }
@@ -24,6 +26,7 @@ class DbDataAccess {
     var createTableCommnads = <String>[
       '''
       CREATE TABLE IF NOT EXISTS "${DestinationsTable.tblName}" (
+        "${DestinationsTable.colId}"	INTEGER NOT NULL PRIMARY KEY,
         "${DestinationsTable.colEndpoint}"	TEXT NOT NULL,
         "${DestinationsTable.colAccessToken}"	TEXT NOT NULL,
         CONSTRAINT "unique_destination" UNIQUE(
@@ -33,6 +36,7 @@ class DbDataAccess {
       ''',
       '''
       CREATE TABLE IF NOT EXISTS "${PayloadRecordsTable.tblName}" (
+        "${PayloadRecordsTable.colId}"	INTEGER NOT NULL PRIMARY KEY,
         "${PayloadRecordsTable.colConfigJson}"	TEXT NOT NULL,
         "${PayloadRecordsTable.colPayloadJson}"	TEXT NOT NULL,
         "${PayloadRecordsTable.colCreatedAt}"	INTEGER NOT NULL,
@@ -51,7 +55,22 @@ class DbDataAccess {
   }
 
   void deleteUnusedDestinations() {
-    final sqlStatement = db.prepare('''
+    // final sqlStatement = db.prepare('''
+    //   DELETE FROM "${DestinationsTable.tblName}"
+    //   WHERE NOT EXISTS (
+    //     SELECT
+    //     1
+    //     FROM
+    //     "${PayloadRecordsTable.tblName}"
+    //     WHERE
+    //     "${PayloadRecordsTable.tblName}.${PayloadRecordsTable.colDestinationKey}"
+    //     = "${DestinationsTable.tblName}.${DestinationsTable.colId}"
+    //   )
+    //   ''');
+    // sqlStatement.execute([]);
+    // sqlStatement.dispose();
+
+    db.execute('''
       DELETE FROM "${DestinationsTable.tblName}" 
       WHERE NOT EXISTS (
         SELECT 
@@ -63,8 +82,6 @@ class DbDataAccess {
         = "${DestinationsTable.tblName}.${DestinationsTable.colId}" 
       )
       ''');
-    sqlStatement.execute([]);
-    sqlStatement.dispose();
   }
 
   void deleteDestination(Destination destination) {
@@ -221,7 +238,7 @@ class DbDataAccess {
 class DestinationsTable {
   static const String tblName = 'destinations';
 
-  static const String colId = 'rowid';
+  static const String colId = 'id';
   static const String colEndpoint = 'endpoint';
   static const String colAccessToken = 'access_token';
 }
@@ -229,7 +246,7 @@ class DestinationsTable {
 class PayloadRecordsTable {
   static const String tblName = 'payload_records';
 
-  static const String colId = 'rowid';
+  static const String colId = 'id';
   static const String colConfigJson = 'config_json';
   static const String colPayloadJson = 'payload_json';
   static const String colCreatedAt = 'created_at_utc_unix_epoch_sec';

@@ -118,11 +118,16 @@ class RawTextSender implements Sender {
       return null;
     }
 
+    var message = json.encode(payload);
+    return sendString(message);
+  }
+
+  @override
+  Future<Response?> sendString(String payload) async {
     final socket = await Socket.connect('localhost', port);
     log('Client connected with port ${socket.port}');
     try {
-      var message = json.encode(payload).replaceAll('\n', ' ');
-      socket.add('$message\n'.codeUnits);
+      socket.add('${payload.replaceAll('\n', ' ')}\n'.codeUnits);
     } finally {
       socket.destroy();
     }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:core';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -51,7 +52,7 @@ class RollbarInfrastructure {
       if (message is Config) {
         _processConfig(message);
       } else if (message is PayloadRecord) {
-        _processPayloadRecord(message);
+        await _processPayloadRecord(message);
       } else if (message == null) {
         // Exit if the main isolate sends a null message, indicating there are no
         // more files to read and parse.
@@ -67,14 +68,59 @@ class RollbarInfrastructure {
     if (ServiceLocator.instance.registrationsCount == 0) {
       ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
           PayloadRepository.create(config.persistPayloads ?? false));
-      ServiceLocator.instance.register<Sender, HttpSender>(
-          HttpSender(config.endpoint, config.accessToken));
+      ServiceLocator.instance.register<Sender, HttpSender>(HttpSender(
+          endpoint: config.endpoint, accessToken: config.accessToken));
     }
   }
 
-  static void _processPayloadRecord(PayloadRecord payloadRecord) {
-    ServiceLocator.instance
-        .tryResolve<PayloadRepository>()
-        ?.addPayloadRecord(payloadRecord);
+  static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
+    final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
+    if (repo != null) {
+      repo.addPayloadRecord(payloadRecord);
+      await _processDestinationPendindRecords(payloadRecord.destination, repo);
+    } else {
+      ModuleLogger.moduleLogger
+          .severe('PayloadRepository service was never registered!');
+      await HttpSender(
+              endpoint: payloadRecord.destination.endpoint,
+              accessToken: payloadRecord.destination.accessToken)
+          .sendString(payloadRecord.payloadJson);
+      return; // we tried our best.
+    }
+  }
+
+  static Future<void> _processDestinationPendindRecords(
+      Destination destination, PayloadRepository repo) async {
+    final records =
+        await repo.getPayloadRecordsForDestinationAsync(destination);
+    if (records.isEmpty) {
+      return;
+    }
+
+    print('sending ${records.length} payloads to destination: $destination...');
+    final sender = HttpSender(
+        endpoint: destination.endpoint, accessToken: destination.accessToken);
+    for (var record in records) {
+      await _processPendingRecord(record, sender, repo);
+    }
+  }
+
+  static Future<void> _processPendingRecord(
+      PayloadRecord record, Sender sender, PayloadRepository repo) async {
+    print('sending payload: ${record.payloadJson}...');
+    final response = await sender.sendString(record.payloadJson);
+    print('response: $response');
+    if (response != null && !response.isError()) {
+      print('removing sent record from repo...');
+      await repo.removePayloadRecordAsync(record);
+    } else {
+      //TODO: update ConnectivityMonitor...
+
+      final cutoffTime =
+          DateTime.now().toUtc().subtract(const Duration(days: 1));
+      if (record.timestamp.compareTo(cutoffTime) < 0) {
+        await repo.removePayloadRecordAsync(record);
+      }
+    }
   }
 }

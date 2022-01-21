@@ -139,5 +139,5 @@ class ConfigBuilder {
 }
 
 Sender _httpSender(Config config) {
-  return HttpSender(config.endpoint, config.accessToken);
+  return HttpSender(endpoint: config.endpoint, accessToken: config.accessToken);
 }

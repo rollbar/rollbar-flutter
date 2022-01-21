@@ -13,7 +13,7 @@ dependencies:
   meta: ^1.7.0
   stack_trace: '>=1.9.5 <1.11.0'
   rollbar_common: '>=0.2.0-beta <1.0.0'
-  sqlite3: ^1.4.0
+  sqlite3: ^1.5.1
 
 dependency_overrides:
   rollbar_common:
