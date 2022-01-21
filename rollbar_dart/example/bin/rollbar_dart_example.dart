@@ -24,6 +24,8 @@ void main() async {
     throw ArgumentError('An error occurred in the dart example app');
   } catch (error, stackTrace) {
     await rollbar.error(error, stackTrace);
-    RollbarInfrastructure.instance.dispose();
+  } finally {
+    await Future.delayed(Duration(seconds: 5));
+    await RollbarInfrastructure.instance.dispose();
   }
 }

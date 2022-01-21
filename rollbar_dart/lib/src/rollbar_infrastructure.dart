@@ -31,6 +31,7 @@ class RollbarInfrastructure {
   Future<void> dispose() async {
     // Send a signal to the spawned isolate indicating that it should exit:
     _sendPort.send(null);
+    await _receivePort.last;
   }
 
   static final RollbarInfrastructure instance = RollbarInfrastructure._();
@@ -51,11 +52,13 @@ class RollbarInfrastructure {
     await for (final message in receivePort) {
       if (message is Config) {
         _processConfig(message);
+        await _processAllPendingRecords();
       } else if (message is PayloadRecord) {
         await _processPayloadRecord(message);
       } else if (message == null) {
-        // Exit if the main isolate sends a null message, indicating there are no
-        // more files to read and parse.
+        // Exit if the main isolate sends a null message, indicating
+        // it is the time to exit.
+        await _processAllPendingRecords();
         break;
       }
     }
@@ -76,6 +79,7 @@ class RollbarInfrastructure {
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
     final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo != null) {
+      print('adding record: $payloadRecord...');
       repo.addPayloadRecord(payloadRecord);
       await _processDestinationPendindRecords(payloadRecord.destination, repo);
     } else {
@@ -101,26 +105,44 @@ class RollbarInfrastructure {
     final sender = HttpSender(
         endpoint: destination.endpoint, accessToken: destination.accessToken);
     for (var record in records) {
-      await _processPendingRecord(record, sender, repo);
+      if (!await _processPendingRecord(record, sender, repo)) {
+        break;
+      }
     }
   }
 
-  static Future<void> _processPendingRecord(
+  static Future<bool> _processPendingRecord(
       PayloadRecord record, Sender sender, PayloadRepository repo) async {
     print('sending payload: ${record.payloadJson}...');
     final response = await sender.sendString(record.payloadJson);
     print('response: $response');
     if (response != null && !response.isError()) {
       print('removing sent record from repo...');
-      await repo.removePayloadRecordAsync(record);
+      repo.removePayloadRecord(record);
+      return true;
     } else {
       //TODO: update ConnectivityMonitor...
 
       final cutoffTime =
           DateTime.now().toUtc().subtract(const Duration(days: 1));
       if (record.timestamp.compareTo(cutoffTime) < 0) {
-        await repo.removePayloadRecordAsync(record);
+        repo.removePayloadRecord(record);
       }
+      return false;
+    }
+  }
+
+  static Future<void> _processAllPendingRecords() async {
+    final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
+    if (repo == null) {
+      ModuleLogger.moduleLogger
+          .severe('PayloadRepository service was never registered!');
+    } else {
+      final destinations = repo.getDestinations();
+      for (final destination in destinations) {
+        await _processDestinationPendindRecords(destination, repo);
+      }
+      await repo.removeUnusedDestinationsAsync();
     }
   }
 }

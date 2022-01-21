@@ -22,9 +22,18 @@ class DbDataAccess {
     return this;
   }
 
+  bool _checkTableExists(String tableName) {
+    final cmd = '''
+    SELECT name 
+    FROM sqlite_master 
+    WHERE type='table' AND name='$tableName'
+    ''';
+    return db.select(cmd, []).isNotEmpty;
+  }
+
   void _setupTablesAsNeeded() {
-    var createTableCommnads = <String>[
-      '''
+    var createTableCommnads = {
+      DestinationsTable.tblName: '''
       CREATE TABLE IF NOT EXISTS "${DestinationsTable.tblName}" (
         "${DestinationsTable.colId}"	INTEGER NOT NULL PRIMARY KEY,
         "${DestinationsTable.colEndpoint}"	TEXT NOT NULL,
@@ -34,7 +43,7 @@ class DbDataAccess {
           "${DestinationsTable.colAccessToken}")
       )
       ''',
-      '''
+      PayloadRecordsTable.tblName: '''
       CREATE TABLE IF NOT EXISTS "${PayloadRecordsTable.tblName}" (
         "${PayloadRecordsTable.colId}"	INTEGER NOT NULL PRIMARY KEY,
         "${PayloadRecordsTable.colConfigJson}"	TEXT NOT NULL,
@@ -47,10 +56,12 @@ class DbDataAccess {
           ON DELETE CASCADE
       )
       ''',
-    ];
+    };
 
-    for (final cmd in createTableCommnads) {
-      db.execute(cmd);
+    for (final tableName in createTableCommnads.keys) {
+      if (!_checkTableExists(tableName)) {
+        db.execute(createTableCommnads[tableName]!);
+      }
     }
   }
 
@@ -137,10 +148,11 @@ class DbDataAccess {
       ''');
 
     sqlStatement.execute([destination.endpoint, destination.accessToken]);
-    sqlStatement.dispose();
 
     // ignore: invalid_use_of_protected_member
     destination.assignID(db.lastInsertRowId);
+    print('destination ID: ${destination.id}');
+    sqlStatement.dispose();
     return destination.id!;
   }
 
