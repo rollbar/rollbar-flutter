@@ -63,7 +63,7 @@ class Rollbar {
 
   /// Sends an error as an occurrence, with the provided level.
   Future<void> log(Level level, dynamic error, StackTrace stackTrace) {
-    return _processResponse(_coreNotifier.log(level, error, stackTrace, null));
+    return _coreNotifier.log(level, error, stackTrace, null);
   }
 
   /// Sends a message as an occurrence, with DEBUG level.
@@ -93,7 +93,7 @@ class Rollbar {
 
   /// Sends a message as an occurrence, with the provided level.
   Future<void> logMsg(Level level, String message) {
-    return _processResponse(_coreNotifier.log(level, null, null, message));
+    return _coreNotifier.log(level, null, null, message);
   }
 
   /// The current notifier configuration.
@@ -116,18 +116,18 @@ class Rollbar {
     }
   }
 
-  static Future<void> _processResponse(Future<Response?> rollbarAction) async {
-    try {
-      var response = await rollbarAction;
-      if (response == null) {
-        Logging.error('No response while sending data to Rollbar', null);
-      } else if (response.isError()) {
-        Logging.error('Error while sending data to Rollbar', response.message);
-      }
-    } on Exception catch (e) {
-      Logging.error(
-          'Internal error encountered while sending data to Rollbar', e);
-      rethrow;
-    }
-  }
+  // static Future<void> _processResponse(Future<Response?> rollbarAction) async {
+  //   try {
+  //     var response = await rollbarAction;
+  //     if (response == null) {
+  //       Logging.error('No response while sending data to Rollbar', null);
+  //     } else if (response.isError()) {
+  //       Logging.error('Error while sending data to Rollbar', response.message);
+  //     }
+  //   } on Exception catch (e) {
+  //     Logging.error(
+  //         'Internal error encountered while sending data to Rollbar', e);
+  //     rethrow;
+  //   }
+  // }
 }

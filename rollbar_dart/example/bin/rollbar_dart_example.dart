@@ -20,12 +20,18 @@ void main() async {
 
   var rollbar = Rollbar(config);
 
-  try {
-    throw ArgumentError('An error occurred in the dart example app');
-  } catch (error, stackTrace) {
-    await rollbar.error(error, stackTrace);
-  } finally {
-    await Future.delayed(Duration(seconds: 5));
-    await RollbarInfrastructure.instance.dispose();
+  int payloadIndex = 10;
+  while (payloadIndex > 0) {
+    try {
+      throw ArgumentError(
+          '$payloadIndex: An error occurred in the dart example app');
+    } catch (error, stackTrace) {
+      await rollbar.error(error, stackTrace);
+    } finally {
+      payloadIndex--;
+    }
   }
+
+  await Future.delayed(Duration(seconds: 10));
+  await RollbarInfrastructure.instance.dispose();
 }

@@ -37,6 +37,7 @@ class RollbarInfrastructure {
   static final RollbarInfrastructure instance = RollbarInfrastructure._();
 
   void process({required PayloadRecord record}) {
+    //print('*** sending record for processing...');
     _sendPort.send(record);
   }
 
@@ -48,6 +49,10 @@ class RollbarInfrastructure {
     final receivePort = ReceivePort();
     sendPort.send(receivePort.sendPort);
 
+    // const timerInterval = Duration(milliseconds: 500);
+    // final timer =
+    //     Timer.periodic(timerInterval, (timer) => _timerCallback(timer));
+
     // Wait for messages from the main isolate.
     await for (final message in receivePort) {
       if (message is Config) {
@@ -58,6 +63,7 @@ class RollbarInfrastructure {
       } else if (message == null) {
         // Exit if the main isolate sends a null message, indicating
         // it is the time to exit.
+        //timer.cancel();
         await _processAllPendingRecords();
         break;
       }
@@ -67,19 +73,25 @@ class RollbarInfrastructure {
     Isolate.exit();
   }
 
+  // static Future<void> _timerCallback(Timer timer) async {
+  //   await _processAllPendingRecords();
+  // }
+
   static void _processConfig(Config config) {
+    //print('+++ processing config...');
     if (ServiceLocator.instance.registrationsCount == 0) {
       ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
           PayloadRepository.create(config.persistPayloads ?? false));
       ServiceLocator.instance.register<Sender, HttpSender>(HttpSender(
           endpoint: config.endpoint, accessToken: config.accessToken));
     }
+    //print('+++ DONE processing config...');
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
+    //print('--- processing payload record...');
     final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo != null) {
-      print('adding record: $payloadRecord...');
       repo.addPayloadRecord(payloadRecord);
       await _processDestinationPendindRecords(payloadRecord.destination, repo);
     } else {
@@ -101,7 +113,6 @@ class RollbarInfrastructure {
       return;
     }
 
-    print('sending ${records.length} payloads to destination: $destination...');
     final sender = HttpSender(
         endpoint: destination.endpoint, accessToken: destination.accessToken);
     for (var record in records) {
@@ -113,11 +124,8 @@ class RollbarInfrastructure {
 
   static Future<bool> _processPendingRecord(
       PayloadRecord record, Sender sender, PayloadRepository repo) async {
-    print('sending payload: ${record.payloadJson}...');
     final response = await sender.sendString(record.payloadJson);
-    print('response: $response');
     if (response != null && !response.isError()) {
-      print('removing sent record from repo...');
       repo.removePayloadRecord(record);
       return true;
     } else {

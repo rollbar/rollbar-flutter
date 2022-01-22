@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '_internal/module.dart';
 import 'api/response.dart';
 import 'sender.dart';
 
@@ -29,14 +32,24 @@ class HttpSender implements Sender {
 
   @override
   Future<Response?> sendString(String payload) async {
-    var response =
-        http.post(Uri.parse(_endpoint), headers: _headers, body: payload);
-    return toRollbarResponse(response);
+    try {
+      var response = await http.post(Uri.parse(_endpoint),
+          headers: _headers, body: payload);
+      return toRollbarResponse(response);
+    } on SocketException catch (_) {
+      ModuleLogger.moduleLogger
+          .info('SocketException while posting payload: $_');
+      return null;
+    } catch (error, stackTrace) {
+      ModuleLogger.moduleLogger
+          .info('Error posting payload: $error. Stack trace: $stackTrace');
+      return null;
+    }
   }
 }
 
-Future<Response> toRollbarResponse(Future<http.Response> response) async {
-  Map data = json.decode((await response).body);
+Future<Response> toRollbarResponse(http.Response response) async {
+  Map data = json.decode((response).body);
 
   var result = Response.fromMap(data as Map<String, dynamic>);
   // if (data.containsKey('err')) {

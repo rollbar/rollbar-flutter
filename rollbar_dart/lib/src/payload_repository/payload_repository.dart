@@ -16,7 +16,7 @@ class PayloadRepository {
 
   static PayloadRepository create(bool persistent) {
     var dataAccess = DbDataAccess().initialize(asPersistent: persistent);
-    dataAccess.deleteUnusedDestinations();
+    //dataAccess.deleteUnusedDestinations();
     return PayloadRepository(dataAccess);
   }
 
@@ -87,7 +87,15 @@ class PayloadRepository {
 
   int addPayloadRecord(PayloadRecord payloadRecord) {
     if (payloadRecord.destination.id == null) {
-      _dataAccess.insertDestination(payloadRecord.destination);
+      int? destinationID = _dataAccess.findDestinationID(
+          endpoint: payloadRecord.destination.endpoint,
+          accessToken: payloadRecord.destination.accessToken);
+      if (destinationID == null) {
+        _dataAccess.insertDestination(payloadRecord.destination);
+      } else {
+        // ignore: invalid_use_of_protected_member
+        payloadRecord.destination.assignID(destinationID);
+      }
     }
     return _dataAccess.insertPayloadRecord(payloadRecord);
   }

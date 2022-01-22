@@ -22,7 +22,7 @@ import 'sender.dart';
 /// - Send the occurrence payload to Rollbar via a [Sender].
 class CoreNotifier {
   final Config _config;
-  final Sender? _sender;
+  //final Sender? _sender;
   final Transformer? _transformer;
   final Destination _destination;
 
@@ -32,12 +32,12 @@ class CoreNotifier {
   static const notifierName = 'rollbar-dart';
 
   CoreNotifier(this._config)
-      : _sender = _make(_config, _config.sender),
+      : //_sender = _make(_config, _config.sender),
         _transformer = _make(_config, _config.transformer),
         _destination = Destination(
             endpoint: _config.endpoint, accessToken: _config.accessToken);
 
-  Future<Response?> log(Level level, dynamic error, StackTrace? stackTrace,
+  Future<void> log(Level level, dynamic error, StackTrace? stackTrace,
       String? message) async {
     var body = await _prepareBody(message, error, stackTrace);
 
@@ -85,7 +85,6 @@ class CoreNotifier {
             json.encode(payload.toJson()), // payload.toJson().toString(),
         destination: _destination);
     RollbarInfrastructure.instance.process(record: payloadRecord);
-    return await _sender!.send(payload.toJson());
   }
 
   Future<Body> _prepareBody(
