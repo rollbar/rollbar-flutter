@@ -7,3 +7,5 @@ local.properties
 rollbar_payloads.db
 
 rollbar_payloads.db-journal
+
+rollbar_payloads copy- backup.db

@@ -77,7 +77,7 @@ class DbDataAccess {
     //     "${PayloadRecordsTable.tblName}.${PayloadRecordsTable.colDestinationKey}"
     //     = "${DestinationsTable.tblName}.${DestinationsTable.colId}"
     //   )
-    //   ''');
+    //   ''', persistent: true);
     // sqlStatement.execute([]);
     // sqlStatement.dispose();
 
@@ -104,12 +104,17 @@ class DbDataAccess {
   }
 
   void deleteDestinationWithID(int destinationID) {
-    final sqlStatement = db.prepare('''
+    // final sqlStatement = db.prepare('''
+    //   DELETE FROM "${DestinationsTable.tblName}"
+    //   WHERE "${DestinationsTable.colId}" = ?
+    //   ''', persistent: true);
+    // sqlStatement.execute([destinationID]);
+    // sqlStatement.dispose();
+
+    db.execute('''
       DELETE FROM "${DestinationsTable.tblName}" 
-      WHERE "${PayloadRecordsTable.colId}" = ?
+      WHERE "${DestinationsTable.colId}" = $destinationID
       ''');
-    sqlStatement.execute([destinationID]);
-    sqlStatement.dispose();
   }
 
   void deletePayloadRecord(PayloadRecord record) {
@@ -121,12 +126,17 @@ class DbDataAccess {
   }
 
   void deletePayloadRecordWithID(int recordID) {
-    final sqlStatement = db.prepare('''
-      DELETE FROM "${PayloadRecordsTable.tblName}" 
-      WHERE "${PayloadRecordsTable.colId}" = ?
+    // final sqlStatement = db.prepare('''
+    //   DELETE FROM "${PayloadRecordsTable.tblName}"
+    //   WHERE "${PayloadRecordsTable.colId}" = ?
+    //   ''', persistent: true);
+    // sqlStatement.execute([recordID]);
+    // sqlStatement.dispose();
+
+    db.execute('''
+      DELETE FROM "${PayloadRecordsTable.tblName}"
+      WHERE "${PayloadRecordsTable.colId}" = $recordID
       ''');
-    sqlStatement.execute([recordID]);
-    sqlStatement.dispose();
   }
 
   void deletePayloadRecordsOlderThan(DateTime utcExpirationTime) {
@@ -145,7 +155,7 @@ class DbDataAccess {
         "${DestinationsTable.colAccessToken}"
         )
       VALUES (?, ?)
-      ''');
+      ''', persistent: true);
 
     sqlStatement.execute([destination.endpoint, destination.accessToken]);
 
@@ -165,7 +175,7 @@ class DbDataAccess {
           "${PayloadRecordsTable.colCreatedAt}"
           ) 
         VALUES (?, ?, ?, ?)
-        ''');
+        ''', persistent: true);
 
     sqlStatement.execute([
       payloadRecord.configJson,
