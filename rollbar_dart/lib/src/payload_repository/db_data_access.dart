@@ -194,20 +194,25 @@ class DbDataAccess {
   Iterable<Row> selectAllDestinations() {
     final ResultSet resultSet = db.select('''
     SELECT 
-    "${DestinationsTable.colId}", 
-    "${DestinationsTable.colEndpoint}", 
-    "${DestinationsTable.colAccessToken}" 
+      "${DestinationsTable.colId}", 
+      "${DestinationsTable.colEndpoint}", 
+      "${DestinationsTable.colAccessToken}" 
     FROM 
-    "${DestinationsTable.tblName}"
+      "${DestinationsTable.tblName}"
     ''');
     return resultSet;
   }
 
   Row? selectDestination(int id) {
     final ResultSet resultSet = db.select('''
-    SELECT "${DestinationsTable.colId}", "${DestinationsTable.colEndpoint}", "${DestinationsTable.colAccessToken}"
-    FROM "${DestinationsTable.tblName}"
-    WHERE "${DestinationsTable.colId}" = ?
+    SELECT  
+      "${DestinationsTable.colId}", 
+      "${DestinationsTable.colEndpoint}", 
+      "${DestinationsTable.colAccessToken}"
+    FROM 
+      "${DestinationsTable.tblName}"
+    WHERE 
+      "${DestinationsTable.colId}" = ?
     ''', [id]);
     if (resultSet.isEmpty) {
       return null;
@@ -222,9 +227,13 @@ class DbDataAccess {
   int? findDestinationID(
       {required String endpoint, required String accessToken}) {
     final ResultSet resultSet = db.select('''
-    SELECT "${DestinationsTable.colId}"
-    FROM "${DestinationsTable.tblName}"
-    WHERE "${DestinationsTable.colEndpoint}" = ? AND "${DestinationsTable.colAccessToken}" = ?
+    SELECT 
+      "${DestinationsTable.colId}"
+    FROM 
+      "${DestinationsTable.tblName}"
+    WHERE 
+      "${DestinationsTable.colEndpoint}" = ? 
+      AND "${DestinationsTable.colAccessToken}" = ?
     ''', [endpoint, accessToken]);
 
     if (resultSet.isEmpty) {
