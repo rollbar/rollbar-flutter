@@ -20,7 +20,7 @@ Future<void> main() async {
   group('Rollbar notifier tests', () {
     setUp(() async {
       sender = MockSender();
-      when(sender.send(any)).thenAnswer((_) async => Response());
+      when(sender.send(any)).thenAnswer((_) async => true);
       var config = (ConfigBuilder('BlaBlaAccessToken')
             ..environment = 'production'
             ..codeVersion = '0.23.2'
@@ -40,7 +40,7 @@ Future<void> main() async {
         failingFunction();
       } catch (error, stackTrace) {
         await rollbar.error(error, stackTrace);
-        var payload = verify(await sender.send(captureAny)).captured.single;
+        var payload = verify(sender.send(captureAny)).captured.single;
 
         expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
@@ -148,9 +148,9 @@ class ExpandableException implements Exception {
 
 class MockSender extends Mock implements Sender {
   @override
-  Future<Response?> send(Map<String, dynamic>? payload) {
+  Future<bool> send(Map<String, dynamic>? payload) {
     return super.noSuchMethod(Invocation.method(#send, [payload]),
-        returnValue: Future<Response?>.value(Response()));
+        returnValue: Future<bool>.value(true));
   }
 }
 

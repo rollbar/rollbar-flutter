@@ -113,9 +113,9 @@ class RawTextSender implements Sender {
   RawTextSender(this.port);
 
   @override
-  Future<Response?> send(Map<String, dynamic>? payload) async {
+  Future<bool> send(Map<String, dynamic>? payload) async {
     if (payload == null) {
-      return null;
+      return false;
     }
 
     var message = json.encode(payload);
@@ -123,7 +123,7 @@ class RawTextSender implements Sender {
   }
 
   @override
-  Future<Response?> sendString(String payload) async {
+  Future<bool> sendString(String payload) async {
     final socket = await Socket.connect('localhost', port);
     log('Client connected with port ${socket.port}');
     try {
@@ -132,9 +132,7 @@ class RawTextSender implements Sender {
       socket.destroy();
     }
 
-    return Response()
-      ..err = 0
-      ..result = (Result()..uuid = '1234');
+    return !Response(err: 0, result: Result(uuid: '1234')).isError();
   }
 }
 

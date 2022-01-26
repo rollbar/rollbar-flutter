@@ -31,7 +31,7 @@ class RollbarInfrastructure {
   Future<void> dispose() async {
     // Send a signal to the spawned isolate indicating that it should exit:
     _sendPort.send(null);
-    await _receivePort.last;
+    _receivePort.close();
   }
 
   static final RollbarInfrastructure instance = RollbarInfrastructure._();
@@ -124,8 +124,8 @@ class RollbarInfrastructure {
 
   static Future<bool> _processPendingRecord(
       PayloadRecord record, Sender sender, PayloadRepository repo) async {
-    final response = await sender.sendString(record.payloadJson);
-    if (response != null && !response.isError()) {
+    final success = await sender.sendString(record.payloadJson);
+    if (success) {
       repo.removePayloadRecord(record);
       return true;
     } else {

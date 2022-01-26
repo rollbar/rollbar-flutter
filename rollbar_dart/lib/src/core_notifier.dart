@@ -22,9 +22,9 @@ import 'sender.dart';
 /// - Send the occurrence payload to Rollbar via a [Sender].
 class CoreNotifier {
   final Config _config;
-  //final Sender? _sender;
+  final Sender? _sender;
   final Transformer? _transformer;
-  final Destination _destination;
+  //final Destination _destination;
 
   // notifierVersion to be updated with each new release:
   static const notifierVersion = '0.2.0-beta';
@@ -32,10 +32,10 @@ class CoreNotifier {
   static const notifierName = 'rollbar-dart';
 
   CoreNotifier(this._config)
-      : //_sender = _make(_config, _config.sender),
-        _transformer = _make(_config, _config.transformer),
-        _destination = Destination(
-            endpoint: _config.endpoint, accessToken: _config.accessToken);
+      : _sender = _make(_config, _config.sender),
+        _transformer = _make(_config, _config.transformer); //,
+  // _destination = Destination(
+  //     endpoint: _config.endpoint, accessToken: _config.accessToken);
 
   Future<void> log(Level level, dynamic error, StackTrace? stackTrace,
       String? message) async {
@@ -78,13 +78,13 @@ class CoreNotifier {
       ..accessToken = _config.accessToken
       ..data = data;
 
-    //TODO: integrating with RollbarInfrastructure:
-    final PayloadRecord payloadRecord = PayloadRecord.create(
-        configJson: json.encode(_config.toJson()), // _config.toString(),
-        payloadJson:
-            json.encode(payload.toJson()), // payload.toJson().toString(),
-        destination: _destination);
-    RollbarInfrastructure.instance.process(record: payloadRecord);
+    // final PayloadRecord payloadRecord = PayloadRecord.create(
+    //     configJson: json.encode(_config.toJson()),
+    //     payloadJson: json.encode(payload.toJson()),
+    //     destination: _destination);
+    // RollbarInfrastructure.instance.process(record: payloadRecord);
+
+    await _sender!.send(payload.toJson());
   }
 
   Future<Body> _prepareBody(

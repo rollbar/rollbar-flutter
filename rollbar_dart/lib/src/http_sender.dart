@@ -6,7 +6,7 @@ import '_internal/module.dart';
 import 'api/response.dart';
 import 'sender.dart';
 
-/// Default HTTP [Sender] implementation.
+/// HTTP [Sender] implementation.
 class HttpSender implements Sender {
   final String _endpoint;
   final Map<String, String> _headers;
@@ -21,9 +21,9 @@ class HttpSender implements Sender {
 
   /// Sends the provided payload as the body of POST request to the configured endpoint.
   @override
-  Future<Response?> send(Map<String, dynamic>? payload) async {
+  Future<bool> send(Map<String, dynamic>? payload) async {
     if (payload == null) {
-      return null;
+      return false;
     }
 
     var requestBody = json.encode(payload);
@@ -31,19 +31,19 @@ class HttpSender implements Sender {
   }
 
   @override
-  Future<Response?> sendString(String payload) async {
+  Future<bool> sendString(String payload) async {
     try {
       var response = await http.post(Uri.parse(_endpoint),
           headers: _headers, body: payload);
-      return toRollbarResponse(response);
+      return !(await toRollbarResponse(response)).isError();
     } on SocketException catch (_) {
       ModuleLogger.moduleLogger
           .info('SocketException while posting payload: $_');
-      return null;
+      return false;
     } catch (error, stackTrace) {
       ModuleLogger.moduleLogger
           .info('Error posting payload: $error. Stack trace: $stackTrace');
-      return null;
+      return false;
     }
   }
 }
@@ -52,17 +52,5 @@ Future<Response> toRollbarResponse(http.Response response) async {
   Map data = json.decode((response).body);
 
   var result = Response.fromMap(data as Map<String, dynamic>);
-  // if (data.containsKey('err')) {
-  //   result.err = data['err'].toInt();
-  // }
-  // if (data.containsKey('message')) {
-  //   result.message = data['message'].toString();
-  // }
-  // if (data.containsKey('result')) {
-  //   if (data['result'].containsKey('uuid')) {
-  //     result.result = Result()..uuid = data['result']['uuid'].toString();
-  //   }
-  // }
-
   return result;
 }

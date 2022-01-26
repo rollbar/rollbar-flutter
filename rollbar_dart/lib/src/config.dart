@@ -1,3 +1,6 @@
+import 'package:rollbar_dart/rollbar_dart.dart';
+import 'package:rollbar_dart/src/persistent_sender.dart';
+
 import 'http_sender.dart';
 
 import 'transformer.dart';
@@ -122,7 +125,7 @@ class ConfigBuilder {
 
   Config build() {
     var sender = this.sender;
-    sender ??= _httpSender;
+    sender ??= _defaultSender;
     return Config._(
         accessToken,
         endpoint,
@@ -138,6 +141,9 @@ class ConfigBuilder {
   }
 }
 
-Sender _httpSender(Config config) {
-  return HttpSender(endpoint: config.endpoint, accessToken: config.accessToken);
+Sender _defaultSender(Config config) {
+  return PersistentSender(
+      config: config,
+      destination: Destination(
+          endpoint: config.endpoint, accessToken: config.accessToken));
 }

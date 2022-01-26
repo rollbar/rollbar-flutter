@@ -18,7 +18,7 @@ void main() {
         "uuid": "67ce3d7bfab14fd99218ae5c985071e7"
     }
 }''');
-      var rollbarResponse = await toRollbarResponse(Future.value(response));
+      var rollbarResponse = await toRollbarResponse(response);
 
       expect(rollbarResponse.err, equals(0));
       expect(rollbarResponse.result, isNotNull);
@@ -32,7 +32,7 @@ void main() {
     "err": 1,
     "message": "invalid token"
 }''');
-      var rollbarResponse = await toRollbarResponse(Future.value(response));
+      var rollbarResponse = await toRollbarResponse(response);
 
       expect(rollbarResponse.err, equals(1));
       expect(rollbarResponse.message, equals('invalid token'));

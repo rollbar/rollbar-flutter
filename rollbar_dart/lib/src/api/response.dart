@@ -69,6 +69,7 @@ class Response {
 
 class Result {
   final String? uuid;
+
   Result({
     this.uuid,
   });
