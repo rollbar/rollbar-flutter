@@ -38,7 +38,6 @@ class RollbarInfrastructure {
   static final RollbarInfrastructure instance = RollbarInfrastructure._();
 
   void process({required PayloadRecord record}) {
-    //print('*** sending record for processing...');
     _sendPort.send(record);
   }
 
@@ -49,10 +48,6 @@ class RollbarInfrastructure {
     // so that it can send JSON strings to this isolate:
     final receivePort = ReceivePort();
     sendPort.send(receivePort.sendPort);
-
-    // const timerInterval = Duration(milliseconds: 500);
-    // final timer =
-    //     Timer.periodic(timerInterval, (timer) => _timerCallback(timer));
 
     // Wait for messages from the main isolate.
     await for (final message in receivePort) {
@@ -65,10 +60,6 @@ class RollbarInfrastructure {
     ModuleLogger.moduleLogger.info('Infrastructure isolate finished.');
     Isolate.exit();
   }
-
-  // static Future<void> _timerCallback(Timer timer) async {
-  //   await _processAllPendingRecords();
-  // }
 
   static Future<bool> _process(dynamic message) async {
     // HACK: This delay helps to avoid occasional sqlite's "db locked" errors/exceptions.
@@ -85,7 +76,6 @@ class RollbarInfrastructure {
     } else if (message == null) {
       // Exit if the main isolate sends a null message, indicating
       // it is the time to exit.
-      //timer.cancel();
       await _processAllPendingRecords();
       return false;
     } else {
@@ -94,18 +84,15 @@ class RollbarInfrastructure {
   }
 
   static void _processConfig(Config config) {
-    //print('+++ processing config...');
     if (ServiceLocator.instance.registrationsCount == 0) {
       ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
           PayloadRepository.create(config.persistPayloads ?? false));
       ServiceLocator.instance.register<Sender, HttpSender>(HttpSender(
           endpoint: config.endpoint, accessToken: config.accessToken));
     }
-    //print('+++ DONE processing config...');
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
-    //print('--- processing payload record...');
     final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo != null) {
       repo.addPayloadRecord(payloadRecord);
