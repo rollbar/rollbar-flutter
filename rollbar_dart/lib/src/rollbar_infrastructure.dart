@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:async/async.dart';
+
 import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
 
@@ -55,16 +56,8 @@ class RollbarInfrastructure {
 
     // Wait for messages from the main isolate.
     await for (final message in receivePort) {
-      if (message is Config) {
-        _processConfig(message);
-        await _processAllPendingRecords();
-      } else if (message is PayloadRecord) {
-        await _processPayloadRecord(message);
-      } else if (message == null) {
-        // Exit if the main isolate sends a null message, indicating
-        // it is the time to exit.
-        //timer.cancel();
-        await _processAllPendingRecords();
+      bool continueProcessing = await _process(message);
+      if (!continueProcessing) {
         break;
       }
     }
@@ -76,6 +69,25 @@ class RollbarInfrastructure {
   // static Future<void> _timerCallback(Timer timer) async {
   //   await _processAllPendingRecords();
   // }
+
+  static Future<bool> _process(dynamic message) async {
+    if (message is Config) {
+      _processConfig(message);
+      await _processAllPendingRecords();
+      return true;
+    } else if (message is PayloadRecord) {
+      await _processPayloadRecord(message);
+      return true;
+    } else if (message == null) {
+      // Exit if the main isolate sends a null message, indicating
+      // it is the time to exit.
+      //timer.cancel();
+      await _processAllPendingRecords();
+      return false;
+    } else {
+      return true;
+    }
+  }
 
   static void _processConfig(Config config) {
     //print('+++ processing config...');

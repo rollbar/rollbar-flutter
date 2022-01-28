@@ -22,6 +22,7 @@ void main() async {
 
   int payloadIndex = 10;
   while (payloadIndex > 0) {
+    await Future.delayed(Duration(seconds: 1));
     try {
       throw ArgumentError(
           '$payloadIndex: An error occurred in the dart example app');

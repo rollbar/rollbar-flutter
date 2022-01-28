@@ -7,9 +7,12 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
+  logging: ^1.0.2
   rollbar_dart: '>=0.2.0-beta <1.0.0'
 
 dependency_overrides:
+  rollbar_common:
+    path: ../../rollbar_common
   rollbar_dart:
     path: ..
 
