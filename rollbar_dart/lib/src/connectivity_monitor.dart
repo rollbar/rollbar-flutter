@@ -44,4 +44,9 @@ class ConnectivityMonitor extends ConnectivityMonitorBase {
       return false;
     }
   }
+
+  @override
+  void overrideAsOffFor({required Duration duration}) {
+    // TODO: implement overrideAsOffFor
+  }
 }
