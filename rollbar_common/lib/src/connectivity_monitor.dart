@@ -102,8 +102,8 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
   /// implemented by this [ConnectivityMonitor].
   bool _connectivityOn = defaultConnectivity;
 
-  /// Connectivity eoverride's exparation timestamp (if any).
-  DateTime? _overrideExparationTimestamp;
+  /// Connectivity eoverride's expiration timestamp (if any).
+  DateTime? _overrideExpirationTimestamp;
 
   /// Signifies active connectivity status override for the [_connectivityOn].
   bool _activeOverride = false;
@@ -149,7 +149,7 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
 
   @override
   void overrideAsOn() {
-    _overrideExparationTimestamp = null;
+    _overrideExpirationTimestamp = null;
     _overrideState(true);
   }
 
@@ -160,7 +160,7 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
 
   @override
   void overrideAsOffFor({required Duration duration}) {
-    _overrideExparationTimestamp = DateTime.now().add(duration);
+    _overrideExpirationTimestamp = DateTime.now().add(duration);
     _overrideState(false);
   }
 
@@ -173,7 +173,7 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
 
   @override
   void disableOverride() {
-    _overrideExparationTimestamp = null;
+    _overrideExpirationTimestamp = null;
     _activeOverride = false;
 
     _recalculateConnectivity();
@@ -187,11 +187,11 @@ abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
 
   bool _recalculateConnectivity() {
     if (_activeOverride &&
-        (_overrideExparationTimestamp != null) &&
+        (_overrideExpirationTimestamp != null) &&
         (DateTime.now().millisecondsSinceEpoch >
-            _overrideExparationTimestamp!.millisecondsSinceEpoch)) {
+            _overrideExpirationTimestamp!.millisecondsSinceEpoch)) {
       _activeOverride = false;
-      _overrideExparationTimestamp = null;
+      _overrideExpirationTimestamp = null;
     }
 
     bool calculatedConnectivity =
