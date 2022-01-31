@@ -6,7 +6,7 @@ import 'dart:isolate';
 
 import 'package:async/async.dart';
 
-import 'package:rollbar_common/rollbar_common.dart';
+import 'package:rollbar_common/rollbar_common.dart' as common;
 import 'package:rollbar_dart/rollbar_dart.dart';
 
 import '_internal/module.dart';
@@ -84,16 +84,20 @@ class RollbarInfrastructure {
   }
 
   static void _processConfig(Config config) {
-    if (ServiceLocator.instance.registrationsCount == 0) {
-      ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
-          PayloadRepository.create(config.persistPayloads ?? false));
-      ServiceLocator.instance.register<Sender, HttpSender>(HttpSender(
+    if (common.ServiceLocator.instance.registrationsCount == 0) {
+      common.ServiceLocator.instance
+          .register<PayloadRepository, PayloadRepository>(
+              PayloadRepository.create(config.persistPayloads ?? false));
+      common.ServiceLocator.instance.register<Sender, HttpSender>(HttpSender(
           endpoint: config.endpoint, accessToken: config.accessToken));
+      common.ServiceLocator.instance
+          .register<common.ConnectivityMonitor, ConnectivityMonitor>(
+              ConnectivityMonitor());
     }
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
-    final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
+    final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo != null) {
       repo.addPayloadRecord(payloadRecord);
       await _processDestinationPendindRecords(payloadRecord.destination, repo);
@@ -127,13 +131,22 @@ class RollbarInfrastructure {
 
   static Future<bool> _processPendingRecord(
       PayloadRecord record, Sender sender, PayloadRepository repo) async {
+    final connectivityMonitor =
+        common.ServiceLocator.instance.tryResolve<common.ConnectivityMonitor>();
+    if (connectivityMonitor != null &&
+        !connectivityMonitor.connectivityState.connectivityOn) {
+      return false;
+    }
+
     final success = await sender.sendString(record.payloadJson);
     if (success) {
       repo.removePayloadRecord(record);
       return true;
     } else {
-      //TODO: update ConnectivityMonitor...
-
+      if (connectivityMonitor != null &&
+          connectivityMonitor.connectivityState.connectivityOn) {
+        connectivityMonitor.overrideAsOff();
+      }
       final cutoffTime =
           DateTime.now().toUtc().subtract(const Duration(days: 1));
       if (record.timestamp.compareTo(cutoffTime) < 0) {
@@ -144,7 +157,7 @@ class RollbarInfrastructure {
   }
 
   static Future<void> _processAllPendingRecords() async {
-    final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
+    final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo == null) {
       ModuleLogger.moduleLogger
           .severe('PayloadRepository service was never registered!');

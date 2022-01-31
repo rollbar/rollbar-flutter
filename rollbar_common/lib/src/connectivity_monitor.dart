@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
+/// [ConnectivityState]
+///
+/// A data type representing a connectivity state.
 class ConnectivityState {
   late final DateTime timestamp;
   final bool connectivityOn;

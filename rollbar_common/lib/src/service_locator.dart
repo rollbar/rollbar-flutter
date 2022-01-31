@@ -2,6 +2,9 @@ import 'package:meta/meta.dart';
 
 import '_internal/module.dart';
 
+/// [ServiceLocatorByType]
+///
+/// Helps in locating shared application wide services by their service types.
 abstract class ServiceLocatorByType {
   void register<TService extends Object, T extends TService>(T service);
 
@@ -11,10 +14,16 @@ abstract class ServiceLocatorByType {
   TService resolve<TService>();
 }
 
+/// [Service]
+///
+/// Models a service identifiable by its ID (as any Enum).
 abstract class Service {
   Enum get id;
 }
 
+/// [ServiceBase]
+///
+/// The base class for defining a [Service].
 abstract class ServiceBase extends Service {
   late final Enum _id;
 
@@ -26,6 +35,9 @@ abstract class ServiceBase extends Service {
   Enum get id => _id;
 }
 
+/// [ServiceLocatorByID]
+///
+/// Helps in locating shared application wide services by their service IDs.
 abstract class ServiceLocatorByID {
   void registerService(Service service);
 
@@ -40,6 +52,10 @@ enum ServiceLocatorState {
   queryPhase,
 }
 
+/// [ServiceLocator]
+///
+/// A generic reusable [ServiceLocator] that provides access to the shared
+/// services by the service type and by the service ID.
 class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
   ServiceLocatorState _state = ServiceLocatorState.neverUsed;
   final Map<Type, Object> _servicesByType = {};
