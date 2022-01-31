@@ -171,6 +171,5 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
     _servicesByID[service.id] = service;
   }
 
-  @protected
   int get registrationsCount => _servicesByType.length + _servicesByID.length;
 }

@@ -3,11 +3,7 @@ import 'dart:async';
 
 import 'package:rollbar_dart/rollbar_dart.dart';
 
-import 'config.dart';
 import 'core_notifier.dart';
-import 'logging.dart';
-import 'api/payload/exception_info.dart';
-import 'api/payload/level.dart';
 
 /// This class handles the lifecycle of an uncaught error handler [Isolate].
 /// Since isolates cannot share state, the error handler initialises its

@@ -5,7 +5,6 @@ import 'config.dart';
 import 'core_notifier.dart';
 import 'uncaught_error.dart';
 import 'logging.dart';
-import 'api/response.dart';
 import 'api/payload/level.dart';
 
 /// Rollbar notifier.

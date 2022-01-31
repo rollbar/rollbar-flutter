@@ -1,11 +1,6 @@
 import 'package:rollbar_dart/rollbar_dart.dart';
 import 'package:rollbar_dart/src/persistent_sender.dart';
 
-import 'http_sender.dart';
-
-import 'transformer.dart';
-import 'sender.dart';
-
 /// Configuration for the [Rollbar] notifier.
 class Config {
   final String accessToken;

@@ -1,11 +1,6 @@
-import 'dart:io';
-
-import 'package:http/http.dart' as http;
 import 'package:rollbar_dart/rollbar_dart.dart';
 import 'dart:convert';
 import '_internal/module.dart';
-import 'api/response.dart';
-import 'sender.dart';
 
 /// Persistent [Sender]. Default [Sender] implementation.
 class PersistentSender implements Sender {

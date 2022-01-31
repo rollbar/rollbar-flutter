@@ -1,17 +1,11 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:core';
-import 'dart:io';
 import 'dart:isolate';
-
-import 'package:async/async.dart';
 
 import 'package:rollbar_common/rollbar_common.dart' as common;
 import 'package:rollbar_dart/rollbar_dart.dart';
 
 import '_internal/module.dart';
 import 'http_sender.dart';
-import 'payload_repository/payload_repository.dart';
 
 class RollbarInfrastructure {
   final ReceivePort _receivePort = ReceivePort();
