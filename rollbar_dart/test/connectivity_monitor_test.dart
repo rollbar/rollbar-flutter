@@ -34,11 +34,35 @@ void main() {
       var cm = ConnectivityMonitor();
       cm.onConnectivityChanged.listen(
           (state) => {state.connectivityOn ? onCount++ : offCount++},
-          onDone: () => {expect(onCount + offCount, 3)});
+          onDone: () => {expect(onCount + offCount, 2)});
 
       cm.overrideAsOn();
       cm.overrideAsOff();
       cm.overrideAsOn();
+
+      cm.disposeOnConnectivityChanged();
+    });
+
+    test('Test connectivity OFF override times out', () async {
+      int offCount = 0;
+      int onCount = 0;
+
+      var cm = ConnectivityMonitor();
+      expect(cm.connectivityState.connectivityOn, true);
+      cm.onConnectivityChanged.listen(
+          (state) => {state.connectivityOn ? onCount++ : offCount++},
+          onDone: () => {expect(onCount + offCount, 2)});
+
+      cm.overrideAsOn();
+      expect(cm.connectivityState.connectivityOn, true);
+      cm.overrideAsOffFor(duration: Duration(seconds: 2));
+      expect(cm.connectivityState.connectivityOn, false);
+      final stateOff = cm.connectivityState;
+      print('stateOff: $stateOff');
+      await Future.delayed(Duration(seconds: 3));
+      final state = cm.connectivityState;
+      print('stateOn: $state');
+      expect(cm.connectivityState.connectivityOn, true);
 
       cm.disposeOnConnectivityChanged();
     });

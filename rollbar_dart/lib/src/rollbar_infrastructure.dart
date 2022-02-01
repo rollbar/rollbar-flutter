@@ -139,7 +139,7 @@ class RollbarInfrastructure {
     } else {
       if (connectivityMonitor != null &&
           connectivityMonitor.connectivityState.connectivityOn) {
-        connectivityMonitor.overrideAsOff();
+        connectivityMonitor.overrideAsOffFor(duration: Duration(seconds: 30));
       }
       final cutoffTime =
           DateTime.now().toUtc().subtract(const Duration(days: 1));

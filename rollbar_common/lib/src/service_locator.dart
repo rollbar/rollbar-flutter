@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 import '_internal/module.dart';
 
 /// [ServiceLocatorByType]

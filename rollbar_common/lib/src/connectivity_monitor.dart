@@ -99,7 +99,7 @@ abstract class ConnectivityMonitor {
 }
 
 abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
-  static const bool defaultConnectivity = false;
+  static const bool defaultConnectivity = true;
 
   /// Connectivity status based on the detection method(s)
   /// implemented by this [ConnectivityMonitor].

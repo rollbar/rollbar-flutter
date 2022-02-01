@@ -1,14 +1,11 @@
 @Timeout(Duration(seconds: 145))
 
 import 'dart:async';
-//import 'dart:io';
-//import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mockito/mockito.dart';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -21,6 +18,7 @@ class MockConnectivityPlatform extends Mock
     implements ConnectivityPlatform {
   static const totalConnectivitySimulations = 20;
   final _interval = const Duration(seconds: 1);
+  // ignore: unused_field
   late final Timer _timer;
   ConnectivityResult _currentConnectivity = ConnectivityResult.none;
   final _connectivityStreamController =
@@ -39,6 +37,7 @@ class MockConnectivityPlatform extends Mock
         indx = 0;
       }
       _currentConnectivity = ConnectivityResult.values[indx];
+      // ignore: avoid_print
       print('Current connectivity: $_currentConnectivity');
       _connectivityStreamController.sink.add(_currentConnectivity);
     });
@@ -102,10 +101,12 @@ void main() {
 
       var cm = ConnectivityMonitor();
       cm.onConnectivityChanged.listen((state) {
+        // ignore: avoid_print
         print(state);
         count += 1;
       }, onDone: () {
         expect(count > 0, true);
+        // ignore: avoid_print
         print('Connectivity events count: $count.');
       });
 
