@@ -18,7 +18,7 @@ class CoreNotifier {
   //final Destination _destination;
 
   // notifierVersion to be updated with each new release:
-  static const notifierVersion = '0.2.0-beta';
+  static const notifierVersion = '0.3.0-beta';
 
   static const notifierName = 'rollbar-dart';
 
