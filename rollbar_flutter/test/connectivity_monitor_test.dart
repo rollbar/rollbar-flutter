@@ -87,7 +87,7 @@ void main() {
       var cm = ConnectivityMonitor();
       cm.onConnectivityChanged.listen(
           (state) => {state.connectivityOn ? onCount++ : offCount++},
-          onDone: () => {expect(onCount + offCount, 3)});
+          onDone: () => {expect(onCount + offCount, 2)});
 
       cm.overrideAsOn();
       cm.overrideAsOff();
@@ -114,9 +114,9 @@ void main() {
           seconds: MockConnectivityPlatform.totalConnectivitySimulations + 1);
       //sleep(Duration(seconds: 100));
       await Future.delayed(simulationDuration);
-      var expectedCount = 2 *
+      var expectedCount = (2 *
           (MockConnectivityPlatform.totalConnectivitySimulations /
-              ConnectivityResult.values.length);
+              ConnectivityResult.values.length)) - 1;
       expect(count, expectedCount);
 
       cm.disposeOnConnectivityChanged();
