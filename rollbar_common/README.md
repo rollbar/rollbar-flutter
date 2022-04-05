@@ -11,29 +11,27 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages). 
 -->
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+# This package implements common components potentially used by other packages of the Rollbar SDK
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- internal SDK logger
+- service locator
+- connectivity monitor
+- abstractions for implementing common design patterns
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Most of these components are already used by the other SDK packages.
+Hence, you can see basic usage patterns by searching for references to these components within the SDK codebase
+as well as within the unit tests of this package.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
-
-```dart
-const like = 'sample';
-```
+Most of these components are already used by the other SDK packages.
+Hence, you can see basic usage patterns by searching for references to these components within the SDK codebase
+as well as within the unit tests of this package.
 
 ## Additional information
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+N/A
