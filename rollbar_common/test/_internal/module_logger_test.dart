@@ -9,10 +9,6 @@ const String expectedModuleLoggerFullName =
 
 void main() {
   group('Named logger tests:', () {
-    setUp(() {
-      // Additional setup goes here.
-    });
-
     test('SDK Logger Name', () {
       expect(SdkLogger.sdkLogger.fullName == 'com.rollbar.sdk', true);
       expect(SdkLogger.sdkLogger.name == 'sdk', true);
