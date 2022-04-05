@@ -10,6 +10,7 @@ A simple usage example:
 
 ```dart
 import 'package:flutter/services.dart';
+import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/rollbar.dart';
 
 Future<void> main() async {
