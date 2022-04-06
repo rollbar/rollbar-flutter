@@ -114,19 +114,4 @@ class Rollbar {
       rethrow;
     }
   }
-
-  // static Future<void> _processResponse(Future<Response?> rollbarAction) async {
-  //   try {
-  //     var response = await rollbarAction;
-  //     if (response == null) {
-  //       Logging.error('No response while sending data to Rollbar', null);
-  //     } else if (response.isError()) {
-  //       Logging.error('Error while sending data to Rollbar', response.message);
-  //     }
-  //   } on Exception catch (e) {
-  //     Logging.error(
-  //         'Internal error encountered while sending data to Rollbar', e);
-  //     rethrow;
-  //   }
-  // }
 }

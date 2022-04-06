@@ -8,18 +8,6 @@ class DbDataAccess {
 
   late final Database db;
 
-  // late final PreparedStatement _cmdDeleteUnusedDestinations;
-  // late final PreparedStatement _cmdDeleteDestinationWithID;
-  // late final PreparedStatement _cmdDeletePayloadRecordWithID;
-  // late final PreparedStatement _cmdDeletePayloadRecordsOlderThan;
-  // late final PreparedStatement _cmdInsertDestination;
-  // late final PreparedStatement _cmdInsertPayloadRecord;
-  // late final PreparedStatement _cmdSelectAllDestinations;
-  // late final PreparedStatement _cmdSelectDestinationWithID;
-  // late final PreparedStatement _cmdFindDestinationID;
-  // late final PreparedStatement _cmdSelectAllPayloadRecords;
-  // late final PreparedStatement _cmdSelectPayloadRecordsWithDestinationID;
-
   DbDataAccess initialize({required bool asPersistent}) {
     if (asPersistent) {
       db = sqlite3.open(dbFileName); //, mutex: true);
@@ -29,49 +17,8 @@ class DbDataAccess {
 
     _setupTablesAsNeeded();
 
-    // _cmdDeleteUnusedDestinations =
-    //     db.prepare(DbSql.deleteUnusedDestinations, persistent: true);
-    // _cmdDeleteDestinationWithID =
-    //     db.prepare(DbSql.deleteDestinationWithID, persistent: true);
-    // _cmdDeletePayloadRecordWithID =
-    //     db.prepare(DbSql.deletePayloadRecordWithID, persistent: true);
-    // _cmdDeletePayloadRecordsOlderThan =
-    //     db.prepare(DbSql.deletePayloadRecordsOlderThan, persistent: true);
-    // _cmdInsertDestination =
-    //     db.prepare(DbSql.insertDestination, persistent: true);
-    // _cmdInsertPayloadRecord =
-    //     db.prepare(DbSql.insertPayloadRecord, persistent: true);
-    // _cmdSelectAllDestinations =
-    //     db.prepare(DbSql.selectAllDestinations, persistent: true);
-    // _cmdSelectDestinationWithID =
-    //     db.prepare(DbSql.selectDestinationWithID, persistent: true);
-    // _cmdFindDestinationID =
-    //     db.prepare(DbSql.findDestinationID, persistent: true);
-    // _cmdSelectAllPayloadRecords =
-    //     db.prepare(DbSql.selectAllPayloadRecords, persistent: true);
-    // _cmdSelectPayloadRecordsWithDestinationID = db
-    //     .prepare(DbSql.selectPayloadRecordsWithDestinationID, persistent: true);
-
     return this;
   }
-
-  // void dispose() {
-  //   _cmdDeleteUnusedDestinations.dispose();
-  //   _cmdDeleteDestinationWithID.dispose();
-  //   _cmdDeletePayloadRecordWithID.dispose();
-  //   _cmdDeletePayloadRecordsOlderThan.dispose();
-  //   _cmdInsertDestination.dispose();
-  //   _cmdInsertPayloadRecord.dispose();
-  //   _cmdSelectAllDestinations.dispose();
-  //   _cmdSelectDestinationWithID.dispose();
-  //   _cmdFindDestinationID.dispose();
-  //   _cmdSelectAllPayloadRecords.dispose();
-  //   _cmdSelectPayloadRecordsWithDestinationID.dispose();
-  // }
-
-  // bool _checkTableExists(String tableName) {
-  //   return db.select(DbSql.checkIfTableExists, [tableName]).isNotEmpty;
-  // }
 
   void _setupTablesAsNeeded() {
     var createTableCommnads = {
@@ -80,15 +27,11 @@ class DbDataAccess {
     };
 
     for (final tableName in createTableCommnads.keys) {
-      // if (!_checkTableExists(tableName)) {
-      //   db.execute(createTableCommnads[tableName]!);
-      // }
       db.execute(createTableCommnads[tableName]!);
     }
   }
 
   void deleteUnusedDestinations() {
-    // _cmdDeleteUnusedDestinations.execute();
     db.execute(DbSql.deleteUnusedDestinations);
   }
 
@@ -101,7 +44,6 @@ class DbDataAccess {
   }
 
   void deleteDestinationWithID(int destinationID) {
-    // _cmdDeleteDestinationWithID.execute([destinationID]);
     db.execute(DbSql.deleteDestinationWithID, [destinationID]);
   }
 
@@ -114,20 +56,15 @@ class DbDataAccess {
   }
 
   void deletePayloadRecordWithID(int recordID) {
-    // _cmdDeletePayloadRecordWithID.execute([recordID]);
     db.execute(DbSql.deletePayloadRecordWithID, [recordID]);
   }
 
   void deletePayloadRecordsOlderThan(DateTime utcExpirationTime) {
-    // _cmdDeletePayloadRecordsOlderThan
-    //     .execute([(utcExpirationTime.millisecondsSinceEpoch / 1000)]);
     db.execute(DbSql.deletePayloadRecordsOlderThan,
         [(utcExpirationTime.millisecondsSinceEpoch / 1000)]);
   }
 
   int insertDestination(Destination destination) {
-    // _cmdInsertDestination
-    //     .execute([destination.endpoint, destination.accessToken]);
     db.execute(DbSql.insertDestination,
         [destination.endpoint, destination.accessToken]);
     // ignore: invalid_use_of_protected_member
@@ -136,19 +73,11 @@ class DbDataAccess {
   }
 
   int insertPayloadRecord(PayloadRecord payloadRecord) {
-    // _cmdInsertPayloadRecord.execute([
-    //   payloadRecord.configJson,
-    //   payloadRecord.payloadJson,
-    //   payloadRecord.destination.id,
-    //   payloadRecord.timestamp.millisecondsSinceEpoch / 1000
-    //   //'strftime("%s","now")' //unixepoch time, read it by selecting: datetime(date_column,'unixepoch')
-    // ]);
     db.execute(DbSql.insertPayloadRecord, [
       payloadRecord.configJson,
       payloadRecord.payloadJson,
       payloadRecord.destination.id,
       payloadRecord.timestamp.millisecondsSinceEpoch / 1000
-      //'strftime("%s","now")' //unixepoch time, read it by selecting: datetime(date_column,'unixepoch')
     ]);
     // ignore: invalid_use_of_protected_member
     payloadRecord.assignID(db.lastInsertRowId);
@@ -156,7 +85,6 @@ class DbDataAccess {
   }
 
   Iterable<Row> selectAllDestinations() {
-    //return _cmdSelectAllDestinations.select();
     return db.select(DbSql.selectAllDestinations);
   }
 
@@ -290,14 +218,6 @@ class DbSql {
     VALUES (?, ?, ?, ?)
     ''';
 
-  // static const String selectAllDestinations = '''
-  //   SELECT
-  //     "${DestinationsTable.colId}",
-  //     "${DestinationsTable.colEndpoint}",
-  //     "${DestinationsTable.colAccessToken}"
-  //   FROM
-  //     "${DestinationsTable.tblName}"
-  //   ''';
   static const String selectAllDestinations = '''
     SELECT *
     FROM ${DestinationsTable.tblName}

@@ -7,10 +7,6 @@ import 'package:rollbar_dart/src/connectivity_monitor.dart';
 
 void main() {
   group('Connectivity monitor (Dart):', () {
-    setUp(() {
-      // Additional setup goes here.
-    });
-
     tearDown(() {});
 
     test('Test active network interface', () async {

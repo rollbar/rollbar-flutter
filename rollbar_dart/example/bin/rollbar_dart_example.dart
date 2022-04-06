@@ -8,6 +8,7 @@ void main() async {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
 
+  //NOTE: Use your Rollbar Project access token:
   var config = (ConfigBuilder('17965fa5041749b6bf7095a190001ded')
         ..environment = 'development'
         ..codeVersion = '0.1.0'

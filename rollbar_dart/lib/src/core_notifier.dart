@@ -15,7 +15,6 @@ class CoreNotifier {
   final Config _config;
   final Sender? _sender;
   final Transformer? _transformer;
-  //final Destination _destination;
 
   // notifierVersion to be updated with each new release:
   static const notifierVersion = '0.3.0-beta';
@@ -25,8 +24,6 @@ class CoreNotifier {
   CoreNotifier(this._config)
       : _sender = _make(_config, _config.sender),
         _transformer = _make(_config, _config.transformer); //,
-  // _destination = Destination(
-  //     endpoint: _config.endpoint, accessToken: _config.accessToken);
 
   Future<void> log(Level level, dynamic error, StackTrace? stackTrace,
       String? message) async {
@@ -68,12 +65,6 @@ class CoreNotifier {
     var payload = Payload()
       ..accessToken = _config.accessToken
       ..data = data;
-
-    // final PayloadRecord payloadRecord = PayloadRecord.create(
-    //     configJson: json.encode(_config.toJson()),
-    //     payloadJson: json.encode(payload.toJson()),
-    //     destination: _destination);
-    // RollbarInfrastructure.instance.process(record: payloadRecord);
 
     await _sender!.send(payload.toJson());
   }
