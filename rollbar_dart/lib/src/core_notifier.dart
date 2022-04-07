@@ -23,7 +23,7 @@ class CoreNotifier {
 
   CoreNotifier(this._config)
       : _sender = _make(_config, _config.sender),
-        _transformer = _make(_config, _config.transformer); //,
+        _transformer = _make(_config, _config.transformer);
 
   Future<void> log(Level level, dynamic error, StackTrace? stackTrace,
       String? message) async {
