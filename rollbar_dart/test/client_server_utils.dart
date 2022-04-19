@@ -113,23 +113,26 @@ class RawTextSender implements Sender {
   RawTextSender(this.port);
 
   @override
-  Future<Response?> send(Map<String, dynamic>? payload) async {
+  Future<bool> send(Map<String, dynamic>? payload) async {
     if (payload == null) {
-      return null;
+      return false;
     }
 
+    var message = json.encode(payload);
+    return sendString(message);
+  }
+
+  @override
+  Future<bool> sendString(String payload) async {
     final socket = await Socket.connect('localhost', port);
     log('Client connected with port ${socket.port}');
     try {
-      var message = json.encode(payload).replaceAll('\n', ' ');
-      socket.add('$message\n'.codeUnits);
+      socket.add('${payload.replaceAll('\n', ' ')}\n'.codeUnits);
     } finally {
       socket.destroy();
     }
 
-    return Response()
-      ..err = 0
-      ..result = (Result()..uuid = '1234');
+    return !Response(err: 0, result: Result(uuid: '1234')).isError();
   }
 }
 

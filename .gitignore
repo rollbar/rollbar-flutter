@@ -3,3 +3,9 @@ local.properties
 **/.pubignore
 
 **/.DS_Store
+
+rollbar_payloads.db
+
+rollbar_payloads.db-journal
+
+rollbar_payloads copy- backup.db

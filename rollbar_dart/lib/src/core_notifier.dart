@@ -1,18 +1,11 @@
 import 'dart:io' show Platform;
 
+import 'package:rollbar_dart/rollbar_dart.dart';
 import 'package:rollbar_dart/src/trace.dart';
-import 'package:rollbar_dart/src/transformer.dart';
 
 import 'api/payload/body.dart';
 import 'api/payload/client.dart';
-import 'api/payload/data.dart';
-import 'api/payload/exception_info.dart';
 import 'api/payload/frame.dart' as rb;
-import 'api/payload/level.dart';
-import 'api/payload/payload.dart';
-import 'api/response.dart';
-import 'config.dart';
-import 'sender.dart';
 
 /// A class that performs the core functions for the notifier:
 /// - Prepare a payload from the provided error or message.
@@ -24,7 +17,7 @@ class CoreNotifier {
   final Transformer? _transformer;
 
   // notifierVersion to be updated with each new release:
-  static const notifierVersion = '0.2.0-beta';
+  static const notifierVersion = '0.3.0-beta';
 
   static const notifierName = 'rollbar-dart';
 
@@ -32,7 +25,7 @@ class CoreNotifier {
       : _sender = _make(_config, _config.sender),
         _transformer = _make(_config, _config.transformer);
 
-  Future<Response?> log(Level level, dynamic error, StackTrace? stackTrace,
+  Future<void> log(Level level, dynamic error, StackTrace? stackTrace,
       String? message) async {
     var body = await _prepareBody(message, error, stackTrace);
 
@@ -73,7 +66,7 @@ class CoreNotifier {
       ..accessToken = _config.accessToken
       ..data = data;
 
-    return await _sender!.send(payload.toJson());
+    await _sender!.send(payload.toJson());
   }
 
   Future<Body> _prepareBody(

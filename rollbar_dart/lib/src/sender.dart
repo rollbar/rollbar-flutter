@@ -1,6 +1,10 @@
-import 'api/response.dart';
-
 /// Sender interface to send payload data to Rollbar.
 abstract class Sender {
-  Future<Response?> send(Map<String, dynamic>? payload);
+  /// Sends the specified payload.
+  /// Returns `true` if sent successfully.
+  Future<bool> send(Map<String, dynamic>? payload);
+
+  /// Sends the specified payload.
+  /// Returns `true` if sent successfully.
+  Future<bool> sendString(String payload);
 }

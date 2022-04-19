@@ -1,11 +1,9 @@
 import 'dart:isolate';
 import 'dart:async';
 
-import 'config.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
+
 import 'core_notifier.dart';
-import 'logging.dart';
-import 'api/payload/exception_info.dart';
-import 'api/payload/level.dart';
 
 /// This class handles the lifecycle of an uncaught error handler [Isolate].
 /// Since isolates cannot share state, the error handler initialises its
@@ -71,7 +69,10 @@ class UncaughtErrorHandler {
       await for (var msg in port) {
         try {
           if (msg is Map<String, dynamic>) {
-            rollbarCore = CoreNotifier(Config.fromMap(msg));
+            final rollbarConfig = Config.fromMap(msg);
+            await RollbarInfrastructure.instance
+                .initialize(rollbarConfig: rollbarConfig);
+            rollbarCore = CoreNotifier(rollbarConfig);
           } else {
             var error = _getError(msg[0]);
             if (rollbarCore != null) {

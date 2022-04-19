@@ -19,7 +19,7 @@ void main() {
   setUp(() async {
     rbdart.RollbarPlatformInfo.isAndroid = true;
     sender = MockSender();
-    when(sender.send(any)).thenAnswer((_) async => Response());
+    when(sender.send(any)).thenAnswer((_) async => true);
 
     callsReceived = [];
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -77,6 +77,9 @@ void main() {
 
   test('if error is enriched PlatformException it should add platform_payload',
       () async {
+    // await RollbarInfrastructure.instance
+    //     .initialize(withPersistentPayloadStore: true);
+
     // Disable uncaught error handling, otherwise we initialize an error handling
     // isolate and we're forced to use a serializable sender factory, instead
     // of the closure
@@ -103,6 +106,8 @@ void main() {
       var frames = platformPayload['data']['body']['trace']['frames'];
       expect(frames.length, equals(2));
       expect(frames[0]['method'], equals('getPlatformSpecificStuff'));
+
+      // await RollbarInfrastructure.instance.dispose();
     });
   });
 }
@@ -119,9 +124,9 @@ Future<void> _runRollbarFlutter(
 
 class MockSender extends Mock implements rbdart.Sender {
   @override
-  Future<Response?> send(Map<String, dynamic>? payload) {
+  Future<bool> send(Map<String, dynamic>? payload) {
     return super.noSuchMethod(Invocation.method(#send, [payload]),
-        returnValue: Future<Response?>.value(Response()));
+        returnValue: Future<bool>.value(true));
   }
 }
 

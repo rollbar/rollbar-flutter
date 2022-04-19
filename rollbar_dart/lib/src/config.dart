@@ -1,7 +1,5 @@
-import 'http_sender.dart';
-
-import 'transformer.dart';
-import 'sender.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
+import 'package:rollbar_dart/src/persistent_sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
 class Config {
@@ -11,6 +9,7 @@ class Config {
   final String? framework;
   final String? codeVersion;
   final String? package;
+  final bool? persistPayloads;
   final bool? handleUncaughtErrors;
   final bool? includePlatformLogs;
   final Transformer Function(Config)? transformer;
@@ -23,6 +22,7 @@ class Config {
       this.framework,
       this.codeVersion,
       this.package,
+      this.persistPayloads,
       this.handleUncaughtErrors,
       this.includePlatformLogs,
       this.transformer,
@@ -40,6 +40,7 @@ class Config {
       'framework': framework,
       'codeVersion': codeVersion,
       'package': package,
+      'persistPayloads': persistPayloads,
       'handleUncaughtErrors': handleUncaughtErrors,
       'includePlatformLogs': includePlatformLogs,
       'transformer': transformer,
@@ -55,11 +56,28 @@ class Config {
           ..framework = values['framework']
           ..codeVersion = values['codeVersion']
           ..package = values['package']
+          ..persistPayloads = values['persistPayloads']
           ..handleUncaughtErrors = values['handleUncaughtErrors']
           ..includePlatformLogs = values['includePlatformLogs']
           ..transformer = values['transformer']
           ..sender = values['sender'])
         .build();
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'accessToken': accessToken,
+      'endpoint': endpoint,
+      'environment': environment,
+      'framework': framework,
+      'codeVersion': codeVersion,
+      'package': package,
+      'persistPayloads': persistPayloads,
+      'handleUncaughtErrors': handleUncaughtErrors,
+      'includePlatformLogs': includePlatformLogs //,
+      // 'transformer': transformer,
+      // 'sender': sender
+    };
   }
 }
 
@@ -71,6 +89,7 @@ class ConfigBuilder {
   String? codeVersion;
   String? package;
 
+  bool? persistPayloads = false;
   bool? handleUncaughtErrors = false;
   bool? includePlatformLogs = false;
 
@@ -93,6 +112,7 @@ class ConfigBuilder {
         framework = config.framework,
         codeVersion = config.codeVersion,
         package = config.package,
+        persistPayloads = config.persistPayloads,
         handleUncaughtErrors = config.handleUncaughtErrors,
         includePlatformLogs = config.includePlatformLogs,
         transformer = config.transformer,
@@ -100,7 +120,7 @@ class ConfigBuilder {
 
   Config build() {
     var sender = this.sender;
-    sender ??= _httpSender;
+    sender ??= _defaultSender;
     return Config._(
         accessToken,
         endpoint,
@@ -108,6 +128,7 @@ class ConfigBuilder {
         framework,
         codeVersion,
         package,
+        persistPayloads,
         handleUncaughtErrors,
         includePlatformLogs,
         transformer,
@@ -115,6 +136,9 @@ class ConfigBuilder {
   }
 }
 
-Sender _httpSender(Config config) {
-  return HttpSender(config.endpoint, config.accessToken);
+Sender _defaultSender(Config config) {
+  return PersistentSender(
+      config: config,
+      destination: Destination(
+          endpoint: config.endpoint, accessToken: config.accessToken));
 }

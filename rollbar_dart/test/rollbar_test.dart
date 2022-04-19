@@ -3,34 +3,44 @@ import 'package:mockito/mockito.dart';
 
 import 'package:rollbar_dart/rollbar.dart';
 
-void main() {
-  group('Rollbar notifier tests', () {
-    late Rollbar rollbar;
-    late Sender sender;
+Future<void> main() async {
+  late Rollbar rollbar;
+  late Sender sender;
+  // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
+  // mock as the sender factory.
+  var config = (ConfigBuilder('BlaBlaAccessToken')
+        ..environment = 'production'
+        ..codeVersion = '0.23.2'
+        ..handleUncaughtErrors = false
+        ..package = 'some_package_name'
+        ..persistPayloads = true)
+      .build();
+  await RollbarInfrastructure.instance.initialize(rollbarConfig: config);
 
+  group('Rollbar notifier tests', () {
     setUp(() async {
       sender = MockSender();
-      when(sender.send(any)).thenAnswer((_) async => Response());
-      // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
-      // mock as the sender factory.
+      when(sender.send(any)).thenAnswer((_) async => true);
       var config = (ConfigBuilder('BlaBlaAccessToken')
             ..environment = 'production'
             ..codeVersion = '0.23.2'
             ..handleUncaughtErrors = false
             ..package = 'some_package_name'
+            ..persistPayloads = true
             ..sender = (_) => sender)
           .build();
-
       rollbar = Rollbar(config);
       await rollbar.ensureInitialized();
     });
+
+    tearDown(() {});
 
     test('When reporting single error it should send json payload', () async {
       try {
         failingFunction();
       } catch (error, stackTrace) {
         await rollbar.error(error, stackTrace);
-        var payload = verify(await sender.send(captureAny)).captured.single;
+        var payload = verify(sender.send(captureAny)).captured.single;
 
         expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
@@ -98,6 +108,8 @@ void main() {
       expect(chain, hasLength(4));
     });
   });
+
+  await RollbarInfrastructure.instance.dispose();
 }
 
 void failingFunction() {
@@ -136,9 +148,9 @@ class ExpandableException implements Exception {
 
 class MockSender extends Mock implements Sender {
   @override
-  Future<Response?> send(Map<String, dynamic>? payload) {
+  Future<bool> send(Map<String, dynamic>? payload) {
     return super.noSuchMethod(Invocation.method(#send, [payload]),
-        returnValue: Future<Response?>.value(Response()));
+        returnValue: Future<bool>.value(true));
   }
 }
 
