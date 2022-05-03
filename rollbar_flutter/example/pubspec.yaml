@@ -15,6 +15,8 @@ dependencies:
   cupertino_icons: ^1.0.0
 
 dependency_overrides:
+  rollbar_common:
+    path: ../../rollbar_common
   rollbar_dart:
     path: ../../rollbar_dart
   rollbar_flutter:
