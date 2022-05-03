@@ -3,6 +3,8 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:rollbar_dart/src/payload_repository/destination.dart';
 import 'package:rollbar_dart/src/payload_repository/payload_record.dart';
 
+import '../_internal/database.dart';
+
 class DbDataAccess {
   static const String dbFileName = 'rollbar_payloads.db';
 
@@ -88,33 +90,15 @@ class DbDataAccess {
     return db.select(DbSql.selectAllDestinations);
   }
 
-  Row? selectDestination(int id) {
-    final ResultSet resultSet = db.select(DbSql.selectDestinationWithID, [id]);
-    if (resultSet.isEmpty) {
-      return null;
-    } else if (resultSet.length > 1) {
-      //TODO: we may want to trace this here as an odd problem...
-      return null;
-    } else {
-      return resultSet.first;
-    }
-  }
+  Row? selectDestination(int id) =>
+      db.select(DbSql.selectDestinationWithID, [id]).singleRow;
 
-  int? findDestinationID(
-      {required String endpoint, required String accessToken}) {
-    final ResultSet resultSet =
-        db.select(DbSql.findDestinationID, [endpoint, accessToken]);
-
-    if (resultSet.isEmpty) {
-      return null;
-    } else if (resultSet.length > 1) {
-      //TODO: we may want to trace this here as an odd problem...
-      return null;
-    } else {
-      for (final row in resultSet) {
-        return row[DestinationsTable.colId];
-      }
-    }
+  int? findDestinationID({
+    required String endpoint,
+    required String accessToken,
+  }) {
+    final result = db.select(DbSql.findDestinationID, [endpoint, accessToken]);
+    return result.singleRow?[DestinationsTable.colId];
   }
 
   Iterable<Row> selectAllPayloadRecords() {
