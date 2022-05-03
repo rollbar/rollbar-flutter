@@ -9,10 +9,9 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function run-pana-checks {
     if [ "$PUB_CACHE" == "" ]; then
-        FLUTTER_SDK="$("$THIS_SCRIPT_DIR"/find-flutter-sdk)"
-        PUB_CACHE="$FLUTTER_SDK"/.pub-cache/
+        PUB_CACHE=$HOME/.pub-cache
     fi
-    
+
     flutter pub global activate pana
 
     mkdir -p pana-report
