@@ -86,9 +86,8 @@ class DbDataAccess {
     return payloadRecord.id!;
   }
 
-  Iterable<Row> selectAllDestinations() {
-    return db.select(DbSql.selectAllDestinations);
-  }
+  Iterable<Row> selectAllDestinations() =>
+      db.select(DbSql.selectAllDestinations);
 
   Row? selectDestination(int id) =>
       db.select(DbSql.selectDestinationWithID, [id]).singleRow;
@@ -101,16 +100,11 @@ class DbDataAccess {
     return result.singleRow?[DestinationsTable.colId];
   }
 
-  Iterable<Row> selectAllPayloadRecords() {
-    final ResultSet resultSet = db.select(DbSql.selectAllPayloadRecords);
-    return resultSet;
-  }
+  Iterable<Row> selectAllPayloadRecords() =>
+      db.select(DbSql.selectAllPayloadRecords);
 
-  Iterable<Row> selectPayloadRecordsWithDestinationID(int destinationID) {
-    final ResultSet resultSet =
-        db.select(DbSql.selectPayloadRecordsWithDestinationID, [destinationID]);
-    return resultSet;
-  }
+  Iterable<Row> selectPayloadRecordsWithDestinationID(int destinationID) =>
+      db.select(DbSql.selectPayloadRecordsWithDestinationID, [destinationID]);
 }
 
 class DestinationsTable {
