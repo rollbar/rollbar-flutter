@@ -3,6 +3,8 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:rollbar_dart/src/payload_repository/destination.dart';
 import 'package:rollbar_dart/src/payload_repository/payload_record.dart';
 
+import '../_internal/database.dart';
+
 class DbDataAccess {
   static const String dbFileName = 'rollbar_payloads.db';
 
@@ -84,49 +86,25 @@ class DbDataAccess {
     return payloadRecord.id!;
   }
 
-  Iterable<Row> selectAllDestinations() {
-    return db.select(DbSql.selectAllDestinations);
+  Iterable<Row> selectAllDestinations() =>
+      db.select(DbSql.selectAllDestinations);
+
+  Row? selectDestination(int id) =>
+      db.select(DbSql.selectDestinationWithID, [id]).singleRow;
+
+  int? findDestinationID({
+    required String endpoint,
+    required String accessToken,
+  }) {
+    final result = db.select(DbSql.findDestinationID, [endpoint, accessToken]);
+    return result.singleRow?[DestinationsTable.colId];
   }
 
-  Row? selectDestination(int id) {
-    final ResultSet resultSet = db.select(DbSql.selectDestinationWithID, [id]);
-    if (resultSet.isEmpty) {
-      return null;
-    } else if (resultSet.length > 1) {
-      //TODO: we may want to trace this here as an odd problem...
-      return null;
-    } else {
-      return resultSet.first;
-    }
-  }
+  Iterable<Row> selectAllPayloadRecords() =>
+      db.select(DbSql.selectAllPayloadRecords);
 
-  int? findDestinationID(
-      {required String endpoint, required String accessToken}) {
-    final ResultSet resultSet =
-        db.select(DbSql.findDestinationID, [endpoint, accessToken]);
-
-    if (resultSet.isEmpty) {
-      return null;
-    } else if (resultSet.length > 1) {
-      //TODO: we may want to trace this here as an odd problem...
-      return null;
-    } else {
-      for (final row in resultSet) {
-        return row[DestinationsTable.colId];
-      }
-    }
-  }
-
-  Iterable<Row> selectAllPayloadRecords() {
-    final ResultSet resultSet = db.select(DbSql.selectAllPayloadRecords);
-    return resultSet;
-  }
-
-  Iterable<Row> selectPayloadRecordsWithDestinationID(int destinationID) {
-    final ResultSet resultSet =
-        db.select(DbSql.selectPayloadRecordsWithDestinationID, [destinationID]);
-    return resultSet;
-  }
+  Iterable<Row> selectPayloadRecordsWithDestinationID(int destinationID) =>
+      db.select(DbSql.selectPayloadRecordsWithDestinationID, [destinationID]);
 }
 
 class DestinationsTable {
@@ -149,8 +127,8 @@ class PayloadRecordsTable {
 
 class DbSql {
   static const String checkIfTableExists = '''
-    SELECT name 
-    FROM sqlite_master 
+    SELECT name
+    FROM sqlite_master
     WHERE type='table' AND name=?
     ''';
   static const String createDesinationsTableAsNeeded = '''
@@ -177,19 +155,19 @@ class DbSql {
     )
     ''';
   static const String deleteUnusedDestinations = '''
-    DELETE FROM "${DestinationsTable.tblName}" 
+    DELETE FROM "${DestinationsTable.tblName}"
     WHERE NOT EXISTS (
-      SELECT 
+      SELECT
       1
-      FROM 
+      FROM
       "${PayloadRecordsTable.tblName}"
       WHERE
-      "${PayloadRecordsTable.tblName}.${PayloadRecordsTable.colDestinationKey}" 
-      = "${DestinationsTable.tblName}.${DestinationsTable.colId}" 
+      "${PayloadRecordsTable.tblName}.${PayloadRecordsTable.colDestinationKey}"
+      = "${DestinationsTable.tblName}.${DestinationsTable.colId}"
     )
     ''';
   static const String deleteDestinationWithID = '''
-    DELETE FROM "${DestinationsTable.tblName}" 
+    DELETE FROM "${DestinationsTable.tblName}"
     WHERE "${DestinationsTable.colId}" = ?
     ''';
   static const String deletePayloadRecordWithID = '''
@@ -197,24 +175,24 @@ class DbSql {
     WHERE "${PayloadRecordsTable.colId}" = ?
     ''';
   static const String deletePayloadRecordsOlderThan = '''
-    DELETE FROM "${PayloadRecordsTable.tblName}" 
+    DELETE FROM "${PayloadRecordsTable.tblName}"
     WHERE "${PayloadRecordsTable.colCreatedAt}" <= ?
     ''';
 
   static const String insertDestination = '''
     INSERT INTO "${DestinationsTable.tblName}" (
-      "${DestinationsTable.colEndpoint}", 
+      "${DestinationsTable.colEndpoint}",
       "${DestinationsTable.colAccessToken}"
       )
     VALUES (?, ?)
     ''';
   static const String insertPayloadRecord = '''
     INSERT INTO "${PayloadRecordsTable.tblName}" (
-      "${PayloadRecordsTable.colConfigJson}", 
-      "${PayloadRecordsTable.colPayloadJson}", 
-      "${PayloadRecordsTable.colDestinationKey}", 
+      "${PayloadRecordsTable.colConfigJson}",
+      "${PayloadRecordsTable.colPayloadJson}",
+      "${PayloadRecordsTable.colDestinationKey}",
       "${PayloadRecordsTable.colCreatedAt}"
-      ) 
+      )
     VALUES (?, ?, ?, ?)
     ''';
 
@@ -223,32 +201,32 @@ class DbSql {
     FROM ${DestinationsTable.tblName}
     ''';
   static const String selectDestinationWithID = '''
-    SELECT  
-      "${DestinationsTable.colId}", 
-      "${DestinationsTable.colEndpoint}", 
+    SELECT
+      "${DestinationsTable.colId}",
+      "${DestinationsTable.colEndpoint}",
       "${DestinationsTable.colAccessToken}"
-    FROM 
+    FROM
       "${DestinationsTable.tblName}"
-    WHERE 
+    WHERE
       "${DestinationsTable.colId}" = ?
     ''';
 
   static const String findDestinationID = '''
-    SELECT 
+    SELECT
       "${DestinationsTable.colId}"
-    FROM 
+    FROM
       "${DestinationsTable.tblName}"
-    WHERE 
-      "${DestinationsTable.colEndpoint}" = ? 
+    WHERE
+      "${DestinationsTable.colEndpoint}" = ?
       AND "${DestinationsTable.colAccessToken}" = ?
     ''';
 
   static const String selectAllPayloadRecords = '''
-    SELECT * 
+    SELECT *
     FROM "${PayloadRecordsTable.tblName}"
     ''';
   static const String selectPayloadRecordsWithDestinationID = '''
-    SELECT * 
+    SELECT *
     FROM "${PayloadRecordsTable.tblName}"
     WHERE "${PayloadRecordsTable.colDestinationKey}" = ?
     ''';
