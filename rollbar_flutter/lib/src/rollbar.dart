@@ -26,7 +26,7 @@ class RollbarFlutter extends Rollbar {
 
         var previousOnError = FlutterError.onError;
         FlutterError.onError = (FlutterErrorDetails details) async {
-          await rollbar._unhandledError(details.exception, details.stack!);
+          await rollbar._unhandledError(details.exception, details.stack ?? StackTrace.empty);
           if (previousOnError != null) {
             previousOnError.call(details);
           }
