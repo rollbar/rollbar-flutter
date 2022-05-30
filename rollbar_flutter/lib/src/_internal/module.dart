@@ -9,6 +9,6 @@ class Module {
 
 @protected
 extension ModuleLogger on Logger {
-  static late final Logger moduleLogger =
+  static final Logger moduleLogger =
       Logger(SdkLogger.extendSdkModuleName(sdkModuleName: Module.name));
 }

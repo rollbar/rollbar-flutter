@@ -1,12 +1,12 @@
 # rollbar-dart and rollbar-flutter
 
-This repository contains the `rollbar_dart` package and the `rollbar_flutter` plugin. 
+This repository contains the `rollbar_dart` package and the `rollbar_flutter` plugin.
 
 For `rollbar-dart`, see its [README](rollbar_dart/README.md).
 
 For `rollbar-flutter`, see its [README](rollbar_flutter/README.md).
 
-## `rollbar-dart` `rollbar-flutter` are currently in Beta. We are looking for beta-testers and feedback!
+## `rollbar-dart` `rollbar-flutter` are currently in Beta. We are looking for beta-testers and feedback
 
 ## Documentation
 
@@ -33,13 +33,13 @@ For bug reports, please open an issue on [GitHub](https://github.com/rollbar/rol
 
 ## Publishing packages
 
-The official packages are published as [`rollbar_dart`](https://pub.dev/packages/rollbar_dart) and [`rollbar_flutter`](https://pub.dev/packages/rollbar_flutter). 
+The official packages are published as [`rollbar_dart`](https://pub.dev/packages/rollbar_dart) and [`rollbar_flutter`](https://pub.dev/packages/rollbar_flutter).
 
 Publishing is straightforward using `pub`, but due to quirks of how ignore files work, the script `build_tools/publish.sh` should always be used to make sure only the necessary files are included, and that the right tool versions are used for publishing.
 
 Eg.:
 
-```
+```sh
 ./build_tools/publish.sh rollbar_dart
 ./build_tools/publish.sh rollbar_flutter
 ```

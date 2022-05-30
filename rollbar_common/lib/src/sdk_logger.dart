@@ -7,5 +7,5 @@ extension SdkLogger on Logger {
     return '$_sdkLoggerName.$sdkModuleName';
   }
 
-  static late final Logger sdkLogger = Logger(_sdkLoggerName);
+  static final Logger sdkLogger = Logger(_sdkLoggerName);
 }
