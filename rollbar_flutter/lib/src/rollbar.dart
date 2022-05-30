@@ -67,7 +67,7 @@ class RollbarFlutter extends Rollbar {
     try {
       await super.error(exception, trace);
     } on Exception catch (e) {
-      Logging.error(
+      Logging.err(
           'Internal error encountered while sending data to Rollbar', e);
     }
   }

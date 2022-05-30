@@ -110,7 +110,7 @@ class Rollbar {
     try {
       return await action;
     } on Exception catch (e) {
-      Logging.error('Internal error encountered while initializing Rollbar', e);
+      Logging.err('Internal error encountered while initializing Rollbar', e);
       rethrow;
     }
   }
