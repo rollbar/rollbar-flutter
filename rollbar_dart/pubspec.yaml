@@ -1,5 +1,5 @@
 name: rollbar_dart
-description: Connect your Dart applications to Rollbar for error reporting
+description: Connect your Dart applications to Rollbar for error reporting.
 version: 0.3.0-beta
 homepage: https://www.rollbar.com
 documentation: https://docs.rollbar.com/docs/flutter#dart
