@@ -1,14 +1,14 @@
 name: rollbar_dart_example
 description: Demonstrates how to use rollbar-dart
 
-publish_to: 'none' 
+publish_to: 'none'
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   logging: ^1.0.2
-  rollbar_dart: '>=0.2.0-beta <1.0.0'
+  rollbar_dart: ^0.3.0-beta
 
 dependency_overrides:
   rollbar_common:

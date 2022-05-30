@@ -15,15 +15,15 @@ dependencies:
     sdk: flutter
   logging: ^1.0.2
   meta: ^1.7.0
-  rollbar_common: '>=0.2.0-beta <1.0.0'
-  rollbar_dart: '>=0.2.0-beta <1.0.0'
+  rollbar_common: ^0.3.0-beta
+  rollbar_dart: ^0.3.0-beta
 
 dependency_overrides:
   rollbar_common:
     path: ../rollbar_common
   rollbar_dart:
     path: ../rollbar_dart
- 
+
 dev_dependencies:
   lints: ^1.0.1
   flutter_lints: ^1.0.4
