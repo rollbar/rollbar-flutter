@@ -18,7 +18,7 @@ class RollbarFlutter extends Rollbar {
 
   static Future<void> run(
       Config config, FutureOr<void> Function(RollbarFlutter) action) async {
-    if (config.handleUncaughtErrors!) {
+    if (config.handleUncaughtErrors ?? false) {
       var rollbar = RollbarFlutter._(config);
 
       await runZonedGuarded(() async {
@@ -26,10 +26,8 @@ class RollbarFlutter extends Rollbar {
 
         var previousOnError = FlutterError.onError;
         FlutterError.onError = (FlutterErrorDetails details) async {
-          await rollbar._unhandledError(details.exception, details.stack!);
-          if (previousOnError != null) {
-            previousOnError.call(details);
-          }
+          await rollbar._unhandledError(details.exception, details.stack ?? StackTrace.empty);
+          previousOnError?.call(details);
         };
 
         var errorHandler = await (rollbar.errorHandler as Future<SendPort?>);
