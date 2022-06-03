@@ -21,7 +21,7 @@ void main() async {
 
   var rollbar = Rollbar(config);
 
-  int payloadIndex = 10;
+  var payloadIndex = 10;
   while (payloadIndex > 0) {
     try {
       throw ArgumentError(
