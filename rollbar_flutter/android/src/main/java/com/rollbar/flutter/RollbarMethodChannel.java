@@ -12,8 +12,9 @@ import io.flutter.plugin.common.MethodCodec;
 
 /**
  * <p>
- * A flutter {@link MethodChannel} implementation that, when an invocation throws an exception,
- * will capture and embed additional occurrence details to be used by the Dart notifier.
+ * A flutter {@link MethodChannel} implementation that, when an invocation
+ * throws an exception, will capture and embed additional occurrence details
+ * to be used by the Dart notifier.
  * </p>
  */
 public class RollbarMethodChannel extends MethodChannel {
@@ -47,8 +48,7 @@ public class RollbarMethodChannel extends MethodChannel {
       try {
         delegate.onMethodCall(call, result);
       } catch (Throwable t) {
-        Rollbar rollbar = RollbarFlutterPlugin.getGlobalInstance();
-        Config config = rollbar == null ? null : rollbar.config();
+        Config config = RollbarFlutterPlugin.getConfig();
         throw new RollbarTracePayload(t, config);
       }
     }
