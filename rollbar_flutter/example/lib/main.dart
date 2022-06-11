@@ -8,7 +8,7 @@ import 'package:rollbar_flutter/rollbar.dart';
 
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
-  var config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
+  final config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
         ..environment = 'development'
         ..codeVersion = '0.2.0'
         ..package = 'rollbar_flutter_example'
