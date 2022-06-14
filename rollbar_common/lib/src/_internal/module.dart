@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:rollbar_common/src/sdk_logger.dart';
+import '../sdk_logger.dart';
 
 @protected
 class Module {
