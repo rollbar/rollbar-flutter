@@ -2,24 +2,15 @@ import 'dart:developer' as developer;
 
 // internal SDK logging (for the SDK use only!!!):
 
-void info(String message, dynamic error) {
-  _log(800, message, error);
-}
-
-void warning(String message, dynamic error) {
-  _log(900, message, error);
-}
-
-void error(String message, dynamic error) {
-  _log(1000, message, error);
-}
+void info(String message, dynamic error) => _log(800, message, error);
+void warn(String message, dynamic error) => _log(900, message, error);
+void err(String message, dynamic error) => _log(1000, message, error);
 
 void _log(int level, String message, dynamic error) {
-  var logName = 'com.rollbar.rollbar-dart';
-  if (error != null) {
-    developer.log(message,
-        level: level, name: logName, error: error.toString());
-  } else {
-    developer.log(message, level: level, name: logName);
-  }
+  developer.log(
+    message,
+    level: level,
+    name: 'com.rollbar.rollbar-dart',
+    error: error?.toString(),
+  );
 }

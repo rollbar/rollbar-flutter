@@ -27,8 +27,8 @@ public class RollbarFlutterPlugin implements FlutterPlugin, MethodCallHandler {
   private MethodChannel channel;
   private Context context;
 
-  public static Rollbar getGlobalInstance() {
-    return globalInstance;
+  public static Config getConfig() {
+    return globalInstance == null ? null : globalInstance.config();
   }
 
   @Override
@@ -52,8 +52,16 @@ public class RollbarFlutterPlugin implements FlutterPlugin, MethodCallHandler {
         Boolean handleUncaughtErrors = call.argument("handleUncaughtErrors");
         Boolean includePlatformLogs = call.argument("includePlatformLogs");
 
-        this.initialize(instanceId, isGlobalInstance, endpoint, accessToken, environment,
-                codeVersion, handleUncaughtErrors, includePlatformLogs);
+        this.initialize(
+            instanceId,
+            isGlobalInstance,
+            endpoint,
+            accessToken,
+            environment,
+            codeVersion,
+            handleUncaughtErrors,
+            includePlatformLogs);
+
         result.success(null);
         break;
       }
@@ -72,10 +80,15 @@ public class RollbarFlutterPlugin implements FlutterPlugin, MethodCallHandler {
     // Rollbar android doesn't support closing at the moment.
   }
 
-  private void initialize(String instanceId, Boolean isGlobalInstance, final String endpoint,
-                          String accessToken, String environment, final String codeVersion,
-                          Boolean handleUncaughtErrors, Boolean includePlatformLogs) {
-
+  private void initialize(
+      String instanceId,
+      Boolean isGlobalInstance,
+      final String endpoint,
+      String accessToken,
+      String environment,
+      final String codeVersion,
+      Boolean handleUncaughtErrors,
+      Boolean includePlatformLogs) {
     ConfigProvider configProvider = new ConfigProvider() {
       @Override
       public Config provide(ConfigBuilder builder) {
@@ -89,8 +102,17 @@ public class RollbarFlutterPlugin implements FlutterPlugin, MethodCallHandler {
       }
     };
 
-    Rollbar rollbar = new Rollbar(context, accessToken, environment, handleUncaughtErrors,
-            includePlatformLogs, configProvider);
+    if (context == null) {
+      return;
+    }
+
+    Rollbar rollbar = new Rollbar(
+        context,
+        accessToken,
+        environment,
+        handleUncaughtErrors,
+        includePlatformLogs,
+        configProvider);
 
     configWriteLock.lock();
     try {

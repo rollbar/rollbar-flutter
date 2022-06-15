@@ -11,6 +11,7 @@ import 'package:rollbar_flutter/src/_internal/module.dart';
 ///
 /// Usage:
 ///
+/// ```dart
 /// void main() => runApp(MaterialApp(home: HomePage()));
 ///
 /// class HomePage extends StatefulWidget {
@@ -57,9 +58,7 @@ import 'package:rollbar_flutter/src/_internal/module.dart';
 ///     super.dispose();
 ///   }
 /// }
-///
-///
-///
+/// ```
 ///
 ////// Service aiding in optimizing network operations.
 /// [ConnectivityMonitor] is designed to work as a singleton.

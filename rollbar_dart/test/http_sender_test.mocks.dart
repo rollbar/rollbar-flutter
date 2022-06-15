@@ -2,10 +2,10 @@
 // in rollbar_dart/test/http_sender_test.dart.
 // Do not manually edit this file.
 
-import 'dart:typed_data' as _i2;
+import 'dart:typed_data' as i2;
 
-import 'package:http/src/response.dart' as _i3;
-import 'package:mockito/mockito.dart' as _i1;
+import 'package:http/src/response.dart' as i3;
+import 'package:mockito/mockito.dart' as i1;
 
 // ignore_for_file: comment_references
 // ignore_for_file: unnecessary_parenthesis
@@ -14,20 +14,20 @@ import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: avoid_redundant_argument_values
 
-class _FakeUint8List extends _i1.Fake {}
+class _FakeUint8List extends i1.Fake {}
 
 /// A class which mocks [Response].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockResponse extends _i1.Mock implements _i3.Response {
+class MockResponse extends i1.Mock implements i3.Response {
   MockResponse() {
-    _i1.throwOnMissingStub(this);
+    i1.throwOnMissingStub(this);
   }
 
   @override
-  _i2.Uint8List get bodyBytes =>
+  i2.Uint8List get bodyBytes =>
       (super.noSuchMethod(Invocation.getter(#bodyBytes),
-          returnValue: _FakeUint8List()) as _i2.Uint8List);
+          returnValue: _FakeUint8List()) as i2.Uint8List);
   @override
   String get body =>
       (super.noSuchMethod(Invocation.getter(#body), returnValue: '') as String);

@@ -136,4 +136,4 @@ class RawTextSender implements Sender {
   }
 }
 
-void log(String _ignored) {}
+void log(String ignored) {}

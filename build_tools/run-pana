@@ -26,7 +26,6 @@ function run-pana-checks {
 case "$FLUTTER_VERSION" in
     1.*) echo "Skipping pana checks for Flutter ${FLUTTER_VERSION}" >&2 ;;
     2.*) run-pana-checks ;;
+    3.*) run-pana-checks ;;
     *) echo "Unknown Flutter version ${FLUTTER_VERSION}" >&2 && exit 1 ;;
 esac
-
-

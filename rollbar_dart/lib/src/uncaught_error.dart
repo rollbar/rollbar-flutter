@@ -79,17 +79,17 @@ class UncaughtErrorHandler {
               var trace = _getTrace(msg[1]);
               await rollbarCore.log(Level.error, error, trace, null);
             } else {
-              Logging.warning(
+              Logging.warn(
                   'An error has been reported to the uncaught error handler before the Rollbar instance was configured',
                   error);
             }
           }
         } on Exception catch (e) {
-          Logging.error('Failed to process rollbar error message', e);
+          Logging.err('Failed to process rollbar error message', e);
         }
       }
     } on Exception catch (e) {
-      Logging.error('The rollbar uncaught error handler has crashed', e);
+      Logging.err('The rollbar uncaught error handler has crashed', e);
     }
   }
 

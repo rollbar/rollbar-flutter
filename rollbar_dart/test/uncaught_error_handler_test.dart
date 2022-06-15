@@ -10,22 +10,22 @@ import 'client_server_utils.dart';
 
 Future<void> main() async {
   group('UncaughtErrorHandler tests', () {
-    late RawTextSocket _server;
-    late UncaughtErrorHandler _handler;
+    late RawTextSocket server;
+    late UncaughtErrorHandler handler;
 
     setUp(() async {
-      _server = await RawTextSocket.build();
-      _handler = await _createErrorHandler(_server.endpoint);
+      server = await RawTextSocket.build();
+      handler = await _createErrorHandler(server.endpoint);
     });
 
     tearDown(() async {
-      await _server.close();
+      await server.close();
     });
 
     test(
         'When error is received in current isolate should report it using sender',
         () async {
-      var errorPort = await _handler.errorHandlerPort;
+      var errorPort = await handler.errorHandlerPort;
       try {
         await throwyMethodA();
       } catch (error, trace) {
@@ -33,7 +33,7 @@ Future<void> main() async {
       }
 
       var payloadJson =
-          await _server.messages.first.timeout(Duration(milliseconds: 500));
+          await server.messages.first.timeout(Duration(milliseconds: 500));
       expect(payloadJson != null, equals(true));
       var payload = json.decode(payloadJson!);
 
@@ -50,11 +50,11 @@ Future<void> main() async {
     test(
         'When error is not caught in separate isolate should report it using sender',
         () async {
-      var errorPort = await _handler.errorHandlerPort;
+      var errorPort = await handler.errorHandlerPort;
       var isolate = await Isolate.spawn(secondIsolateMethod, errorPort);
       try {
         var payloadJson =
-            await _server.messages.first.timeout(Duration(milliseconds: 500));
+            await server.messages.first.timeout(Duration(milliseconds: 500));
         expect(payloadJson != null, equals(true));
         var payload = json.decode(payloadJson!);
 

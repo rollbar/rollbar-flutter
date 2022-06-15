@@ -5,13 +5,13 @@ version: 0.1.0+1
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.15.1 <3.0.0"
+  flutter: '>=2.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-
-  rollbar_flutter: any
+  rollbar_flutter: ^0.3.0-beta
   cupertino_icons: ^1.0.0
 
 dependency_overrides:
@@ -21,7 +21,6 @@ dependency_overrides:
     path: ../../rollbar_dart
   rollbar_flutter:
     path: ../
-
 
 dev_dependencies:
   flutter_test:
