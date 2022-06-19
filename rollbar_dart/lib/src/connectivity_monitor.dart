@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:rollbar_common/rollbar_common.dart';
 
+import '_internal/list.dart';
+
 /// Service aiding in optimizing network operations.
 /// [ConnectivityMonitor] is designed to work as a singleton.
 class ConnectivityMonitor extends ConnectivityMonitorBase {
@@ -13,33 +15,27 @@ class ConnectivityMonitor extends ConnectivityMonitorBase {
 
   // Checks/updates connectivity status.
   Future<void> checkConnectivity() async {
-    var hasActiveNetInterface = await hasActiveNetworkInterface();
-    // we can not judje the connectivity status based on unknown
+    // we cannot judge the connectivity status based on unknown
     // active interfaces status, hence, let's consider it as connected:
-    connectivityOn = hasActiveNetInterface ?? true;
+    connectivityOn = (await hasActiveNetworkInterface()) ?? true;
   }
 
   /// Tests on availability of an active network interface.
   Future<bool?> hasActiveNetworkInterface() async {
-    if (!NetworkInterface.listSupported) {
-      return null; // we don't really know one way or another...
+    if (NetworkInterface.listSupported) {
+      final interfaces = await NetworkInterface.list(
+          includeLoopback: false, includeLinkLocal: false);
+      return interfaces.any((interface) => interface.addresses.isNotEmpty);
+    } else {
+      return null;
     }
-
-    var netInterfaces = await NetworkInterface.list(
-        includeLoopback: false, includeLinkLocal: false);
-    for (var ni in netInterfaces) {
-      if (ni.addresses.isNotEmpty) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /// Tests Internet connectivity to Rollbar.com.
   Future<bool> hasInternetConnectionToRollbar() async {
     try {
-      final result = await InternetAddress.lookup('rollbar.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+      final addresses = await InternetAddress.lookup('rollbar.com');
+      return addresses.tryFirst?.rawAddress.isNotEmpty == true;
     } on SocketException catch (_) {
       return false;
     }

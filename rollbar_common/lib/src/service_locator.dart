@@ -1,4 +1,6 @@
+import 'dart:core';
 import '_internal/module.dart';
+import '_internal/object.dart';
 
 /// [ServiceLocatorByType]
 ///
@@ -103,12 +105,7 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
   @override
   TService? tryResolve<TService>() {
     _assertSafeTransitionTo(ServiceLocatorState.queryPhase);
-
-    Object? result = _servicesByType[TService];
-    if (result == null) {
-      return null;
-    }
-    return result as TService;
+    return _servicesByType[TService].tryAs<TService>();
   }
 
   @override
@@ -126,7 +123,8 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
 
   @override
   bool registerIfNone<TService extends Object, T extends TService>(
-      T singleton) {
+      T singleton,
+  ) {
     if (!_servicesByType.containsKey(TService)) {
       _servicesByType[TService] = singleton;
       _assertSafeTransitionTo(ServiceLocatorState.registrationPhase);

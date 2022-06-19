@@ -1,12 +1,8 @@
 class Client {
   String? locale;
-
   String? hostname;
-
   String? os;
-
   String? osVersion;
-
   String? rootPackage;
 
   Map<String, String>? dart;
@@ -17,7 +13,7 @@ class Client {
   /// and it's being sent under the `server` element, though this might change in the future.
   /// See the file `core_notifier.dart` for details.
   Map<String, dynamic> toJson() {
-    var result = <String, dynamic>{
+    final result = <String, dynamic>{
       'locale': locale,
       'hostname': hostname,
       'os': os,

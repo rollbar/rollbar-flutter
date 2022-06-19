@@ -5,24 +5,18 @@ class ExceptionInfo {
   String? description;
 
   Map<String, dynamic> toJson() {
-    var result = {'class': clazz, 'message': message};
+    final result = {'class': clazz, 'message': message};
     if (description != null) {
       result['description'] = description;
     }
     return result;
   }
 
-  static ExceptionInfo fromMap(Map<String, dynamic> attributes) {
-    var result = ExceptionInfo();
-    if (attributes.containsKey('class')) {
-      result.clazz = attributes['class'];
-    }
-    if (attributes.containsKey('message')) {
-      result.message = attributes['message'];
-    }
-    if (attributes.containsKey('description')) {
-      result.description = attributes['description'];
-    }
-    return result;
-  }
+  ExceptionInfo();
+
+  factory ExceptionInfo.fromMap(Map<String, dynamic> attributes) =>
+      ExceptionInfo()
+        ..clazz = attributes['class']
+        ..message = attributes['message']
+        ..description = attributes['description'];
 }

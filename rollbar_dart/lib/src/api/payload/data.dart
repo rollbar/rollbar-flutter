@@ -19,7 +19,7 @@ class Data {
   Map? server;
 
   Map<String, dynamic> toJson() {
-    var result = {
+    final result = {
       'notifier': notifier,
       'environment': environment,
       'client': client.toJson(),
@@ -30,18 +30,12 @@ class Data {
       'body': body.toJson(),
     };
 
-    addIfNotNull(result, 'framework', framework);
-    addIfNotNull(result, 'code_version', codeVersion);
-    addIfNotNull(result, 'custom', custom);
-    addIfNotNull(result, 'platform_payload', platformPayload);
-    addIfNotNull(result, 'server', server);
+    if (custom != null) result['custom'] = custom;
+    if (server != null) result['server'] = server;
+    if (framework != null) result['framework'] = framework;
+    if (codeVersion != null) result['code_version'] = codeVersion;
+    if (platformPayload != null) result['platform_payload'] = platformPayload;
 
     return result;
-  }
-
-  void addIfNotNull(Map<String, dynamic> result, String name, dynamic value) {
-    if (value != null) {
-      result[name] = value;
-    }
   }
 }

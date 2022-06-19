@@ -242,6 +242,9 @@
       <excludeFolder url="file://$MODULE_DIR$/rollbar_flutter/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/rollbar_flutter/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/rollbar_flutter/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/rollbar_flutter/example/ios/.symlinks/plugins/rollbar_flutter/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/rollbar_flutter/example/ios/.symlinks/plugins/rollbar_flutter/build" />
+      <excludeFolder url="file://$MODULE_DIR$/rollbar_flutter/example/ios/.symlinks/plugins/rollbar_flutter/.dart_tool" />
     </content>
     <orderEntry type="jdk" jdkName="Android API 32 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -69,10 +69,9 @@ class ConnectivityMonitor extends rdart.ConnectivityMonitor {
   ConnectivityMonitor() {
     _connectivity = Connectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-        (result) => _processConnectivityEvent(result),
-        onDone: () => _processConnectivityStreamCompletion(),
-        onError: (error, stackTrace) =>
-            _processConnectivityDetectionError(error, stackTrace));
+        _processConnectivityEvent,
+        onDone: _processConnectivityStreamCompletion,
+        onError: _processConnectivityDetectionError);
   }
 
   void _processConnectivityEvent(ConnectivityResult connectivityResult) {
@@ -107,12 +106,12 @@ class ConnectivityMonitor extends rdart.ConnectivityMonitor {
 
   @override
   Future<void> checkConnectivity() async {
-    ConnectivityResult result = await _connectivity.checkConnectivity();
-    if (result == ConnectivityResult.none) {
-      connectivityOn = false;
-      return;
+    switch (await _connectivity.checkConnectivity()) {
+      case ConnectivityResult.none:
+        connectivityOn = false;
+        break;
+      default:
+        connectivityOn = await super.hasInternetConnectionToRollbar();
     }
-
-    connectivityOn = await super.hasInternetConnectionToRollbar();
   }
 }

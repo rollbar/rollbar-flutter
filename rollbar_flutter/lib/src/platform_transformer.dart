@@ -67,7 +67,9 @@ class PlatformTransformer implements Transformer {
 
   // Fix message, we hijacked it on the platform side to carry the payload
   void _restoreDartChainMessage(
-      List<TraceInfo?>? dartChain, List<TraceInfo?> embeddedChain) {
+    List<TraceInfo?>? dartChain,
+    List<TraceInfo?> embeddedChain,
+  ) {
     if (embeddedChain.isNotEmpty) {
       for (var element in dartChain!) {
         if (element!.exception != null &&

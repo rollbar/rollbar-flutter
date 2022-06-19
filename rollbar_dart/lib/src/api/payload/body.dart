@@ -6,9 +6,7 @@ abstract class Body {
   Map<String, dynamic> toJson();
   List<TraceInfo?>? getTraces();
 
-  static Body empty() {
-    return Message()..body = '';
-  }
+  static Body empty() => Message()..body = '';
 
   static Body? fromMap(Map attributes) {
     if (attributes.containsKey('trace')) {
@@ -91,25 +89,17 @@ class TraceChain implements Body {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'trace_chain': traces!.map((v) {
-        return v!.toJson()['trace'];
-      }).toList()
-    };
+    return {'trace_chain': traces!.map((v) => v!.toJson()['trace']).toList()};
   }
 
   static TraceChain fromMap(Map attributes) {
     var chain = attributes['trace_chain'] as List;
     return TraceChain()
-      ..traces = chain.map((v) {
-        return TraceInfo.fromMap({'trace': v});
-      }).toList();
+      ..traces = chain.map((v) => TraceInfo.fromMap({'trace': v})).toList();
   }
 
   @override
-  List<TraceInfo?>? getTraces() {
-    return traces;
-  }
+  List<TraceInfo?>? getTraces() => traces;
 }
 
 /// A text message to be sent to Rollbar.
@@ -117,9 +107,7 @@ class Message implements Body {
   String? body;
 
   @override
-  List<TraceInfo> getTraces() {
-    return [];
-  }
+  List<TraceInfo> getTraces() => [];
 
   static Message? fromMap(Map attributes) {
     if (!attributes.containsKey('message')) {
