@@ -13,7 +13,7 @@ extension HigherOrderMap<T> on T? {
   /// Applies a transformation `f` to `this` if `this` is not `null`.
   U? map<U>(U Function(T) f) => this != null ? f(unwrap()) : null;
 
-  U? flatMap<U>(U? Function(T) f) => this != null ? f(unwrap()) : null;
+  T or(T alternative) => this == null ? alternative : unwrap();
 }
 
 extension HigherOrderWhere<T> on T {

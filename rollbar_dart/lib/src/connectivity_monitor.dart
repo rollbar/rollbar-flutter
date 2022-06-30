@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:rollbar_common/rollbar_common.dart';
 
-import '_internal/list.dart';
+import 'ext/collections.dart';
 
 /// Service aiding in optimizing network operations.
 /// [ConnectivityMonitor] is designed to work as a singleton.
@@ -24,7 +24,9 @@ class ConnectivityMonitor extends ConnectivityMonitorBase {
   Future<bool?> hasActiveNetworkInterface() async {
     if (NetworkInterface.listSupported) {
       final interfaces = await NetworkInterface.list(
-          includeLoopback: false, includeLinkLocal: false);
+        includeLoopback: false,
+        includeLinkLocal: false,
+      );
       return interfaces.any((interface) => interface.addresses.isNotEmpty);
     } else {
       return null;

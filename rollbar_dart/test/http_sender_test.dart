@@ -1,5 +1,5 @@
 import 'package:http/http.dart' as http;
-import 'package:rollbar_dart/src/http_sender.dart';
+import 'package:rollbar_dart/src/api/response.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
@@ -10,7 +10,7 @@ import 'http_sender_test.mocks.dart';
 void main() {
   group('Response conversion', () {
     test('Can convert successful API response', () async {
-      var response = MockResponse();
+      final response = MockResponse();
       when(response.body).thenReturn('''{
     "err": 0,
     "result": {
@@ -18,7 +18,7 @@ void main() {
         "uuid": "67ce3d7bfab14fd99218ae5c985071e7"
     }
 }''');
-      var rollbarResponse = await toRollbarResponse(response);
+      final rollbarResponse = Response.from(response);
 
       expect(rollbarResponse.err, equals(0));
       expect(rollbarResponse.result, isNotNull);
@@ -27,12 +27,12 @@ void main() {
     });
 
     test('Can convert error API response', () async {
-      var response = MockResponse();
+      final response = MockResponse();
       when(response.body).thenReturn('''{
     "err": 1,
     "message": "invalid token"
 }''');
-      var rollbarResponse = await toRollbarResponse(response);
+      final rollbarResponse = Response.from(response);
 
       expect(rollbarResponse.err, equals(1));
       expect(rollbarResponse.message, equals('invalid token'));

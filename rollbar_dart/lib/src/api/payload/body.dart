@@ -1,10 +1,12 @@
+import '../../ext/collections.dart';
+import '../../ext/trace.dart';
 import 'exception_info.dart';
 import 'frame.dart';
 
 /// Container class with the error or message to be sent to Rollbar.
 abstract class Body {
-  Map<String, dynamic> toJson();
-  List<TraceInfo?>? getTraces();
+  JsonMap toMap();
+  List<TraceInfo?>? get traces;
 
   static Body empty() => Message()..body = '';
 
@@ -17,33 +19,42 @@ abstract class Body {
       return TraceChain.fromMap(attributes);
     }
   }
+
+  factory Body.from(
+    String? message,
+    dynamic error,
+    StackTrace? stackTrace,
+  ) {
+    if (error != null) {
+      return TraceInfo()
+        ..exception = ExceptionInfo.from(error, message)
+        ..rawTrace = stackTrace?.rawTrace
+        ..frames = stackTrace?.frames.map(Frame.from).toList();
+    }
+
+    return Message()..body = message;
+  }
 }
 
 /// An individual error with its corresponding stack trace if available.
 class TraceInfo implements Body {
-  late List<Frame> frames;
+  List<Frame>? frames;
   ExceptionInfo? exception;
   String? rawTrace;
 
-  TraceInfo() {
-    frames = [];
-  }
+  @override
+  List<TraceInfo> get traces => [this];
 
   @override
-  List<TraceInfo> getTraces() {
-    return [this];
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     var traceInfo = <String, dynamic>{
       'trace': <String, dynamic>{
-        'frames': frames.map((f) => f.toJson()).toList(),
+        'frames': (frames ?? []).map((f) => f.toMap()).toList(),
       }
     };
 
     if (exception != null) {
-      traceInfo['trace']['exception'] = exception!.toJson();
+      traceInfo['trace']['exception'] = exception!.toMap();
     }
 
     if (rawTrace != null) {
@@ -85,21 +96,19 @@ class TraceInfo implements Body {
 /// A chain of multiple errors, where the first one on the list represents the
 /// root cause of the error.
 class TraceChain implements Body {
+  @override
   List<TraceInfo?>? traces;
 
   @override
-  Map<String, dynamic> toJson() {
-    return {'trace_chain': traces!.map((v) => v!.toJson()['trace']).toList()};
-  }
+  JsonMap toMap() => {
+        'trace_chain': traces?.map((v) => v?.toMap()['trace']).toList(),
+      };
 
   static TraceChain fromMap(Map attributes) {
     var chain = attributes['trace_chain'] as List;
     return TraceChain()
       ..traces = chain.map((v) => TraceInfo.fromMap({'trace': v})).toList();
   }
-
-  @override
-  List<TraceInfo?>? getTraces() => traces;
 }
 
 /// A text message to be sent to Rollbar.
@@ -107,7 +116,7 @@ class Message implements Body {
   String? body;
 
   @override
-  List<TraceInfo> getTraces() => [];
+  List<TraceInfo> get traces => [];
 
   static Message? fromMap(Map attributes) {
     if (!attributes.containsKey('message')) {
@@ -120,9 +129,9 @@ class Message implements Body {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      'message': {'body': body}
-    };
-  }
+  JsonMap toMap() => {
+        'message': {
+          'body': body,
+        }
+      };
 }

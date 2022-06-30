@@ -1,5 +1,6 @@
-import 'package:rollbar_dart/rollbar_dart.dart';
-import 'package:rollbar_dart/src/persistent_sender.dart';
+import '../rollbar.dart';
+import 'ext/collections.dart';
+import 'persistent_sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
 class Config {
@@ -32,21 +33,19 @@ class Config {
   /// Technically sending arbitrary objects through a [SendPort] is not supported. It works
   /// as long as both isolates are part of the same process, but it is not currently a documented
   /// feature, whereas sending a [Map] as the message is.
-  Map<String, dynamic> toMap() {
-    return {
-      'accessToken': accessToken,
-      'endpoint': endpoint,
-      'environment': environment,
-      'framework': framework,
-      'codeVersion': codeVersion,
-      'package': package,
-      'persistPayloads': persistPayloads,
-      'handleUncaughtErrors': handleUncaughtErrors,
-      'includePlatformLogs': includePlatformLogs,
-      'transformer': transformer,
-      'sender': sender
-    };
-  }
+  JsonMap toMap() => {
+        'accessToken': accessToken,
+        'endpoint': endpoint,
+        'environment': environment,
+        'framework': framework,
+        'codeVersion': codeVersion,
+        'package': package,
+        'persistPayloads': persistPayloads,
+        'handleUncaughtErrors': handleUncaughtErrors,
+        'includePlatformLogs': includePlatformLogs,
+        'transformer': transformer,
+        'sender': sender
+      };
 
   /// Converts the [Map] instance into a [Config] object.
   static Config fromMap(Map<String, dynamic> values) {
@@ -64,21 +63,19 @@ class Config {
         .build();
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'accessToken': accessToken,
-      'endpoint': endpoint,
-      'environment': environment,
-      'framework': framework,
-      'codeVersion': codeVersion,
-      'package': package,
-      'persistPayloads': persistPayloads,
-      'handleUncaughtErrors': handleUncaughtErrors,
-      'includePlatformLogs': includePlatformLogs //,
-      // 'transformer': transformer,
-      // 'sender': sender
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'accessToken': accessToken,
+        'endpoint': endpoint,
+        'environment': environment,
+        'framework': framework,
+        'codeVersion': codeVersion,
+        'package': package,
+        'persistPayloads': persistPayloads,
+        'handleUncaughtErrors': handleUncaughtErrors,
+        'includePlatformLogs': includePlatformLogs //,
+        // 'transformer': transformer,
+        // 'sender': sender
+      };
 }
 
 class ConfigBuilder {
@@ -118,27 +115,25 @@ class ConfigBuilder {
         transformer = config.transformer,
         sender = config.sender;
 
-  Config build() {
-    var sender = this.sender;
-    sender ??= _defaultSender;
-    return Config._(
-        accessToken,
-        endpoint,
-        environment,
-        framework,
-        codeVersion,
-        package,
-        persistPayloads,
-        handleUncaughtErrors,
-        includePlatformLogs,
-        transformer,
-        sender);
-  }
+  Config build() => Config._(
+      accessToken,
+      endpoint,
+      environment,
+      framework,
+      codeVersion,
+      package,
+      persistPayloads,
+      handleUncaughtErrors,
+      includePlatformLogs,
+      transformer,
+      sender ?? _defaultSender);
 }
 
 Sender _defaultSender(Config config) {
   return PersistentSender(
       config: config,
       destination: Destination(
-          endpoint: config.endpoint, accessToken: config.accessToken));
+        endpoint: config.endpoint,
+        accessToken: config.accessToken,
+      ));
 }

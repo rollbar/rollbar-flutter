@@ -1,6 +1,9 @@
 import 'dart:developer' as developer;
+import 'package:meta/meta.dart';
 
-/// Internal SDK logging (for the SDK use only!!!):
+@sealed
+@internal
+@immutable
 class Logging {
   static void info(String message, dynamic error) => _log(800, message, error);
   static void warn(String message, dynamic error) => _log(900, message, error);

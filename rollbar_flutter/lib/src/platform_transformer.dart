@@ -4,6 +4,8 @@ import 'package:flutter/services.dart' show PlatformException;
 import 'package:rollbar_dart/rollbar.dart'
     show Body, Data, RollbarPlatformInfo, TraceChain, TraceInfo, Transformer;
 
+import '_internal/object.dart';
+
 /// This trasformer inspects some platform specific exception types, which
 /// carry additional occurrence details in their exception messages.
 /// This allows the Rollbar Dart notifier to report a complete trace including
@@ -42,22 +44,22 @@ class PlatformTransformer implements Transformer {
   }
 
   void _attachPlatformPayload(String message, Data data) {
-    var embeddedPayload = jsonDecode(message);
-    var embeddedBody = embeddedPayload['data']['body'] as Map?;
+    final embeddedPayload = jsonDecode(message);
+    final embeddedBody = embeddedPayload['data']['body'] as Map?;
 
     if (appendToChain) {
       data.body = _prependPlatformTraceToChain(data.body, embeddedBody!);
     } else {
       data.platformPayload = embeddedPayload;
       _restoreDartChainMessage(
-          data.body.getTraces(), Body.fromMap(embeddedBody!)!.getTraces()!);
+          data.body.traces, embeddedBody.map(Body.fromMap)?.traces);
     }
   }
 
   Body _prependPlatformTraceToChain(Body dartBody, Map embeddedBody) {
-    var embeddedChain = Body.fromMap(embeddedBody)!.getTraces()!;
+    var embeddedChain = Body.fromMap(embeddedBody)!.traces!;
 
-    var dartChain = dartBody.getTraces()!;
+    var dartChain = dartBody.traces!;
 
     _restoreDartChainMessage(dartChain, embeddedChain);
 
@@ -68,15 +70,15 @@ class PlatformTransformer implements Transformer {
   // Fix message, we hijacked it on the platform side to carry the payload
   void _restoreDartChainMessage(
     List<TraceInfo?>? dartChain,
-    List<TraceInfo?> embeddedChain,
+    List<TraceInfo?>? embeddedChain,
   ) {
-    if (embeddedChain.isNotEmpty) {
+    if (embeddedChain?.isNotEmpty == true) {
       for (var element in dartChain!) {
         if (element!.exception != null &&
             element.exception!.message!.startsWith('PlatformException') &&
             element.exception!.message!.contains(androidTracePayloadPrefix)) {
           element.exception!.message =
-              'PlatformException(error, "${embeddedChain[0]!.exception!.message}")';
+              'PlatformException(error, "${embeddedChain![0]!.exception!.message}")';
         }
       }
     }

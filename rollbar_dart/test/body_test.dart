@@ -28,7 +28,7 @@ void main() {
           ..clazz = 'TestException'
           ..message = 'Attempted to test some code');
 
-      var asJson = jsonEncode(traceInfo.toJson());
+      var asJson = jsonEncode(traceInfo.toMap());
 
       for (var builder in [
         (v) => TraceInfo.fromMap(v),
@@ -39,7 +39,7 @@ void main() {
         expect(recovered.exception!.clazz, equals('TestException'));
         expect(recovered.exception!.message,
             equals('Attempted to test some code'));
-        expect(recovered.frames.length, equals(2));
+        expect(recovered.frames?.length, equals(2));
         expect(recovered.rawTrace, equals('stack frame 1 2 3'));
       }
     });
@@ -71,7 +71,7 @@ void main() {
           ..message = 'Attempted to test some code');
 
       var chain = TraceChain()..traces = [traceInfo1, traceInfo2];
-      var asJson = jsonEncode(chain.toJson());
+      var asJson = jsonEncode(chain.toMap());
 
       for (var builder in [
         (v) => TraceChain.fromMap(v),
@@ -80,19 +80,19 @@ void main() {
         var recovered = builder(jsonDecode(asJson)) as TraceChain;
 
         expect(recovered.traces!.length, equals(2));
-        expect(recovered.traces![0]!.frames.length, equals(2));
-        expect(recovered.traces![0]!.frames[0].method, equals('inAChain'));
+        expect(recovered.traces![0]!.frames?.length, equals(2));
+        expect(recovered.traces![0]!.frames?[0].method, equals('inAChain'));
 
-        expect(recovered.traces![1]!.frames.length, equals(1));
+        expect(recovered.traces![1]!.frames?.length, equals(1));
         expect(
-            recovered.traces![1]!.frames[0].method, equals('_AnotherMethod'));
+            recovered.traces![1]!.frames?[0].method, equals('_AnotherMethod'));
       }
     });
 
     test('Message json roundtrip serialization test', () {
       var message = Message()..body = 'This is a test body';
 
-      var asJson = jsonEncode(message.toJson());
+      var asJson = jsonEncode(message.toMap());
 
       for (var builder in [(v) => Message.fromMap(v), (v) => Body.fromMap(v)]) {
         var recovered = builder(jsonDecode(asJson)) as Message;

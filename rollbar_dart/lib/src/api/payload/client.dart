@@ -1,3 +1,5 @@
+import '../../ext/collections.dart';
+
 class Client {
   String? locale;
   String? hostname;
@@ -12,15 +14,11 @@ class Client {
   /// The `root` field is not supported by the backend as part of the `client` element,
   /// and it's being sent under the `server` element, though this might change in the future.
   /// See the file `core_notifier.dart` for details.
-  Map<String, dynamic> toJson() {
-    final result = <String, dynamic>{
-      'locale': locale,
-      'hostname': hostname,
-      'os': os,
-      'os_version': osVersion,
-      'dart': dart
-    };
-
-    return result;
-  }
+  JsonMap toMap() => {
+        'locale': locale,
+        'hostname': hostname,
+        'os': os,
+        'os_version': osVersion,
+        'dart': dart
+      };
 }

@@ -18,7 +18,7 @@ class UncaughtErrorHandler {
   }
 
   static Future<UncaughtErrorHandler> build(Config config) async {
-    var handler = UncaughtErrorHandler._(config);
+    final handler = UncaughtErrorHandler._(config);
 
     if (config.handleUncaughtErrors!) {
       var errorPort = await handler._errorPort;

@@ -6,17 +6,20 @@ import 'package:flutter/services.dart';
 import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/rollbar.dart';
 
+late final RollbarFlutter rollbar;
+
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
-  final config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
+  final config = (ConfigBuilder('71ec6c76a22f46f0be567c633a3fb894')
         ..environment = 'development'
-        ..codeVersion = '0.2.0'
+        ..codeVersion = '0.3.0'
         ..package = 'rollbar_flutter_example'
         ..handleUncaughtErrors = true
         ..includePlatformLogs = false)
       .build();
 
   await RollbarFlutter.run(config, (_rollbar) {
+    rollbar = _rollbar;
     runApp(MyApp());
   });
 }
@@ -25,12 +28,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Rollbar Flutter Example',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Rollbar Flutter example'),
+      home: MyHomePage(title: 'Rollbar Flutter Example'),
     );
   }
 }
@@ -47,87 +50,74 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.rollbar.flutter.example/activity');
 
-  int _counter = 0;
-  final _lastError = 'No errors yet';
-  String _batteryLevel = 'Unknown battery level.';
-  String _faultyMsg = 'No successful invocations yet.';
+  var _lastError = 'No errors yet';
+  var _batteryLevel = 'Unknown battery level.';
+  var _faultyMsg = 'No successful invocations yet.';
+  var _counter = 0;
 
   _MyHomePageState();
 
-  Future<void> _getBatteryLevel() async {
-    var batteryLevelMsg = await _getBatteryLevelMsg();
-    setState(() {
-      _batteryLevel = batteryLevelMsg;
+  Future<void> getBatteryLevel() async {
+    await platform.invokeMethod('getBatteryLevel').then((level) {
+      setState(() {
+        _batteryLevel = 'Battery level at $level%.';
+      });
+    }).catchError((error, stackTrace) {
+      rollbar.error(error, stackTrace);
     });
   }
 
-  Future<String> _getBatteryLevelMsg() async {
-    String batteryLevel;
-    final result = await platform.invokeMethod('getBatteryLevel');
-    batteryLevel = 'Battery level at $result % .';
-    return batteryLevel;
-  }
-
-  Future<void> _faultyMethod() async {
-    var msg = await _getFaultyMethodMsg();
-    setState(() {
-      _faultyMsg = msg;
+  Future<void> faultyMethod() async {
+    await platform.invokeMethod('faultyMethod').then((message) {
+      setState(() {
+        _faultyMsg = message;
+      });
+    }).catchError((error, stackTrace) {
+      rollbar.error(error, stackTrace);
     });
   }
 
-  Future<String> _getFaultyMethodMsg() async {
-    try {
-      return await platform.invokeMethod('faultyMethod');
-    } catch (error, _) {
-      rethrow;
-    }
-  }
-
-  Future<void> _incrementCounter() async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    setState(() {
-      _counter++;
-      if (_counter % 2 == 0) {
-        throw ArgumentError('Unavoidable failure');
-      }
+  Future<void> incrementCounter() async {
+    await Future.delayed(Duration(milliseconds: 100)).then((_) {
+      setState(() {
+        if (++_counter % 2 == 0) {
+          throw ArgumentError('Unavoidable failure');
+        }
+      });
     });
   }
 
-  Future<void> _crash() async {
+  Future<void> crash() async {
     return await platform.invokeMethod('crash');
   }
 
   @override
   Widget build(BuildContext context) {
-    var bodyChildren = <Widget>[
-      // If we ever remove Flutter 1 support, this should be updated to [ElevatedButton]
-      // ignore: deprecated_member_use
-      RaisedButton(
-        onPressed: _getBatteryLevel,
+    final bodyChildren = <Widget>[
+      ElevatedButton(
+        onPressed: getBatteryLevel,
         child: Text('Get Battery Level'),
       ),
       Text(_batteryLevel),
-      // ignore: deprecated_member_use
-      RaisedButton(
-        onPressed: _faultyMethod,
+      ElevatedButton(
+        onPressed: faultyMethod,
         child: Text('Call Faulty Method'),
       ),
       Text(_faultyMsg)
     ];
 
     if (Platform.isIOS) {
-      // ignore: deprecated_member_use
-      bodyChildren.add(RaisedButton(
-        onPressed: _crash,
-        child: Text('Crash application'),
-      ));
+      bodyChildren.add(
+        ElevatedButton(
+          onPressed: crash,
+          child: Text('Crash application'),
+        ),
+      );
     }
 
     bodyChildren.addAll(<Widget>[
       Divider(),
-      Text(
-        'Times you have pushed the plus button:',
-      ),
+      Text('Times you have pushed the plus button:'),
       Text(
         '$_counter',
         style: Theme.of(context).textTheme.headline4,
@@ -154,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: incrementCounter,
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ),

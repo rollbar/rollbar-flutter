@@ -1,17 +1,18 @@
-import 'package:logging/logging.dart' as diag;
-import 'package:rollbar_dart/rollbar.dart';
+import 'package:logging/logging.dart' show Logger, Level;
+import 'package:rollbar_dart/rollbar.dart'
+    show Rollbar, ConfigBuilder, RollbarInfrastructure;
 
 /// Command line application example using rollbar-dart.
 void main() async {
-  diag.Logger.root.level = diag.Level.ALL;
-  diag.Logger.root.onRecord.listen((record) {
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
 
-  //NOTE: Use your Rollbar Project access token:
-  var config = (ConfigBuilder('17965fa5041749b6bf7095a190001ded')
+  // NOTE: Use your Rollbar Project access token:
+  final config = (ConfigBuilder('17965fa5041749b6bf7095a190001ded')
         ..environment = 'development'
-        ..codeVersion = '0.1.0'
+        ..codeVersion = '0.3.0'
         ..package = 'rollbar_dart_example'
         ..persistPayloads = true
         ..handleUncaughtErrors = true)
@@ -19,17 +20,13 @@ void main() async {
 
   await RollbarInfrastructure.instance.initialize(rollbarConfig: config);
 
-  var rollbar = Rollbar(config);
+  final rollbar = Rollbar(config);
 
-  var payloadIndex = 10;
-  while (payloadIndex > 0) {
+  for (var i = 10; i > 0; i--) {
     try {
-      throw ArgumentError(
-          '$payloadIndex: An error occurred in the dart example app');
+      throw ArgumentError('$i: An error occurred in the dart example app');
     } catch (error, stackTrace) {
       await rollbar.error(error, stackTrace);
-    } finally {
-      payloadIndex--;
     }
   }
 

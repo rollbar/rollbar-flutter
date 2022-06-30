@@ -8,6 +8,7 @@ export 'src/rollbar_infrastructure.dart';
 export 'src/sender.dart';
 export 'src/transformer.dart';
 
+export 'src/api/payload/client.dart' show Client;
 export 'src/api/payload/payload.dart' show Payload;
 export 'src/api/payload/level.dart' show Level;
 export 'src/api/payload/data.dart' show Data;

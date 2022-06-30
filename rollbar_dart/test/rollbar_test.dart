@@ -129,7 +129,7 @@ class ExpandableTransformer implements Transformer {
             ..message = message);
       }).toList();
 
-      traceChain.addAll(data.body.getTraces()!);
+      traceChain.addAll(data.body.traces!);
       data.body = TraceChain()..traces = traceChain;
     }
     return data;

@@ -1,6 +1,6 @@
 import 'package:rollbar_dart/rollbar_dart.dart';
 import 'dart:convert';
-import '_internal/module.dart';
+import 'ext/module.dart';
 
 /// Persistent [Sender]. Default [Sender] implementation.
 class PersistentSender implements Sender {

@@ -1,7 +1,7 @@
 import 'package:test/test.dart';
 
 import 'package:rollbar_common/src/sdk_logger.dart';
-import 'package:rollbar_dart/src/_internal/module.dart';
+import 'package:rollbar_dart/src/ext/module.dart';
 
 const String expectedModuleLoggerName = 'rollbar_dart';
 const String expectedModuleLoggerFullName =

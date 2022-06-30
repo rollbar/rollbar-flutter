@@ -1,3 +1,4 @@
+import '../../ext/collections.dart';
 import 'data.dart';
 
 /// Represents the payload to be sent to Rollbar. A successfully constructed Payload matches Rollbar's
@@ -6,7 +7,8 @@ class Payload {
   String? accessToken;
   late Data data;
 
-  Map<String, dynamic> toJson() {
-    return {'access_token': accessToken, 'data': data.toJson()};
-  }
+  JsonMap toMap() => {
+        'access_token': accessToken,
+        'data': data.toMap(),
+      };
 }

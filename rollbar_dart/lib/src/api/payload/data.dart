@@ -1,3 +1,4 @@
+import '../../ext/collections.dart';
 import 'body.dart' show Body;
 import 'client.dart' show Client;
 import 'level.dart';
@@ -18,24 +19,19 @@ class Data {
   Map? platformPayload;
   Map? server;
 
-  Map<String, dynamic> toJson() {
-    final result = {
-      'notifier': notifier,
-      'environment': environment,
-      'client': client.toJson(),
-      'platform': platform,
-      'language': language,
-      'level': level.name,
-      'timestamp': timestamp,
-      'body': body.toJson(),
-    };
-
-    if (custom != null) result['custom'] = custom;
-    if (server != null) result['server'] = server;
-    if (framework != null) result['framework'] = framework;
-    if (codeVersion != null) result['code_version'] = codeVersion;
-    if (platformPayload != null) result['platform_payload'] = platformPayload;
-
-    return result;
-  }
+  JsonMap toMap() => {
+        'notifier': notifier,
+        'environment': environment,
+        'client': client.toMap(),
+        'platform': platform,
+        'language': language,
+        'level': level?.name,
+        'timestamp': timestamp,
+        'body': body.toMap(),
+        'custom': custom,
+        'server': server,
+        'framework': framework,
+        'code_version': codeVersion,
+        'platform_payload': platformPayload,
+      }..removeWhere((key, value) => value == null);
 }

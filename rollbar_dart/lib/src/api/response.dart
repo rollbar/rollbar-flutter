@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../ext/object.dart';
+import '../ext/collections.dart';
 
 /// Represents the response from the Rollbar API.
 class Response {
@@ -12,42 +15,30 @@ class Response {
     this.result,
   });
 
-  bool isError() {
-    return err != null && err != 0;
-  }
+  bool get isError => err != null && err != 0;
 
-  Response copyWith({
-    int? err,
-    String? message,
-    Result? result,
-  }) {
-    return Response(
-      err: err ?? this.err,
-      message: message ?? this.message,
-      result: result ?? this.result,
-    );
-  }
+  Response copyWith({int? err, String? message, Result? result}) => Response(
+        err: err ?? this.err,
+        message: message ?? this.message,
+        result: result ?? this.result,
+      );
 
-  Map<String, dynamic> toMap() {
-    return {
-      'err': err,
-      'message': message,
-      'result': result?.toMap(),
-    };
-  }
+  JsonMap toMap() => {
+        'err': err,
+        'message': message,
+        'result': result?.toMap(),
+      };
 
-  factory Response.fromMap(Map<String, dynamic> map) {
-    return Response(
-      err: map['err']?.toInt(),
-      message: map['message'],
-      result: map['result'] != null ? Result.fromMap(map['result']) : null,
-    );
-  }
+  factory Response.fromMap(JsonMap map) => Response(
+        err: map['err']?.toInt(),
+        message: map['message'],
+        result: (map['result'] as JsonMap?).map(Result.fromMap),
+      );
 
-  String toJson() => json.encode(toMap());
+  factory Response.fromJson(String json) => Response.fromMap(jsonDecode(json));
 
-  factory Response.fromJson(String source) =>
-      Response.fromMap(json.decode(source));
+  factory Response.from(http.Response response) =>
+      Response.fromMap(jsonDecode(response.body));
 
   @override
   String toString() =>
@@ -70,36 +61,18 @@ class Response {
 class Result {
   final String? uuid;
 
-  Result({
-    this.uuid,
-  });
+  Result({this.uuid});
 
-  Result copyWith({
-    String? uuid,
-  }) {
-    return Result(
-      uuid: uuid ?? this.uuid,
-    );
-  }
+  Result copyWith({String? uuid}) => Result(uuid: uuid ?? this.uuid);
 
-  Map<String, dynamic> toMap() {
-    return {
-      'uuid': uuid,
-    };
-  }
-
-  factory Result.fromMap(Map<String, dynamic> map) {
-    return Result(
-      uuid: map['uuid'],
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
+  factory Result.fromMap(JsonMap map) => Result(uuid: map['uuid']);
   factory Result.fromJson(String source) => Result.fromMap(json.decode(source));
+
+  JsonMap toMap() => {'uuid': uuid};
 
   @override
   String toString() => 'Result(uuid: $uuid)';
+  String toJson() => json.encode(toMap());
 
   @override
   bool operator ==(Object other) {

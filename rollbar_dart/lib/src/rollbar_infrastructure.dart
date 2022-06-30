@@ -4,7 +4,7 @@ import 'dart:isolate';
 import 'package:rollbar_common/rollbar_common.dart' as common;
 import 'package:rollbar_dart/rollbar_dart.dart';
 
-import '_internal/module.dart';
+import 'ext/module.dart';
 import 'http_sender.dart';
 
 class RollbarInfrastructure {
@@ -128,8 +128,7 @@ class RollbarInfrastructure {
       PayloadRecord record, Sender sender, PayloadRepository repo) async {
     final connectivityMonitor =
         common.ServiceLocator.instance.tryResolve<common.ConnectivityMonitor>();
-    if (connectivityMonitor != null &&
-        !connectivityMonitor.connectivityState.connectivityOn) {
+    if (connectivityMonitor?.connectivityState.connectivityOn != true) {
       return false;
     }
 

@@ -20,28 +20,25 @@ class RollbarFlutter extends Rollbar {
     Config config,
     FutureOr<void> Function(RollbarFlutter) action,
   ) async {
-    final shouldHandleUncaughtErrors = config.handleUncaughtErrors ?? false;
+    final rollbar = RollbarFlutter._(config);
 
-    if (!shouldHandleUncaughtErrors) {
-      var rollbar = RollbarFlutter._(config);
+    if (config.handleUncaughtErrors != true) {
       await rollbar._initializePlatformInstance();
       await action(rollbar);
       return;
     }
 
-    var rollbar = RollbarFlutter._(config);
-
     await runZonedGuarded(() async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      var previousOnError = FlutterError.onError;
+      final previousOnError = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) async {
         final stackTrace = details.stack ?? StackTrace.empty;
         await rollbar._unhandledError(details.exception, stackTrace);
         previousOnError?.call(details);
       };
 
-      var errorHandler = await (rollbar.errorHandler as Future<SendPort?>);
+      final errorHandler = await (rollbar.errorHandler as Future<SendPort?>);
       if (errorHandler == null) return;
 
       Isolate.current.addErrorListener(errorHandler);
@@ -71,17 +68,16 @@ class RollbarFlutter extends Rollbar {
   Future<void> _unhandledError(dynamic exception, StackTrace trace) async {
     try {
       await super.error(exception, trace);
-    } on Exception catch (e) {
-      Logging.err(
-          'Internal error encountered while sending data to Rollbar', e);
+    } on Exception catch (error) {
+      Logging.err('Internal error while sending data to Rollbar', error);
     }
   }
 
   static Config _initConfig(Config config) {
-    var builder = ConfigBuilder.from(config);
-    builder.framework ??= 'flutter';
-
-    return (builder..transformer = platformTransformer).build();
+    return (ConfigBuilder.from(config)
+          ..framework ??= 'flutter'
+          ..transformer = platformTransformer)
+        .build();
   }
 }
 
@@ -90,4 +86,4 @@ class RollbarFlutter extends Rollbar {
 /// Free and static functions are the only way we can pass factories to
 /// different isolates, which we need to be able to do to register uncaught
 /// error handlers.
-Transformer platformTransformer(Config config) => PlatformTransformer();
+Transformer platformTransformer(Config _) => PlatformTransformer();
