@@ -25,13 +25,14 @@ class CoreNotifier {
     StackTrace? stackTrace,
     String? message,
   ) async {
-    final client = Client()
-      ..locale = Platform.localeName
-      ..hostname = Platform.localHostname
-      ..os = Platform.operatingSystem
-      ..osVersion = Platform.operatingSystemVersion
-      ..rootPackage = _config.package
-      ..dart = {'version': Platform.version};
+    final client = Client(
+      locale: Platform.localeName,
+      hostname: Platform.localHostname,
+      os: Platform.operatingSystem,
+      osVersion: Platform.operatingSystemVersion,
+      rootPackage: _config.package,
+      dart: {'version': Platform.version},
+    );
 
     var data = Data()
       ..body = Body.from(message, error, stackTrace)

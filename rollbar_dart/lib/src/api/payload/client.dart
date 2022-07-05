@@ -1,13 +1,23 @@
+import 'package:meta/meta.dart';
 import '../../ext/collections.dart';
 
+@immutable
 class Client {
-  String? locale;
-  String? hostname;
-  String? os;
-  String? osVersion;
-  String? rootPackage;
+  final String locale;
+  final String hostname;
+  final String os;
+  final String osVersion;
+  final String rootPackage;
+  final Map<String, String> dart;
 
-  Map<String, String>? dart;
+  Client({
+    required this.locale,
+    required this.hostname,
+    required this.os,
+    required this.osVersion,
+    required this.rootPackage,
+    required this.dart,
+  });
 
   /// Converts the object into a Json encodable map.
   ///

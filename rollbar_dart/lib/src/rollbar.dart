@@ -4,24 +4,29 @@ import 'dart:isolate';
 import 'config.dart';
 import 'core_notifier.dart';
 import 'uncaught_error.dart';
-import 'logging.dart';
+import 'rollbar_infrastructure.dart';
+//import 'logging.dart';
 import 'api/payload/level.dart';
 
 /// Rollbar notifier.
 class Rollbar {
-  Config _config;
+  final Config _config;
   final CoreNotifier _coreNotifier;
-  final Future<UncaughtErrorHandler> _errorHandler;
+  //final Future<UncaughtErrorHandler?> errorHandler;
 
-  Rollbar(this._config)
-      : _coreNotifier = CoreNotifier(_config),
-        _errorHandler =
-            _resolveWithLogging(UncaughtErrorHandler.build(_config));
+  Rollbar(this._config) : _coreNotifier = CoreNotifier(_config) {
+    if (_config.handleUncaughtErrors) {
+      UncaughtErrorHandler.start(_config, _coreNotifier);
+    }
+
+    RollbarInfrastructure.initialize(config: _config);
+  }
+  //errorHandler = UncaughtErrorHandler.build(_config);
 
   /// Some initialization operations are asynchronous, such as initializing
   /// the [Isolate] that handles uncaught errors. This future can be awaited
   /// to ensure all async initialization operations are complete.
-  Future<UncaughtErrorHandler> ensureInitialized() async => _errorHandler;
+//  Future<UncaughtErrorHandler> ensureInitialized() async => _errorHandler;
 
   /// Returns an error handler port which can be registered as an [Isolate]
   /// error listener, eg:
@@ -29,8 +34,7 @@ class Rollbar {
   /// ```dart
   /// Isolate.current.addErrorListener(await rollbar.errorHandler);
   /// ```
-  Future<SendPort?>? get errorHandler async =>
-      (await _errorHandler).errorHandlerPort;
+//  Future<SendPort?>? get errorHandler async => (await _errorHandler).errorPort;
 
   /// Sends an error as an occurrence, with DEBUG level.
   Future<void> debug(dynamic error, StackTrace stackTrace) =>
@@ -78,18 +82,18 @@ class Rollbar {
   /// The current notifier configuration.
   Config get config => _config;
 
-  /// Updates the configuration of this instance.
-  Future<void> configure(Config config) async {
-    _config = config;
-    await (await _errorHandler).configure(_config);
-  }
+  // /// Updates the configuration of this instance.
+  // Future<void> configure(Config config) async {
+  //   _config = config;
+  //   await (await _errorHandler).configure(_config);
+  // }
 
-  static Future<T> _resolveWithLogging<T>(Future<T> action) async {
-    try {
-      return await action;
-    } on Exception catch (e) {
-      Logging.err('Internal error encountered while initializing Rollbar', e);
-      rethrow;
-    }
-  }
+  // static Future<T> _resolveWithLogging<T>(Future<T> action) async {
+  //   try {
+  //     return await action;
+  //   } on Exception catch (e) {
+  //     Logging.err('Internal error encountered while initializing Rollbar', e);
+  //     rethrow;
+  //   }
+  // }
 }

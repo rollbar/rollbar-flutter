@@ -19,7 +19,7 @@ void main() {
             ..handleUncaughtErrors = true)
           .build();
 
-      await RollbarInfrastructure.instance.initialize(rollbarConfig: config);
+      await RollbarInfrastructure.instance.initialize(config: config);
 
       final rollbar = Rollbar(config);
       await rollbar.ensureInitialized();

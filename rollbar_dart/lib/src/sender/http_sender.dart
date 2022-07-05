@@ -4,10 +4,9 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 
-import 'ext/module.dart';
-import 'ext/collections.dart';
-import 'ext/object.dart';
-import 'api/response.dart';
+import '../ext/module.dart';
+import '../ext/collections.dart';
+import '../api/response.dart';
 import 'sender.dart';
 
 /// HTTP [Sender] implementation.
@@ -27,8 +26,7 @@ class HttpSender implements Sender {
 
   /// Sends the provided payload as the body of POST request to the configured endpoint.
   @override
-  Future<bool> send(JsonMap? payload) async =>
-      await payload.map(jsonEncode).map(sendString) ?? false;
+  Future<bool> send(JsonMap payload) async => sendString(jsonEncode(payload));
 
   @override
   Future<bool> sendString(String payload) async {

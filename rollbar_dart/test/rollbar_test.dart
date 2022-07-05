@@ -15,7 +15,7 @@ Future<void> main() async {
         ..package = 'some_package_name'
         ..persistPayloads = true)
       .build();
-  await RollbarInfrastructure.instance.initialize(rollbarConfig: config);
+  await RollbarInfrastructure.instance.initialize(config: config);
 
   group('Rollbar notifier tests', () {
     setUp(() async {

@@ -11,23 +11,24 @@ class PayloadRecord {
 
   late final Destination destination;
 
-  PayloadRecord.create(
-      {required String configJson,
-      required String payloadJson,
-      required Destination destination})
-      : this(
-            timestamp: DateTime.now().toUtc(),
-            configJson: configJson,
-            payloadJson: payloadJson,
-            destination: destination);
+  PayloadRecord.create({
+    required String configJson,
+    required String payloadJson,
+    required Destination destination,
+  }) : this(
+          timestamp: DateTime.now().toUtc(),
+          configJson: configJson,
+          payloadJson: payloadJson,
+          destination: destination,
+        );
 
-  PayloadRecord(
-      {required this.timestamp,
-      required this.configJson,
-      required this.payloadJson,
-      required this.destination,
-      int? id})
-      : _id = id;
+  PayloadRecord({
+    required this.timestamp,
+    required this.configJson,
+    required this.payloadJson,
+    required this.destination,
+    int? id,
+  }) : _id = id;
 
   int? get id => _id;
 
@@ -97,11 +98,10 @@ class PayloadRecord {
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
-        timestamp.hashCode ^
-        configJson.hashCode ^
-        payloadJson.hashCode ^
-        destination.hashCode;
-  }
+  int get hashCode =>
+      id.hashCode ^
+      timestamp.hashCode ^
+      configJson.hashCode ^
+      payloadJson.hashCode ^
+      destination.hashCode;
 }

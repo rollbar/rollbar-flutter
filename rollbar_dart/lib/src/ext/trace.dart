@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:meta/meta.dart';
 import 'collections.dart';
 
-class Signature {
+@internal
+extension Signature on RegExp {
   static final RegExp dso = RegExp(r'(\n|^)isolate_dso_base:');
   static final RegExp inst = RegExp(r'(\n|^)isolate_instructions:');
   static final RegExp nativeFrame = RegExp(r'^ *#[0-9]+ ');
 }
 
+@internal
 extension TraceAdapter on StackTrace {
   bool get isNative => [Signature.dso, Signature.inst].all(toString().contains);
 

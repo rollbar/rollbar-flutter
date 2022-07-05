@@ -10,18 +10,18 @@ late final RollbarFlutter rollbar;
 
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
-  final config = (ConfigBuilder('71ec6c76a22f46f0be567c633a3fb894')
-        ..environment = 'development'
-        ..codeVersion = '0.3.0'
-        ..package = 'rollbar_flutter_example'
-        ..handleUncaughtErrors = true
-        ..includePlatformLogs = false)
-      .build();
+  final config = Config(
+    accessToken: '71ec6c76a22f46f0be567c633a3fb894',
+    environment: 'development',
+    codeVersion: '0.3.0',
+    package: 'rollbar_flutter_example',
+    handleUncaughtErrors: true,
+    includePlatformLogs: false,
+  );
 
-  await RollbarFlutter.run(config, (_rollbar) {
-    rollbar = _rollbar;
-    runApp(MyApp());
-  });
+  rollbar = await RollbarFlutter.start(config);
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -57,37 +57,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _MyHomePageState();
 
-  Future<void> getBatteryLevel() async {
-    await platform.invokeMethod('getBatteryLevel').then((level) {
-      setState(() {
-        _batteryLevel = 'Battery level at $level%.';
-      });
-    }).catchError((error, stackTrace) {
-      rollbar.error(error, stackTrace);
-    });
+  Future<void> batteryLevel() async {
+    await platform
+        .invokeMethod('getBatteryLevel')
+        .then((level) => setState(() => _batteryLevel = 'Battery at $level%.'))
+        .catchError(
+          (_) => setState(() => _lastError = 'No battery data.'),
+          test: (error) => error is PlatformException,
+        );
   }
 
   Future<void> faultyMethod() async {
-    await platform.invokeMethod('faultyMethod').then((message) {
-      setState(() {
-        _faultyMsg = message;
-      });
-    }).catchError((error, stackTrace) {
-      rollbar.error(error, stackTrace);
-    });
+    await platform
+        .invokeMethod('faultyMethod')
+        .then((message) => setState(() => _faultyMsg = message))
+        .catchError(
+          (error) => setState(() => _lastError = error.toString()),
+          test: (_) => false,
+        );
   }
 
   Future<void> incrementCounter() async {
-    await Future.delayed(Duration(milliseconds: 100)).then((_) {
-      setState(() {
-        if (++_counter % 2 == 0) {
-          throw ArgumentError('Unavoidable failure');
-        }
-      });
+    await Future.delayed(Duration(milliseconds: 100));
+    setState(() {
+      if (++_counter % 2 == 0) {
+        throw ArgumentError('Unavoidable failure');
+      }
     });
   }
 
-  Future<void> crash() async {
+  Future<Never> crash() async {
     return await platform.invokeMethod('crash');
   }
 
@@ -95,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final bodyChildren = <Widget>[
       ElevatedButton(
-        onPressed: getBatteryLevel,
+        onPressed: batteryLevel,
         child: Text('Get Battery Level'),
       ),
       Text(_batteryLevel),
@@ -122,14 +121,17 @@ class _MyHomePageState extends State<MyHomePage> {
         '$_counter',
         style: Theme.of(context).textTheme.headline4,
       ),
-      Divider(),
+      Divider(height: 10),
       Text(
         'Most recent Flutter error:',
         style: Theme.of(context).textTheme.headline6,
       ),
-      Text(
-        _lastError,
-        style: Theme.of(context).textTheme.caption,
+      Padding(
+        padding: EdgeInsets.only(top: 16),
+        child: Text(
+          _lastError,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
       )
     ]);
 

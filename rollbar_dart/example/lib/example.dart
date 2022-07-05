@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart' show Logger, Level;
 import 'package:rollbar_dart/rollbar.dart'
-    show Rollbar, ConfigBuilder, RollbarInfrastructure;
+    show Rollbar, Config, RollbarInfrastructure;
 
 /// Command line application example using rollbar-dart.
 void main() async {
@@ -10,15 +10,16 @@ void main() async {
   });
 
   // NOTE: Use your Rollbar Project access token:
-  final config = (ConfigBuilder('17965fa5041749b6bf7095a190001ded')
-        ..environment = 'development'
-        ..codeVersion = '0.3.0'
-        ..package = 'rollbar_dart_example'
-        ..persistPayloads = true
-        ..handleUncaughtErrors = true)
-      .build();
+  final config = Config(
+    accessToken: '17965fa5041749b6bf7095a190001ded',
+    environment: 'development',
+    codeVersion: '0.3.0',
+    package: 'rollbar_dart_example',
+    persistPayloads: true,
+    handleUncaughtErrors: true,
+  );
 
-  await RollbarInfrastructure.instance.initialize(rollbarConfig: config);
+  await RollbarInfrastructure.initialize(config: config);
 
   final rollbar = Rollbar(config);
 
@@ -31,5 +32,5 @@ void main() async {
   }
 
   await Future.delayed(Duration(seconds: 10));
-  await RollbarInfrastructure.instance.dispose();
+  await RollbarInfrastructure.dispose();
 }
