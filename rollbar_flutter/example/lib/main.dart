@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/rollbar.dart';
 
-late final RollbarFlutter rollbar;
+late final Rollbar rollbar;
 
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
@@ -19,7 +19,7 @@ Future<void> main() async {
     includePlatformLogs: false,
   );
 
-  rollbar = await RollbarFlutter.start(config);
+  rollbar = await RollbarFlutter.start(config: config);
 
   runApp(MyApp());
 }
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key = null, required this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -77,8 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
         );
   }
 
-  Future<void> incrementCounter() async {
-    await Future.delayed(Duration(milliseconds: 100));
+  void incrementCounter() {
     setState(() {
       if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
@@ -86,8 +85,12 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<Never> crash() async {
-    return await platform.invokeMethod('crash');
+  void divideByZero() {
+    1 ~/ 0;
+  }
+
+  void crash() {
+    platform.invokeMethod('crash');
   }
 
   @override
@@ -102,7 +105,11 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: faultyMethod,
         child: Text('Call Faulty Method'),
       ),
-      Text(_faultyMsg)
+      Text(_faultyMsg),
+      ElevatedButton(
+        onPressed: divideByZero,
+        child: Text('Divide by zero'),
+      ),
     ];
 
     if (Platform.isIOS) {

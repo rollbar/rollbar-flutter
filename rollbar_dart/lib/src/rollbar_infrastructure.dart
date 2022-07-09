@@ -9,49 +9,42 @@ import 'package:rollbar_dart/rollbar_dart.dart';
 import 'ext/module.dart';
 import 'sender/http_sender.dart';
 
-class RollbarInfrastructure {
-  static final ReceivePort _receivePort = ReceivePort();
-  static late final SendPort _sendPort;
+abstract class PayloadProcessing {
+  void process({required PayloadRecord record});
+}
 
-  // RollbarInfrastructure._() {
-  //   Isolate.spawn(
-  //     _processWorkItemsInBackground,
-  //     _receivePort.sendPort,
-  //     debugName: 'RollbarInfrastructureIsolate',
-  //   );
-  // }
+class RollbarInfrastructure implements PayloadProcessing {
+  final ReceivePort _receivePort;
+  final SendPort _sendPort;
+  final Isolate _isolate;
 
-  static Future<void> initialize({required Config config}) async {
-    await Isolate.spawn(
-      work,
-      _receivePort.sendPort,
-      debugName: 'RollbarInfrastructureIsolate',
-    );
+  RollbarInfrastructure._(this._isolate, this._receivePort, this._sendPort);
 
-    _sendPort = await _receivePort.first;
-    _sendPort.send(config);
-    //return _sendPort;
-
-    // return _sendPort = await _receivePort.first
-    //   ..send(config);
+  static Future<RollbarInfrastructure> start({
+    required Config config,
+  }) async {
+    final receivePort = ReceivePort();
+    final isolate = await Isolate.spawn(work, receivePort.sendPort);
+    final sendPort = (await receivePort.first)..send(config);
+    return RollbarInfrastructure._(isolate, receivePort, sendPort);
   }
 
-  static Future<void> dispose() async {
+  Future<void> dispose() async {
     // Send a signal to the spawned isolate indicating that it should exit:
     _sendPort.send(null);
     _receivePort.close();
+    _isolate.kill(priority: Isolate.beforeNextEvent);
   }
 
   //static final RollbarInfrastructure instance = RollbarInfrastructure._();
 
-  static void process({required PayloadRecord record}) {
+  @override
+  void process({required PayloadRecord record}) {
     _sendPort.send(record);
   }
 
   @internal
   static Future<void> work(SendPort sendPort) async {
-    // Send a SendPort to the main isolate (RollbarInfrastructure)
-    // so that it can send JSON strings to this isolate:
     final infrastructurePort = ReceivePort();
     sendPort.send(infrastructurePort.sendPort);
 
@@ -64,7 +57,8 @@ class RollbarInfrastructure {
       }
     }
 
-    Isolate.exit();
+    //Isolate.current.kill(priority: Isolate.immediate);
+    //Isolate.exit();
   }
 
   static Future<bool> _process(dynamic message) async {
@@ -114,7 +108,7 @@ class RollbarInfrastructure {
       await HttpSender(
               endpoint: payloadRecord.destination.endpoint,
               accessToken: payloadRecord.destination.accessToken)
-          .sendString(payloadRecord.payloadJson);
+          .sendString(payloadRecord.payloadJson, null);
     }
   }
 
@@ -151,7 +145,7 @@ class RollbarInfrastructure {
       return false;
     }
 
-    final success = await sender.sendString(record.payloadJson);
+    final success = await sender.sendString(record.payloadJson, null);
     if (success) {
       repo.removePayloadRecord(record);
       return true;

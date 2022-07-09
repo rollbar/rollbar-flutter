@@ -27,7 +27,7 @@ class Config {
   /// since it will need to be passed to an error handler isolate as a message.
   final Sender Function(Config) sender;
 
-  Config({
+  const Config({
     required this.accessToken,
     this.endpoint = 'https://api.rollbar.com/api/1/item/',
     this.environment = 'development',
@@ -41,8 +41,7 @@ class Config {
     this.sender = persistentSender,
   });
 
-  factory Config.from(
-    Config other, {
+  Config copyWith({
     String? accessToken,
     String? endpoint,
     String? environment,
@@ -54,21 +53,20 @@ class Config {
     bool? includePlatformLogs,
     Transformer Function(Config)? transformer,
     Sender Function(Config)? sender,
-  }) {
-    return Config(
-      accessToken: accessToken ?? other.accessToken,
-      endpoint: endpoint ?? other.endpoint,
-      environment: environment ?? other.environment,
-      framework: framework ?? other.framework,
-      codeVersion: codeVersion ?? other.codeVersion,
-      package: package ?? other.package,
-      persistPayloads: persistPayloads ?? other.persistPayloads,
-      handleUncaughtErrors: handleUncaughtErrors ?? other.handleUncaughtErrors,
-      includePlatformLogs: includePlatformLogs ?? other.includePlatformLogs,
-      transformer: transformer ?? other.transformer,
-      sender: sender ?? other.sender,
-    );
-  }
+  }) =>
+      Config(
+        accessToken: accessToken ?? this.accessToken,
+        endpoint: endpoint ?? this.endpoint,
+        environment: environment ?? this.environment,
+        framework: framework ?? this.framework,
+        codeVersion: codeVersion ?? this.codeVersion,
+        package: package ?? this.package,
+        persistPayloads: persistPayloads ?? this.persistPayloads,
+        handleUncaughtErrors: handleUncaughtErrors ?? this.handleUncaughtErrors,
+        includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
+        transformer: transformer ?? this.transformer,
+        sender: sender ?? this.sender,
+      );
 
   /// Converts the [Map] instance into a [Config] object.
   factory Config.fromMap(JsonMap map) => Config(
@@ -84,11 +82,6 @@ class Config {
       transformer: map['transformer'],
       sender: map['sender']);
 
-  /// Converts the current configuration to a [Map], so that we can share
-  /// configs between isolates. Technically sending arbitrary objects through
-  /// a [SendPort] is not supported. It works as long as both isolates are
-  /// part of the same process, but it is not currently a documented feature,
-  /// whereas sending a [Map] as the message is.
   JsonMap toMap() => {
         'accessToken': accessToken,
         'endpoint': endpoint,
@@ -99,65 +92,5 @@ class Config {
         'persistPayloads': persistPayloads,
         'handleUncaughtErrors': handleUncaughtErrors,
         'includePlatformLogs': includePlatformLogs,
-        'transformer': transformer,
-        'sender': sender,
       };
 }
-
-// class ConfigBuilder {
-//   final String accessToken;
-//   String endpoint = 'https://api.rollbar.com/api/1/item/';
-//   String? environment;
-//   String? framework;
-//   String? codeVersion;
-//   String package;
-
-//   bool persistPayloads = false;
-//   bool handleUncaughtErrors = false;
-//   bool includePlatformLogs = false;
-
-//   /// If [handleUncaughtErrors] is enabled, the transformer function *must* be
-//   /// a static or free function, and cannot be a closure or instance function,
-//   /// since it will need to be passed to an error handler isolate as a message.
-//   Transformer Function(Config)? transformer;
-
-//   /// If [handleUncaughtErrors] is enabled, the sender factory *must* be
-//   /// a static or free function, and cannot be a closure or instance function,
-//   /// since it will need to be passed to an error handler isolate as a message.
-//   Sender Function(Config)? sender;
-
-//   ConfigBuilder(this.accessToken);
-
-//   ConfigBuilder.from(Config config)
-//       : accessToken = config.accessToken,
-//         endpoint = config.endpoint,
-//         environment = config.environment,
-//         framework = config.framework,
-//         codeVersion = config.codeVersion,
-//         package = config.package,
-//         persistPayloads = config.persistPayloads,
-//         handleUncaughtErrors = config.handleUncaughtErrors,
-//         includePlatformLogs = config.includePlatformLogs,
-//         transformer = config.transformer,
-//         sender = config.sender;
-
-//   Config build() => Config(
-//       accessToken,
-//       endpoint,
-//       environment,
-//       framework,
-//       codeVersion,
-//       package,
-//       persistPayloads,
-//       handleUncaughtErrors,
-//       includePlatformLogs,
-//       transformer,
-//       sender ?? persistentSender);
-// }
-
-Sender persistentSender(Config config) => PersistentSender(
-    config: config,
-    destination: Destination(
-      endpoint: config.endpoint,
-      accessToken: config.accessToken,
-    ));

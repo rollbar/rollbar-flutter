@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../ext/module.dart';
 import '../ext/collections.dart';
 import '../api/response.dart';
+import '../rollbar_infrastructure.dart';
 import 'sender.dart';
 
 /// HTTP [Sender] implementation.
@@ -26,10 +27,11 @@ class HttpSender implements Sender {
 
   /// Sends the provided payload as the body of POST request to the configured endpoint.
   @override
-  Future<bool> send(JsonMap payload) async => sendString(jsonEncode(payload));
+  Future<bool> send(JsonMap payload, PayloadProcessing? processor) async =>
+      sendString(jsonEncode(payload), processor);
 
   @override
-  Future<bool> sendString(String payload) async {
+  Future<bool> sendString(String payload, PayloadProcessing? processor) async {
     try {
       final response = await http.post(
         Uri.parse(_endpoint),

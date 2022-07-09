@@ -3,19 +3,26 @@
 @implementation RollbarMethodChannel
 
 + (instancetype)methodChannelWithName:(NSString*)name
-                      binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger {
-    return [[RollbarMethodChannel alloc] initWithName:name binaryMessenger:messenger codec:FlutterStandardMethodCodec.sharedInstance];
+                      binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
+{
+    return [[RollbarMethodChannel alloc] initWithName:name
+                                      binaryMessenger:messenger
+                                                codec:FlutterStandardMethodCodec.sharedInstance];
 }
 
 + (instancetype)methodChannelWithName:(NSString*)name
                       binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
-                                codec:(NSObject<FlutterMethodCodec>*)codec {
-    return [[RollbarMethodChannel alloc] initWithName:name binaryMessenger:messenger codec:codec];
+                                codec:(NSObject<FlutterMethodCodec>*)codec
+{
+    return [[RollbarMethodChannel alloc] initWithName:name
+                                      binaryMessenger:messenger
+                                                codec:codec];
 }
 
 - (instancetype)initWithName:(NSString*)name
              binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
-                       codec:(NSObject<FlutterMethodCodec>*)codec {
+                       codec:(NSObject<FlutterMethodCodec>*)codec
+{
     self = [super initWithName:name binaryMessenger:messenger codec:codec];
     return self;
 }

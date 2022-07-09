@@ -1,14 +1,10 @@
-import 'dart:isolate';
 import 'dart:async';
 import 'dart:developer';
+import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 
 import '../../rollbar.dart';
-import 'ext/collections.dart';
-//import 'ext/object.dart';
-
-import 'logging.dart';
 import 'core_notifier.dart';
 
 /// This class handles the lifecycle of an uncaught error handler [Isolate].
@@ -17,12 +13,16 @@ import 'core_notifier.dart';
 class UncaughtErrorHandler {
   static late final SendPort sendPort;
   static late final CoreNotifier notifier;
+  static late final PayloadProcessing processor;
 
-  //UncaughtErrorHandler(this.errorPort);
+  static Future<void> start(
+    Config config,
+    CoreNotifier coreNotifier,
+    PayloadProcessing payloadProcessor,
+  ) async {
+    processor = payloadProcessor;
 
-  static Future<void> start(Config config, CoreNotifier coreNotifier) async {
     final receivePort = ReceivePort();
-    sendPort = await receivePort.first;
     notifier = coreNotifier;
 
     final isolate = await Isolate.spawn(
@@ -31,9 +31,9 @@ class UncaughtErrorHandler {
       paused: true,
     );
 
+    sendPort = await receivePort.first;
     isolate.addErrorListener(sendPort);
     isolate.resume(isolate.pauseCapability!);
-    //return UncaughtErrorHandler(sendPort);
   }
 
   @protected
@@ -46,7 +46,7 @@ class UncaughtErrorHandler {
         final error = _getError(message[0]);
         final trace = _getTrace(message[1]);
         log('UncaughtErrorHandler._handleError got error: $error).');
-        await notifier.log(Level.error, error, trace, null);
+        await notifier.log(Level.error, error, trace, null, processor);
       } on Exception catch (e) {
         log('Failed to process rollbar error message: $e');
       }

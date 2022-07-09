@@ -19,9 +19,7 @@ void main() async {
     handleUncaughtErrors: true,
   );
 
-  await RollbarInfrastructure.initialize(config: config);
-
-  final rollbar = Rollbar(config);
+  final rollbar = await Rollbar.start(config: config);
 
   for (var i = 10; i > 0; i--) {
     try {
@@ -32,5 +30,5 @@ void main() async {
   }
 
   await Future.delayed(Duration(seconds: 10));
-  await RollbarInfrastructure.dispose();
+  //await RollbarInfrastructure.dispose();
 }

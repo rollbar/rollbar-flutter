@@ -1,11 +1,17 @@
+import 'package:meta/meta.dart';
+
 import '../../ext/collections.dart';
 import 'data.dart';
 
-/// Represents the payload to be sent to Rollbar. A successfully constructed Payload matches Rollbar's
-/// spec, and can be POSTed to the correct endpoint when serialized as JSON.
+/// Represents the payload to be sent to Rollbar. A successfully constructed
+/// Payload matches Rollbar's spec, and can be POSTed to the correct endpoint
+/// when serialized as JSON.
+@immutable
 class Payload {
-  String? accessToken;
-  late Data data;
+  final String accessToken;
+  final Data data;
+
+  const Payload({required this.accessToken, required this.data});
 
   JsonMap toMap() => {
         'access_token': accessToken,

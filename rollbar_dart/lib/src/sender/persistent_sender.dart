@@ -1,15 +1,27 @@
 import 'dart:convert';
 import 'dart:developer';
-import '../ext/object.dart';
+
+import 'package:meta/meta.dart';
+
 import '../ext/collections.dart';
 import '../../rollbar.dart';
 
+@internal
+Sender persistentSender(Config config) => PersistentSender(
+      config: config,
+      destination: Destination(
+        endpoint: config.endpoint,
+        accessToken: config.accessToken,
+      ),
+    );
+
 /// Persistent [Sender]. Default [Sender] implementation.
+@immutable
 class PersistentSender implements Sender {
   final Config _config;
   final Destination _destination;
 
-  PersistentSender({
+  const PersistentSender({
     required Config config,
     required Destination destination,
   })  : _config = config,
@@ -18,22 +30,17 @@ class PersistentSender implements Sender {
   /// Sends the provided payload as the body of POST request to
   /// the configured endpoint.
   @override
-  Future<bool> send(JsonMap payload) async => sendString(jsonEncode(payload));
+  Future<bool> send(JsonMap payload, PayloadProcessing? processor) async =>
+      sendString(jsonEncode(payload), processor);
 
   @override
-  Future<bool> sendString(String payload) async {
+  Future<bool> sendString(String payload, PayloadProcessing? processor) async {
     try {
-      final config = _config.toMap()
-        ..remove('transformer')
-        ..remove('sender');
-
-      final record = PayloadRecord.create(
-        configJson: jsonEncode(config),
-        payloadJson: payload,
-        destination: _destination,
-      );
-
-      RollbarInfrastructure.process(record: record);
+      processor?.process(
+          record: PayloadRecord.create(
+              configJson: jsonEncode(_config.toMap()),
+              payloadJson: payload,
+              destination: _destination));
 
       return true;
     } catch (error, stackTrace) {

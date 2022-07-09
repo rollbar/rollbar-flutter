@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:rollbar_dart/rollbar.dart';
+import 'package:rollbar_dart/src/core_notifier.dart';
 import 'package:rollbar_dart/src/uncaught_error.dart';
 import 'package:test/test.dart';
 
@@ -11,11 +12,20 @@ import 'client_server_utils.dart';
 Future<void> main() async {
   group('UncaughtErrorHandler tests', () {
     late RawTextSocket server;
-    late UncaughtErrorHandler handler;
 
     setUp(() async {
       server = await RawTextSocket.build();
-      handler = await _createErrorHandler(server.endpoint);
+
+      final config = Config(
+          accessToken: 'BlaBlaAccessToken',
+          endpoint: server.endpoint,
+          environment: 'production',
+          package: 'some_package_name',
+          codeVersion: '1.0.0',
+          handleUncaughtErrors: true,
+          sender: createTextSender);
+
+      await UncaughtErrorHandler.start(config, CoreNotifier(config));
     });
 
     tearDown(() async {
@@ -25,11 +35,11 @@ Future<void> main() async {
     test(
         'When error is received in current isolate should report it using sender',
         () async {
-      var errorPort = await handler.errorHandlerPort;
+      var errorPort = UncaughtErrorHandler.sendPort;
       try {
         await throwyMethodA();
       } catch (error, trace) {
-        errorPort!.send([error.toString(), trace.toString()]);
+        errorPort.send([error.toString(), trace.toString()]);
       }
 
       var payloadJson =
@@ -50,7 +60,7 @@ Future<void> main() async {
     test(
         'When error is not caught in separate isolate should report it using sender',
         () async {
-      var errorPort = await handler.errorHandlerPort;
+      var errorPort = UncaughtErrorHandler.sendPort;
       var isolate = await Isolate.spawn(secondIsolateMethod, errorPort);
       try {
         var payloadJson =
@@ -85,18 +95,6 @@ Future<void> nestedThrowy() async {
 Future<void> inDifferentIsolate() async {
   await Future.delayed(Duration(milliseconds: 1));
   throw TimeoutException('Too late');
-}
-
-Future<UncaughtErrorHandler> _createErrorHandler(String endpoint) async {
-  var config = (ConfigBuilder('BlaBlaAccessToken')
-        ..endpoint = endpoint
-        ..environment = 'production'
-        ..codeVersion = '1.0.0'
-        ..handleUncaughtErrors = true
-        ..sender = createTextSender)
-      .build();
-
-  return await UncaughtErrorHandler.build(config);
 }
 
 Future<void> secondIsolateMethod(SendPort? errorPort) async {

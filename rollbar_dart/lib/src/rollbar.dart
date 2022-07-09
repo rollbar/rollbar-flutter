@@ -1,26 +1,39 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:meta/meta.dart';
+
 import 'config.dart';
 import 'core_notifier.dart';
 import 'uncaught_error.dart';
 import 'rollbar_infrastructure.dart';
-//import 'logging.dart';
 import 'api/payload/level.dart';
 
-/// Rollbar notifier.
+@sealed
 class Rollbar {
-  final Config _config;
+  final Config config;
   final CoreNotifier _coreNotifier;
+  final RollbarInfrastructure _infrastructure;
   //final Future<UncaughtErrorHandler?> errorHandler;
 
-  Rollbar(this._config) : _coreNotifier = CoreNotifier(_config) {
-    if (_config.handleUncaughtErrors) {
-      UncaughtErrorHandler.start(_config, _coreNotifier);
-    }
+  Rollbar._(this.config, this._infrastructure, this._coreNotifier);
 
-    RollbarInfrastructure.initialize(config: _config);
+  static Future<Rollbar> start({required Config config}) async {
+    final infrastructure = await RollbarInfrastructure.start(config: config);
+    final notifier = CoreNotifier(config);
+    final rollbar = Rollbar._(config, infrastructure, notifier);
+
+    // if (config.handleUncaughtErrors) {
+    //   await UncaughtErrorHandler.start(
+    //     config,
+    //     rollbar._coreNotifier,
+    //     infrastructure,
+    //   );
+    // }
+
+    return rollbar;
   }
+
   //errorHandler = UncaughtErrorHandler.build(_config);
 
   /// Some initialization operations are asynchronous, such as initializing
@@ -35,6 +48,14 @@ class Rollbar {
   /// Isolate.current.addErrorListener(await rollbar.errorHandler);
   /// ```
 //  Future<SendPort?>? get errorHandler async => (await _errorHandler).errorPort;
+
+  /// Sends an error as an occurrence, with the provided level.
+  Future<void> log(Level level, dynamic error, StackTrace stackTrace) =>
+      _coreNotifier.log(level, error, stackTrace, null, _infrastructure);
+
+  /// Sends a message as an occurrence, with the provided level.
+  Future<void> logMsg(Level level, String message) =>
+      _coreNotifier.log(level, null, null, message, _infrastructure);
 
   /// Sends an error as an occurrence, with DEBUG level.
   Future<void> debug(dynamic error, StackTrace stackTrace) =>
@@ -56,10 +77,6 @@ class Rollbar {
   Future<void> critical(dynamic error, StackTrace stackTrace) =>
       log(Level.critical, error, stackTrace);
 
-  /// Sends an error as an occurrence, with the provided level.
-  Future<void> log(Level level, dynamic error, StackTrace stackTrace) =>
-      _coreNotifier.log(level, error, stackTrace, null);
-
   /// Sends a message as an occurrence, with DEBUG level.
   Future<void> debugMsg(String message) => logMsg(Level.debug, message);
 
@@ -74,26 +91,4 @@ class Rollbar {
 
   /// Sends a message as an occurrence, with CRITICAL level.
   Future<void> criticalMsg(String message) => logMsg(Level.critical, message);
-
-  /// Sends a message as an occurrence, with the provided level.
-  Future<void> logMsg(Level level, String message) =>
-      _coreNotifier.log(level, null, null, message);
-
-  /// The current notifier configuration.
-  Config get config => _config;
-
-  // /// Updates the configuration of this instance.
-  // Future<void> configure(Config config) async {
-  //   _config = config;
-  //   await (await _errorHandler).configure(_config);
-  // }
-
-  // static Future<T> _resolveWithLogging<T>(Future<T> action) async {
-  //   try {
-  //     return await action;
-  //   } on Exception catch (e) {
-  //     Logging.err('Internal error encountered while initializing Rollbar', e);
-  //     rethrow;
-  //   }
-  // }
 }

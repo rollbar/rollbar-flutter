@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:rollbar_dart/rollbar.dart'
-    show Body, Data, RollbarPlatformInfo, TraceChain, TraceInfo, Transformer;
+    show Body, Data, TraceChain, TraceInfo, Transformer;
 
 import '_internal/object.dart';
 
@@ -26,7 +27,7 @@ class PlatformTransformer implements Transformer {
   @override
   Future<Data> transform(dynamic error, StackTrace? trace, Data data) async {
     if (error is PlatformException) {
-      if (RollbarPlatformInfo.isAndroid) {
+      if (Platform.isAndroid) {
         _enrichAndroidTrace(error, data);
       }
     }
