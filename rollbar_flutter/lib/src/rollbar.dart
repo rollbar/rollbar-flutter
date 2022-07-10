@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
+export 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_dart/rollbar.dart';
 
 import 'platform_transformer.dart';
@@ -12,31 +14,41 @@ extension _Methods on MethodChannel {
       await invokeMethod('initialize', config.toMap());
 }
 
+typedef RollbarClosure = FutureOr<void> Function();
+
 @sealed
 class RollbarFlutter {
-  static const platform = MethodChannel('com.rollbar.flutter');
+  static const _platform = MethodChannel('com.rollbar.flutter');
 
   RollbarFlutter._();
 
-  static Future<Rollbar> start({required Config config}) async {
-    final rollbar = await Rollbar.start(
+  static Future<void> run({
+    required Config config,
+    required RollbarClosure appRunner,
+  }) async {
+    await Rollbar.run(
         config: config.copyWith(
             framework: 'flutter', transformer: platformTransformer));
 
-    await platform.initialize(config: config);
-
-    if (config.handleUncaughtErrors) {
-      await runZonedGuarded(() async {
-        WidgetsFlutterBinding.ensureInitialized();
-        FlutterError.onError = (error) async {
-          await rollbar.error(error.exception, error.stack ?? StackTrace.empty);
-          FlutterError.presentError(error);
-        };
-      }, (exception, stackTrace) {
-        rollbar.error(exception, stackTrace);
-      });
+    if (!config.handleUncaughtErrors) {
+      WidgetsFlutterBinding.ensureInitialized();
+      await _platform.initialize(config: config);
+      await appRunner();
+      return;
     }
 
-    return rollbar;
+    await runZonedGuarded(() async {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      FlutterError.onError = (error) async {
+        FlutterError.presentError(error);
+        await Rollbar.error(error.exception, error.stack ?? StackTrace.empty);
+      };
+
+      await _platform.initialize(config: config);
+      await appRunner();
+    }, (exception, stackTrace) {
+      Rollbar.error(exception, stackTrace);
+    });
   }
 }

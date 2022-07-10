@@ -3,25 +3,19 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/rollbar.dart';
-
-late final Rollbar rollbar;
 
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
   final config = Config(
     accessToken: '71ec6c76a22f46f0be567c633a3fb894',
-    environment: 'development',
-    codeVersion: '0.3.0',
     package: 'rollbar_flutter_example',
-    handleUncaughtErrors: true,
-    includePlatformLogs: false,
   );
 
-  rollbar = await RollbarFlutter.start(config: config);
-
-  runApp(MyApp());
+  await RollbarFlutter.run(
+    config: config,
+    appRunner: () => runApp(MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -57,22 +51,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _MyHomePageState();
 
-  Future<void> batteryLevel() async {
-    await platform
-        .invokeMethod('getBatteryLevel')
-        .then((level) => setState(() => _batteryLevel = 'Battery at $level%.'))
-        .catchError(
-          (_) => setState(() => _lastError = 'No battery data.'),
-          test: (error) => error is PlatformException,
-        );
+  void batteryLevel() async {
+    String batteryLevel;
+    try {
+      final int level = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery at $level%.';
+    } on PlatformException catch (e, stackTrace) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
+      await Rollbar.warn(e, stackTrace);
+    }
+
+    setState(() {
+      _batteryLevel = batteryLevel;
+    });
   }
 
-  Future<void> faultyMethod() async {
-    await platform
+  void faultyMethod() {
+    platform
         .invokeMethod('faultyMethod')
         .then((message) => setState(() => _faultyMsg = message))
         .catchError(
-          (error) => setState(() => _lastError = error.toString()),
+          (e) => setState(() => _lastError = e.message),
           test: (_) => false,
         );
   }
@@ -81,6 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
+      } else {
+        Rollbar.log(Level.info, message: 'Counter incremented to $_counter');
       }
     });
   }
@@ -110,18 +111,11 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: divideByZero,
         child: Text('Divide by zero'),
       ),
-    ];
-
-    if (Platform.isIOS) {
-      bodyChildren.add(
+      if (Platform.isIOS)
         ElevatedButton(
           onPressed: crash,
           child: Text('Crash application'),
         ),
-      );
-    }
-
-    bodyChildren.addAll(<Widget>[
       Divider(),
       Text('Times you have pushed the plus button:'),
       Text(
@@ -140,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
       )
-    ]);
+    ];
 
     return Scaffold(
       appBar: AppBar(

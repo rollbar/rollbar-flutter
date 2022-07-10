@@ -19,7 +19,7 @@ void main() async {
     handleUncaughtErrors: true,
   );
 
-  final rollbar = await Rollbar.start(config: config);
+  final rollbar = await Rollbar.run(config: config);
 
   for (var i = 10; i > 0; i--) {
     try {

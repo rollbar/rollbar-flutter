@@ -1,5 +1,5 @@
 {
-  "dart.flutterSdkPath": "/Users/matux/code/lib/flutter/flutter",
+  "dart.flutterSdkPath": "/Users/matux/fvm/versions/3.0.4",
   // Remove .fvm files from search
   "search.exclude": {
     "**/.fvm": true

@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../rollbar.dart';
 import 'ext/collections.dart';
+import 'ext/environment.dart';
 import 'sender/persistent_sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
@@ -11,8 +12,8 @@ class Config {
   final String endpoint;
   final String environment;
   final String framework;
-  final String? codeVersion;
-  final String package;
+  final String codeVersion;
+  final String? package;
   final bool persistPayloads;
   final bool handleUncaughtErrors;
   final bool includePlatformLogs;
@@ -30,12 +31,12 @@ class Config {
   const Config({
     required this.accessToken,
     this.endpoint = 'https://api.rollbar.com/api/1/item/',
-    this.environment = 'development',
+    this.environment = Environment.mode,
     this.framework = 'dart',
-    this.codeVersion,
-    required this.package,
+    this.codeVersion = 'main',
+    this.package,
     this.persistPayloads = false,
-    this.handleUncaughtErrors = false,
+    this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
     this.transformer,
     this.sender = persistentSender,

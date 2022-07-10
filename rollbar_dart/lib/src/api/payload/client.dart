@@ -8,39 +8,30 @@ class Client {
   final String hostname;
   final String os;
   final String osVersion;
-  final String rootPackage;
-  final Map<String, String> dart;
+  final String dartVersion;
 
   const Client({
     required this.locale,
     required this.hostname,
     required this.os,
     required this.osVersion,
-    required this.rootPackage,
-    required this.dart,
+    required this.dartVersion,
   });
 
-  factory Client.fromPlatform({required String rootPackage}) => Client(
+  factory Client.fromPlatform() => Client(
         locale: Platform.localeName,
         hostname: Platform.localHostname,
         os: Platform.operatingSystem,
         osVersion: Platform.operatingSystemVersion,
-        rootPackage: rootPackage,
-        dart: {'version': Platform.version},
+        dartVersion: Platform.version,
       );
 
   /// Converts the object into a Json encodable map.
-  ///
-  /// The `root` field is not supported by the backend as part of the `client`
-  /// element, and it's being sent under the `server` element, though this
-  /// might change in the future.
-  ///
-  /// See the file `core_notifier.dart` for details.
   JsonMap toMap() => {
         'locale': locale,
         'hostname': hostname,
         'os': os,
         'os_version': osVersion,
-        'dart': dart
+        'dart': {'version': dartVersion}
       };
 }

@@ -58,8 +58,8 @@ class ConnectivityState {
   int get hashCode => timestamp.hashCode ^ connectivityOn.hashCode;
 }
 
-/// Declaration of the [ConnectivityMonitor] interface.
-abstract class ConnectivityMonitor {
+/// Declaration of the [ConnectivityMonitoring] interface.
+abstract class ConnectivityMonitoring {
   /// Current connectivity state.
   ConnectivityState get connectivityState;
 
@@ -91,18 +91,18 @@ abstract class ConnectivityMonitor {
   /// Disables current manual connectivity state override (if any).
   void disableOverride();
 
-  /// Initializesthis instance of the [ConnectivityMonitor].
+  /// Initializesthis instance of the [ConnectivityMonitoring].
   void initialize();
 
   /// Disposes of (closes) the [onConnectivityChanged] event stream forever.
   void disposeOnConnectivityChanged();
 }
 
-abstract class ConnectivityMonitorBase implements ConnectivityMonitor {
+abstract class ConnectivityMonitorBase implements ConnectivityMonitoring {
   static const bool defaultConnectivity = true;
 
   /// Connectivity status based on the detection method(s)
-  /// implemented by this [ConnectivityMonitor].
+  /// implemented by this [ConnectivityMonitoring].
   bool _connectivityOn = defaultConnectivity;
 
   /// Connectivity eoverride's expiration timestamp (if any).

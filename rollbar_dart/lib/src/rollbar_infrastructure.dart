@@ -3,7 +3,7 @@ import 'dart:isolate';
 import 'dart:developer';
 
 import 'package:meta/meta.dart';
-import 'package:rollbar_common/rollbar_common.dart' as common;
+import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
 
 import 'ext/module.dart';
@@ -17,15 +17,17 @@ class RollbarInfrastructure implements PayloadProcessing {
   final ReceivePort _receivePort;
   final SendPort _sendPort;
   final Isolate _isolate;
+  static var i = 1;
 
   RollbarInfrastructure._(this._isolate, this._receivePort, this._sendPort);
 
-  static Future<RollbarInfrastructure> start({
-    required Config config,
-  }) async {
+  static Future<RollbarInfrastructure> start() async {
+    ++i;
     final receivePort = ReceivePort();
     final isolate = await Isolate.spawn(work, receivePort.sendPort);
-    final sendPort = (await receivePort.first)..send(config);
+    final sendPort = await receivePort.first
+      ..send(Rollbar.config);
+    ++i;
     return RollbarInfrastructure._(isolate, receivePort, sendPort);
   }
 
@@ -48,9 +50,12 @@ class RollbarInfrastructure implements PayloadProcessing {
     final infrastructurePort = ReceivePort();
     sendPort.send(infrastructurePort.sendPort);
 
+    ++i;
+
     // Wait for messages from the main isolate.
     await for (final message in infrastructurePort) {
-      log('Infrastructure Isolate got ${message.runtimeType}');
+      log('Infrastructure Isolate got ${message.runtimeType} | $i');
+      ++i;
       bool continueProcessing = await _process(message);
       if (!continueProcessing) {
         break;
@@ -85,34 +90,35 @@ class RollbarInfrastructure implements PayloadProcessing {
   }
 
   static void _processConfig(Config config) {
-    if (common.ServiceLocator.instance.registrationsCount == 0) {
-      common.ServiceLocator.instance
-          .register<PayloadRepository, PayloadRepository>(
-              PayloadRepository.create(config.persistPayloads));
-      common.ServiceLocator.instance.register<Sender, HttpSender>(HttpSender(
-          endpoint: config.endpoint, accessToken: config.accessToken));
-      common.ServiceLocator.instance
-          .register<common.ConnectivityMonitor, ConnectivityMonitor>(
-              ConnectivityMonitor());
-    }
+    if (ServiceLocator.instance.registrationsCount > 0) return;
+
+    ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
+      PayloadRepository.create(config.persistPayloads),
+    );
+    ServiceLocator.instance.register<Sender, HttpSender>(
+      HttpSender(endpoint: config.endpoint, accessToken: config.accessToken),
+    );
+    ServiceLocator.instance
+        .register<ConnectivityMonitoring, ConnectivityMonitor>(
+      ConnectivityMonitor(),
+    );
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
-    final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
+    final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo != null) {
       repo.addPayloadRecord(payloadRecord);
-      await _processDestinationPendindRecords(payloadRecord.destination, repo);
+      await _processDestinationPendingRecords(payloadRecord.destination, repo);
     } else {
-      ModuleLogger.moduleLogger
-          .severe('PayloadRepository service was never registered!');
+      ModuleLogger.moduleLogger.severe('PayloadRepository not registered');
       await HttpSender(
-              endpoint: payloadRecord.destination.endpoint,
-              accessToken: payloadRecord.destination.accessToken)
-          .sendString(payloadRecord.payloadJson, null);
+        endpoint: payloadRecord.destination.endpoint,
+        accessToken: payloadRecord.destination.accessToken,
+      ).sendString(payloadRecord.payloadJson, null);
     }
   }
 
-  static Future<void> _processDestinationPendindRecords(
+  static Future<void> _processDestinationPendingRecords(
     Destination destination,
     PayloadRepository repo,
   ) async {
@@ -140,7 +146,7 @@ class RollbarInfrastructure implements PayloadProcessing {
     PayloadRepository repo,
   ) async {
     final connectivityMonitor =
-        common.ServiceLocator.instance.tryResolve<common.ConnectivityMonitor>();
+        ServiceLocator.instance.tryResolve<ConnectivityMonitoring>();
     if (connectivityMonitor?.connectivityState.connectivityOn != true) {
       return false;
     }
@@ -164,14 +170,12 @@ class RollbarInfrastructure implements PayloadProcessing {
   }
 
   static Future<void> _processAllPendingRecords() async {
-    final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
+    final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo == null) {
-      ModuleLogger.moduleLogger
-          .severe('PayloadRepository service was never registered!');
+      ModuleLogger.moduleLogger.severe('PayloadRepository not registered');
     } else {
-      final destinations = repo.getDestinations();
-      for (final destination in destinations) {
-        await _processDestinationPendindRecords(destination, repo);
+      for (final destination in repo.destinations) {
+        await _processDestinationPendingRecords(destination, repo);
       }
       await repo.removeUnusedDestinationsAsync();
     }

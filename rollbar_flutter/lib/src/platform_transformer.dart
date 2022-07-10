@@ -5,8 +5,6 @@ import 'package:flutter/services.dart' show PlatformException;
 import 'package:rollbar_dart/rollbar.dart'
     show Body, Data, TraceChain, TraceInfo, Transformer;
 
-import '_internal/object.dart';
-
 /// Free function to create the transformer.
 ///
 /// Free and static functions are the only way we can pass factories to
@@ -43,8 +41,9 @@ class PlatformTransformer implements Transformer {
       'com.rollbar.flutter.RollbarTracePayload:';
 
   void _enrichAndroidTrace(PlatformException error, Data data) {
-    // We cannot use error.stackTrace here, it will contain 'com.rollbar.flutter.RollbarTracePayload:'
-    // only in debug mode, but not in release
+    // We cannot use error.stackTrace here, it will contain
+    // 'com.rollbar.flutter.RollbarTracePayload:' only in debug mode, but not
+    // in release
     if (error.message!.startsWith(androidTracePayloadPrefix)) {
       var message = error.message!.substring(androidTracePayloadPrefix.length);
       _attachPlatformPayload(message, data);
@@ -52,22 +51,21 @@ class PlatformTransformer implements Transformer {
   }
 
   void _attachPlatformPayload(String message, Data data) {
-    final embeddedPayload = jsonDecode(message);
-    final embeddedBody = embeddedPayload['data']['body'] as Map?;
+    final embeddedPayload = jsonDecode(message) as Map;
+    final embeddedBody = embeddedPayload['data']['body'] as Map;
 
     if (appendToChain) {
-      data.body = _prependPlatformTraceToChain(data.body, embeddedBody!);
+      data.body = _prependPlatformTraceToChain(data.body, embeddedBody);
     } else {
       data.platformPayload = embeddedPayload;
       _restoreDartChainMessage(
-          data.body.traces, embeddedBody.map(Body.fromMap)?.traces);
+          data.body.traces, Body.fromMap(embeddedBody)?.traces);
     }
   }
 
   Body _prependPlatformTraceToChain(Body dartBody, Map embeddedBody) {
-    var embeddedChain = Body.fromMap(embeddedBody)!.traces!;
-
-    var dartChain = dartBody.traces!;
+    final embeddedChain = Body.fromMap(embeddedBody)!.traces!;
+    final dartChain = dartBody.traces!;
 
     _restoreDartChainMessage(dartChain, embeddedChain);
 

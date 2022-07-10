@@ -31,17 +31,11 @@ class PayloadRepository {
   // Entities manipulation methods:
   /////////////////////////////////
 
-  Set<Destination> getDestinations() {
-    final Set<Destination> destinations = <Destination>{};
-    for (final row in _dataAccess.selectAllDestinations()) {
-      destinations.add(_createDestination(row));
-    }
-    return destinations;
-  }
+  Set<Destination> get destinations =>
+      _dataAccess.selectAllDestinations().map(_createDestination).toSet();
 
   int addDestination(Destination destination) {
-    final int id = _dataAccess.insertDestination(destination);
-    return id;
+    return _dataAccess.insertDestination(destination);
   }
 
   void removeUnusedDestinations() {
@@ -49,17 +43,12 @@ class PayloadRepository {
   }
 
   Set<PayloadRecord> getPayloadRecords() {
-    final recordRows = _dataAccess.selectAllPayloadRecords();
-    final Map<int, Destination> destinations = <int, Destination>{};
-    for (final destination in getDestinations()) {
-      destinations[destination.id!] = destination;
-    }
-    final Set<PayloadRecord> records = <PayloadRecord>{};
-    for (final row in recordRows) {
-      records.add(_createPayloadRecord(
-          row, destinations[row[PayloadRecordsTable.colDestinationKey]]!));
-    }
-    return records;
+    final destinations = {for (final d in this.destinations) d.id!: d};
+    return _dataAccess
+        .selectAllPayloadRecords()
+        .map((row) => _createPayloadRecord(
+            row, destinations[row[PayloadRecordsTable.colDestinationKey]]!))
+        .toSet();
   }
 
   Set<PayloadRecord> getPayloadRecordsForDestination(Destination destination) {
@@ -131,7 +120,7 @@ class PayloadRepository {
   ///////////////////////////////////////
 
   Future<Set<Destination>> getDestinationsAsync() async {
-    return getDestinations();
+    return destinations;
   }
 
   Future<int> addDestinationAsync(Destination destination) async {
