@@ -35,7 +35,7 @@ class PersistentSender implements Sender {
   @override
   Future<bool> sendString(String payload) async {
     try {
-      Rollbar.infrastructure.process(
+      Rollbar.process(
           record: PayloadRecord.create(
               configJson: jsonEncode(_config.toMap()),
               payloadJson: payload,

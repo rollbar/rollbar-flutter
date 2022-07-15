@@ -1,69 +1,64 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:rollbar_dart/rollbar_dart.dart';
-import 'flutter1_workarounds.dart' as rbdart;
 import 'package:rollbar_flutter/rollbar.dart';
 
-import 'platform_exception_utils.dart';
+import 'utils/platform_exception_utils.dart';
 
 void main() {
-  const channel = MethodChannel('rollbar_flutter');
+  const channel = MethodChannel('com.rollbar.flutter');
 
   TestWidgetsFlutterBinding.ensureInitialized();
   late List<MethodCall> callsReceived;
   late MockSender sender;
 
+  Config defaultConfig() => const Config(
+      accessToken: 'SomeAccessToken',
+      package: 'some_package_name',
+      includePlatformLogs: true,
+      handleUncaughtErrors: true,
+      sender: mockSender);
+
   setUp(() async {
-    rbdart.RollbarPlatformInfo.isAndroid = true;
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
     sender = MockSender();
     when(sender.send(any)).thenAnswer((_) async => true);
 
     callsReceived = [];
-    channel.setMockMethodCallHandler((MethodCall methodCall) async {
+    channel.setMockMethodCallHandler((methodCall) async {
       callsReceived.add(methodCall);
       return '42';
     });
   });
 
   tearDown(() {
-    rbdart.RollbarPlatformInfo.reset();
+    debugDefaultTargetPlatformOverride = null;
     channel.setMockMethodCallHandler(null);
   });
 
-  Config defaultConfig() {
-    return Config(
-        accessToken: 'BlaBlaAccessToken',
-        environment: 'production',
-        package: 'some_package_name',
-        codeVersion: '0.1.0beta',
-        includePlatformLogs: true,
-        handleUncaughtErrors: true,
-        sender: createMockSender);
-  }
-
-  List<MethodCall> getCalls(String method) {
-    return callsReceived.where((c) => c.method == method).toList();
-  }
-
-  test('When running application it should initialize platform component',
-      () async {
+  test('Initialize platform component when running application', () async {
     final config = defaultConfig();
-    final _ = await RollbarFlutter.start(config: config);
+    await RollbarFlutter.run(config, () {
+      final initCalls =
+          callsReceived.where((call) => call.method == 'initialize').toList();
+      expect(initCalls.length, equals(1));
 
-    var initCalls = getCalls('initialize');
-    expect(initCalls.length, equals(1));
-    var init = initCalls[0];
-    // These are the arguments the our platform plugin expects:
-    expect(init.arguments.length, equals(8));
-    expect(init.arguments['endpoint'], equals(config.endpoint));
-    expect(init.arguments['accessToken'], equals(config.accessToken));
-    expect(init.arguments['environment'], equals(config.environment));
-    expect(init.arguments['codeVersion'], equals(config.codeVersion));
-    expect(init.arguments['handleUncaughtErrors'],
-        equals(config.handleUncaughtErrors));
-    expect(init.arguments['includePlatformLogs'],
-        equals(config.includePlatformLogs));
+      final init = initCalls[0];
+      // These are the arguments the our platform plugin expects:
+      expect(init.arguments.length, equals(9));
+      expect(init.arguments['accessToken'], equals(config.accessToken));
+      expect(init.arguments['endpoint'], equals(config.endpoint));
+      expect(init.arguments['environment'], equals(config.environment));
+      expect(init.arguments['framework'], equals(config.framework));
+      expect(init.arguments['codeVersion'], equals(config.codeVersion));
+      expect(init.arguments['package'], equals(config.package));
+      expect(init.arguments['persistPayloads'], equals(config.persistPayloads));
+      expect(init.arguments['handleUncaughtErrors'],
+          equals(config.handleUncaughtErrors));
+      expect(init.arguments['includePlatformLogs'],
+          equals(config.includePlatformLogs));
+    });
   });
 
   test('if error is default PlatformException it should parse java trace',
@@ -71,46 +66,51 @@ void main() {
     //fail('TODO');
   });
 
-  test('if error is enriched PlatformException it should add platform_payload',
-      () async {
+  test('Add platform_payload if PlatformException is enriched', () async {
     // await RollbarInfrastructure.instance
     //     .initialize(withPersistentPayloadStore: true);
 
-    // Disable uncaught error handling, otherwise we initialize an error handling
-    // isolate and we're forced to use a serializable sender factory, instead
-    // of the closure
-    var config = Config.from(defaultConfig(),
-        handleUncaughtErrors: false, sender: (config) => sender);
+    // Disable uncaught error handling, otherwise we initialize an error
+    // handling isolate and we're forced to use a serializable sender factory,
+    // instead of the closure
+    final config = defaultConfig().copyWith(
+      handleUncaughtErrors: false,
+      sender: (_) => sender,
+    );
 
-    final rollbar = await RollbarFlutter.start(config: config);
+    await RollbarFlutter.run(config, () async {
+      final exception = androidPlatformException(
+        topFrameMethod: 'platformSpecificStuff',
+      );
 
-    var exception = createAndroidPlatformException(
-        topFrameMethod: 'getPlatformSpecificStuff');
+      await Rollbar.error(exception, StackTrace.empty);
 
-    await rollbar.error(exception, StackTrace.empty);
+      final payload = verify(await sender.send(captureAny)).captured.single;
+      expect(payload['data']['framework'], equals('flutter'));
 
-    var payload = verify(await sender.send(captureAny)).captured.single;
+      final platformPayload = payload['data']['platform_payload'];
+      expect(platformPayload, isNotNull);
+      expect(
+          platformPayload['data']['notifier']['name'], equals('rollbar-java'));
 
-    expect(payload['data']['framework'], equals('flutter'));
-
-    var platformPayload = payload['data']['platform_payload'];
-    expect(platformPayload, isNotNull);
-    expect(platformPayload['data']['notifier']['name'], equals('rollbar-java'));
-
-    var frames = platformPayload['data']['body']['trace']['frames'];
-    expect(frames.length, equals(2));
-    expect(frames[0]['method'], equals('getPlatformSpecificStuff'));
+      final frames = platformPayload['data']['body']['trace']['frames'];
+      expect(frames.length, equals(2));
+      expect(frames[0]['method'], equals('platformSpecificStuff'));
+    });
   });
 }
 
-class MockSender extends Mock implements rbdart.Sender {
+class MockSender extends Mock implements Sender {
   @override
-  Future<bool> send(Map<String, dynamic>? payload) {
-    return super.noSuchMethod(Invocation.method(#send, [payload]),
-        returnValue: Future<bool>.value(true));
+  Future<bool> send(JsonMap? payload) {
+    return super.noSuchMethod(
+      Invocation.method(#send, [payload]),
+      returnValue: Future<bool>.value(true),
+    );
   }
+
+  @override
+  Future<bool> sendString(String _) async => true;
 }
 
-MockSender createMockSender(Config c) {
-  return MockSender();
-}
+MockSender mockSender(Config _) => MockSender();

@@ -13,17 +13,14 @@ class RollbarInfrastructure {
   final ReceivePort _receivePort;
   final SendPort _sendPort;
   final Isolate _isolate;
-  static var i = 1;
 
   RollbarInfrastructure._(this._isolate, this._receivePort, this._sendPort);
 
-  static Future<RollbarInfrastructure> start() async {
-    ++i;
+  static Future<RollbarInfrastructure> start({required Config config}) async {
     final receivePort = ReceivePort();
     final isolate = await Isolate.spawn(work, receivePort.sendPort);
-    final sendPort = await receivePort.first
-      ..send(Rollbar.config);
-    ++i;
+    final sendPort = await receivePort.first;
+    sendPort.send(config.toMap());
     return RollbarInfrastructure._(isolate, receivePort, sendPort);
   }
 
@@ -45,12 +42,8 @@ class RollbarInfrastructure {
     final infrastructurePort = ReceivePort();
     sendPort.send(infrastructurePort.sendPort);
 
-    ++i;
-
     // Wait for messages from the main isolate.
     await for (final message in infrastructurePort) {
-      log('Infrastructure Isolate got ${message.runtimeType} | $i');
-      ++i;
       bool continueProcessing = await _process(message);
       if (!continueProcessing) {
         break;

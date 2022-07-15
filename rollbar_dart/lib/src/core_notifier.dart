@@ -14,6 +14,7 @@ typedef DataTransform = Future<Data> Function(Data);
 /// - Apply the configured transformation, if any.
 /// - Send the occurrence payload to Rollbar via a [Sender].
 class CoreNotifier {
+  final Config config;
   final Sender _sender;
   final Transformer? _transformer;
 
@@ -21,14 +22,14 @@ class CoreNotifier {
   static const version = '0.3.0-beta';
   static const name = 'rollbar-dart';
 
-  CoreNotifier()
-      : _sender = Rollbar.config.sender(Rollbar.config),
-        _transformer = Rollbar.config.transformer?.call(Rollbar.config);
+  CoreNotifier({required this.config})
+      : _sender = config.sender(config),
+        _transformer = config.transformer?.call(config);
 
   Future<void> message(Level level, String message) async {
     final body = Body.from(message);
-    final data = await DataBuilder.data(level, body);
-    final payload = Payload(Rollbar.config.accessToken, data);
+    final data = await makeData(config, level, body);
+    final payload = Payload(config.accessToken, data);
     await _sender.send(payload.toMap());
   }
 
@@ -39,8 +40,8 @@ class CoreNotifier {
     String? message,
   ]) async {
     final body = Body.from(message, error: error, stackTrace: stackTrace);
-    final data = await DataBuilder.data(level, body, map(error, stackTrace));
-    final payload = Payload(Rollbar.config.accessToken, data);
+    final data = await makeData(config, level, body, map(error, stackTrace));
+    final payload = Payload(config.accessToken, data);
     await _sender.send(payload.toMap());
   }
 
@@ -48,11 +49,10 @@ class CoreNotifier {
   DataTransform? map(dynamic error, StackTrace? stackTrace) =>
       (_transformer?.transform).map((transform) =>
           (data) async => await transform(error, stackTrace, data));
-}
 
-@internal
-extension DataBuilder on Data {
-  static Future<Data> data(
+  @internal
+  Future<Data> makeData(
+    Config config,
     Level level,
     Body body, [
     DataTransform? transform,
@@ -63,12 +63,12 @@ extension DataBuilder on Data {
         language: 'dart',
         level: level,
         platform: Platform.operatingSystem,
-        framework: Rollbar.config.framework,
-        codeVersion: Rollbar.config.codeVersion,
+        framework: config.framework,
+        codeVersion: config.codeVersion,
         client: Client.fromPlatform(),
-        environment: Rollbar.config.environment,
+        environment: config.environment,
         notifier: {'version': CoreNotifier.version, 'name': CoreNotifier.name},
-        server: {'root': Rollbar.config.package});
+        server: {'root': config.package});
 
     return await transform?.call(data) ?? data;
   }

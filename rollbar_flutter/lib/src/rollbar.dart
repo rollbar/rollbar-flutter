@@ -22,10 +22,10 @@ class RollbarFlutter {
 
   RollbarFlutter._();
 
-  static Future<void> run({
-    required Config config,
-    required RollbarClosure appRunner,
-  }) async {
+  static Future<void> run(
+    Config config,
+    RollbarClosure appRunner,
+  ) async {
     await Rollbar.run(
         config: config.copyWith(
             framework: 'flutter', transformer: platformTransformer));

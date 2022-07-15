@@ -8,16 +8,36 @@ PODS:
   - rollbar_flutter (0.0.1):
     - Flutter
     - Rollbar (~> 1.12.14)
+  - sqlite3 (3.39.0):
+    - sqlite3/common (= 3.39.0)
+  - sqlite3/common (3.39.0)
+  - sqlite3/fts5 (3.39.0):
+    - sqlite3/common
+  - sqlite3/json1 (3.39.0):
+    - sqlite3/common
+  - sqlite3/perf-threadsafe (3.39.0):
+    - sqlite3/common
+  - sqlite3/rtree (3.39.0):
+    - sqlite3/common
+  - sqlite3_flutter_libs (0.0.1):
+    - Flutter
+    - sqlite3 (~> 3.39.0)
+    - sqlite3/fts5
+    - sqlite3/json1
+    - sqlite3/perf-threadsafe
+    - sqlite3/rtree
 
 DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - Flutter (from `Flutter`)
   - rollbar_flutter (from `.symlinks/plugins/rollbar_flutter/ios`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
 
 SPEC REPOS:
   trunk:
     - ReachabilitySwift
     - Rollbar
+    - sqlite3
 
 EXTERNAL SOURCES:
   connectivity_plus:
@@ -26,6 +46,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   rollbar_flutter:
     :path: ".symlinks/plugins/rollbar_flutter/ios"
+  sqlite3_flutter_libs:
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
 
 SPEC CHECKSUMS:
   connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
@@ -33,6 +55,8 @@ SPEC CHECKSUMS:
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   Rollbar: 58f315609433558a82af5a54d7888bb020bec561
   rollbar_flutter: b7542ba065cdece3cef1b316c748d24d129ead51
+  sqlite3: ddcd34fff6490ab01f36560b87eabbebf8b2121d
+  sqlite3_flutter_libs: f2619ae5df7f92e8bc330243073c815ee061e033
 
 PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
 

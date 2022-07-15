@@ -1,7 +1,5 @@
 import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart' as trace;
-
-import '../../ext/object.dart';
 import '../../ext/collections.dart';
 
 /// Contains the information of a single frame in a stack trace.
@@ -23,11 +21,12 @@ class Frame {
   });
 
   factory Frame.from(trace.Frame frame) {
-    final sp = frame.member?.splitOnce('.');
+    final filename = Uri.parse(frame.uri.toString()).path;
+    final typeAndMember = frame.member?.splitOnce('.');
     return Frame(
-        filename: Uri.parse(frame.uri.toString()).path,
-        type: sp?.first,
-        member: sp?.second,
+        filename: filename,
+        type: typeAndMember?.first,
+        member: typeAndMember?.second,
         line: frame.line,
         column: frame.column);
   }

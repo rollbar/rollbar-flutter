@@ -12,10 +12,7 @@ Future<void> main() async {
     package: 'rollbar_flutter_example',
   );
 
-  await RollbarFlutter.run(
-    config: config,
-    appRunner: () => runApp(MyApp()),
-  );
+  await RollbarFlutter.run(config, () => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {
