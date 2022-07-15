@@ -8,18 +8,18 @@ void main() {
     test('Json roundtrip serialization test', () {
       final frame = Frame()
         ..className = 'ignore.this.Class'
-        ..colno = 3
+        ..column = 3
         ..filename = 'test.dart'
-        ..lineno = 100
+        ..line = 100
         ..method = 'someMethod';
 
       final asJson = jsonEncode(frame.toMap());
       final recovered = Frame.fromMap(jsonDecode(asJson));
 
       expect(recovered.className, equals(frame.className));
-      expect(recovered.colno, equals(frame.colno));
+      expect(recovered.column, equals(frame.column));
       expect(recovered.filename, equals(frame.filename));
-      expect(recovered.lineno, equals(frame.lineno));
+      expect(recovered.line, equals(frame.line));
       expect(recovered.method, equals(frame.method));
     });
 
@@ -29,9 +29,9 @@ void main() {
       final recovered = Frame.fromMap(jsonDecode(asJson));
 
       expect(recovered.className, equals(nullFrame.className));
-      expect(recovered.colno, equals(nullFrame.colno));
+      expect(recovered.column, equals(nullFrame.column));
       expect(recovered.filename, equals(nullFrame.filename));
-      expect(recovered.lineno, equals(nullFrame.lineno));
+      expect(recovered.line, equals(nullFrame.line));
       expect(recovered.method, equals(nullFrame.method));
     });
 

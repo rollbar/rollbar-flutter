@@ -1,5 +1,13 @@
 import 'dart:io' show Platform;
+import 'dart:async';
+
+import 'package:meta/meta.dart';
+
 import '../../rollbar.dart';
+import 'ext/object.dart';
+
+@internal
+typedef DataTransform = Future<Data> Function(Data);
 
 /// A class that performs the core functions for the notifier:
 /// - Prepare a payload from the provided error or message.
@@ -17,35 +25,51 @@ class CoreNotifier {
       : _sender = Rollbar.config.sender(Rollbar.config),
         _transformer = Rollbar.config.transformer?.call(Rollbar.config);
 
-  Future<void> log(
+  Future<void> message(Level level, String message) async {
+    final body = Body.from(message);
+    final data = await DataBuilder.data(level, body);
+    final payload = Payload(Rollbar.config.accessToken, data);
+    await _sender.send(payload.toMap());
+  }
+
+  Future<void> notify(
     Level level,
     dynamic error,
-    StackTrace? stackTrace,
+    StackTrace? stackTrace, [
     String? message,
-    PayloadProcessing processor,
-  ) async {
-    var data = Data()
-      ..body = Body.from(message, error, stackTrace)
-      ..timestamp = DateTime.now().microsecondsSinceEpoch
-      ..language = 'dart'
-      ..level = level
-      ..platform = Platform.operatingSystem
-      ..framework = Rollbar.config.framework
-      ..codeVersion = Rollbar.config.codeVersion
-      ..client = Client.fromPlatform()
-      ..environment = Rollbar.config.environment
-      ..notifier = {'version': CoreNotifier.version, 'name': CoreNotifier.name}
-      ..server = {'root': Rollbar.config.package};
+  ]) async {
+    final body = Body.from(message, error: error, stackTrace: stackTrace);
+    final data = await DataBuilder.data(level, body, map(error, stackTrace));
+    final payload = Payload(Rollbar.config.accessToken, data);
+    await _sender.send(payload.toMap());
+  }
 
-    if (_transformer != null) {
-      data = await _transformer!.transform(error, stackTrace, data);
-    }
+  @internal
+  DataTransform? map(dynamic error, StackTrace? stackTrace) =>
+      (_transformer?.transform).map((transform) =>
+          (data) async => await transform(error, stackTrace, data));
+}
 
-    final payload = Payload(
-      accessToken: Rollbar.config.accessToken,
-      data: data,
-    );
+@internal
+extension DataBuilder on Data {
+  static Future<Data> data(
+    Level level,
+    Body body, [
+    DataTransform? transform,
+  ]) async {
+    final data = Data(
+        body: body,
+        timestamp: DateTime.now().microsecondsSinceEpoch,
+        language: 'dart',
+        level: level,
+        platform: Platform.operatingSystem,
+        framework: Rollbar.config.framework,
+        codeVersion: Rollbar.config.codeVersion,
+        client: Client.fromPlatform(),
+        environment: Rollbar.config.environment,
+        notifier: {'version': CoreNotifier.version, 'name': CoreNotifier.name},
+        server: {'root': Rollbar.config.package});
 
-    await _sender.send(payload.toMap(), processor);
+    return await transform?.call(data) ?? data;
   }
 }

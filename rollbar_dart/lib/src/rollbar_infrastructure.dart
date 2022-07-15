@@ -9,11 +9,7 @@ import 'package:rollbar_dart/rollbar_dart.dart';
 import 'ext/module.dart';
 import 'sender/http_sender.dart';
 
-abstract class PayloadProcessing {
-  void process({required PayloadRecord record});
-}
-
-class RollbarInfrastructure implements PayloadProcessing {
+class RollbarInfrastructure {
   final ReceivePort _receivePort;
   final SendPort _sendPort;
   final Isolate _isolate;
@@ -40,7 +36,6 @@ class RollbarInfrastructure implements PayloadProcessing {
 
   //static final RollbarInfrastructure instance = RollbarInfrastructure._();
 
-  @override
   void process({required PayloadRecord record}) {
     _sendPort.send(record);
   }
@@ -114,7 +109,7 @@ class RollbarInfrastructure implements PayloadProcessing {
       await HttpSender(
         endpoint: payloadRecord.destination.endpoint,
         accessToken: payloadRecord.destination.accessToken,
-      ).sendString(payloadRecord.payloadJson, null);
+      ).sendString(payloadRecord.payloadJson);
     }
   }
 
@@ -151,7 +146,7 @@ class RollbarInfrastructure implements PayloadProcessing {
       return false;
     }
 
-    final success = await sender.sendString(record.payloadJson, null);
+    final success = await sender.sendString(record.payloadJson);
     if (success) {
       repo.removePayloadRecord(record);
       return true;
@@ -170,14 +165,14 @@ class RollbarInfrastructure implements PayloadProcessing {
   }
 
   static Future<void> _processAllPendingRecords() async {
-    final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
-    if (repo == null) {
-      ModuleLogger.moduleLogger.severe('PayloadRepository not registered');
-    } else {
-      for (final destination in repo.destinations) {
-        await _processDestinationPendingRecords(destination, repo);
+    final repository = ServiceLocator.instance.tryResolve<PayloadRepository>();
+
+    if (repository != null && repository.destinations.isNotEmpty == true) {
+      for (final destination in repository.destinations) {
+        await _processDestinationPendingRecords(destination, repository);
       }
-      await repo.removeUnusedDestinationsAsync();
+
+      await repository.removeUnusedDestinationsAsync();
     }
   }
 }

@@ -41,6 +41,13 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+void classlessException(MethodChannel platform) {
+  platform.invokeMethod('faultyMethod').catchError(
+        (e) => print('$e'),
+        test: (_) => false,
+      );
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.rollbar.flutter.example/activity');
 
@@ -81,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
       } else {
-        Rollbar.log(Level.info, message: 'Counter incremented to $_counter');
+        Rollbar.message('Counter incremented to $_counter');
       }
     });
   }

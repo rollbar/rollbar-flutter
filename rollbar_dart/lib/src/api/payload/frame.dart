@@ -1,34 +1,54 @@
+import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart' as trace;
+
+import '../../ext/object.dart';
 import '../../ext/collections.dart';
 
 /// Contains the information of a single frame in a stack trace.
+@sealed
+@immutable
 class Frame {
-  int? colno;
-  int? lineno;
-  String? method;
-  String? filename;
-  String? className;
+  final String filename;
+  final String? type;
+  final String? member;
+  final int? line;
+  final int? column;
 
-  Frame();
+  const Frame({
+    required this.filename,
+    this.type,
+    this.member,
+    this.line,
+    this.column,
+  });
 
-  factory Frame.fromMap(JsonMap map) => Frame()
-    ..colno = map['colno']
-    ..lineno = map['lineno']
-    ..method = map['method']
-    ..filename = map['filename']
-    ..className = map['class_name'];
+  factory Frame.from(trace.Frame frame) {
+    final sp = frame.member?.splitOnce('.');
+    return Frame(
+        filename: Uri.parse(frame.uri.toString()).path,
+        type: sp?.first,
+        member: sp?.second,
+        line: frame.line,
+        column: frame.column);
+  }
 
-  factory Frame.from(trace.Frame frame) => Frame()
-    ..colno = frame.column
-    ..lineno = frame.line
-    ..method = frame.member
-    ..filename = Uri.parse(frame.uri.toString()).path;
+  factory Frame.fromMap(JsonMap map) => Frame(
+      filename: map['filename'],
+      member: map['method'],
+      type: map['class_name'],
+      line: map['lineno'],
+      column: map['colno']);
+
+  @override
+  String toString() => 'Frame($type.$member($filename:$line:$column))';
 
   JsonMap toMap() => {
-        'colno': colno,
-        'lineno': lineno,
-        'method': method,
         'filename': filename,
-        'class_name': className,
-      }..removeWhere((k, v) => v == null);
+        'class_name': type,
+        'method': member,
+        'lineno': line,
+        'colno': column,
+      }..compact();
 }
+
+extension _Attributes on JsonMap {}

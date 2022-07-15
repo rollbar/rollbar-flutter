@@ -1,6 +1,5 @@
 import 'dart:core';
 import 'package:meta/meta.dart';
-import 'package:rollbar_dart/src/ext/tuple.dart';
 
 @internal
 typedef JsonMap = Map<String, dynamic>;
@@ -14,10 +13,8 @@ extension TryFirst<E> on Iterable<E> {
   E? get tryFirst => isNotEmpty ? first : null;
 }
 
-@internal
 extension Predicates<E> on Iterable<E> {
-  /// Checks whether all elements of this iterable satisfy the given
-  /// predicate [p].
+  /// Checks whether all elements of this iterable satisfy [p].
   ///
   /// Checks every element in iteration order, and returns `true` if
   /// all of them make [p] return `true`, otherwise returns false.
@@ -29,40 +26,32 @@ extension Predicates<E> on Iterable<E> {
   /// result = numbers.all((n) => n < 10); // true;
   /// ```
   @internal
-  bool all(Predicate<E> p) {
+  bool all(Predicate p) {
     for (E e in this) {
       if (!p(e)) return false;
     }
 
     return true;
   }
-
-  /// Maps over elements that satisfy the given predicate.
-  Iterable<E> mapIf(Predicate<E> p, Transform<E, E> f) =>
-      map((e) => p(e) ? f(e) : e);
 }
 
-@internal
-extension SplitString on String {
-  Tuple2<String, String> splitOnce(Pattern p) {
-    final it = p.allMatches(this).iterator;
-    if (it.moveNext()) {
-      final m = it.current;
-      return Tuple2(substring(0, m.start), substring(m.end));
-    }
+extension MapIf<E> on Iterable<E> {
+  Iterable<E> mapIf(Predicate<E> p, Transform<E, E> f) =>
+      map((e) => p(e) ? f(e) : e);
 
-    return Tuple2('', '');
+  void forEachIf(Predicate<E> p, void Function(E) f) {
+    for (final e in this) {
+      if (p(e)) f(e);
+    }
   }
 }
 
-@internal
 extension CompactList<E> on List<E?> {
   /// Returns a new non-null List by filtering out null values in the this List.
   @internal
   List<E> compact() => whereType<E>().toList();
 }
 
-@internal
 extension WhereMap<K, V> on Map<K, V> {
   /// Returns a new Map by filtering its elements using the given predicate.
   @internal
@@ -79,7 +68,6 @@ extension WhereMap<K, V> on Map<K, V> {
   }
 }
 
-@internal
 extension CompactMap<K, V> on Map<K, V?> {
   /// Returns a new non-null Map by filtering out null values in the this Map.
   @internal

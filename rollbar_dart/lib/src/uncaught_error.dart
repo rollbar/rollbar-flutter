@@ -13,15 +13,8 @@ import 'core_notifier.dart';
 class UncaughtErrorHandler {
   static late final SendPort sendPort;
   static late final CoreNotifier notifier;
-  static late final PayloadProcessing processor;
 
-  static Future<void> start(
-    Config config,
-    CoreNotifier coreNotifier,
-    PayloadProcessing payloadProcessor,
-  ) async {
-    processor = payloadProcessor;
-
+  static Future<void> start(Config config, CoreNotifier coreNotifier) async {
     final receivePort = ReceivePort();
     notifier = coreNotifier;
 
@@ -46,7 +39,7 @@ class UncaughtErrorHandler {
         final error = _getError(message[0]);
         final trace = _getTrace(message[1]);
         log('UncaughtErrorHandler._handleError got error: $error).');
-        await notifier.log(Level.error, error, trace, null, processor);
+        await notifier.notify(Level.error, error, trace);
       } on Exception catch (e) {
         log('Failed to process rollbar error message: $e');
       }
@@ -86,8 +79,6 @@ class UncaughtErrorHandler {
     final clazz = exceptionPart.substring(0, exceptionPart.length - 1).trim();
     final message = error.substring(exceptionPart.length).trim();
 
-    return ExceptionInfo()
-      ..clazz = clazz
-      ..message = message;
+    return ExceptionInfo(type: clazz, message: message);
   }
 }

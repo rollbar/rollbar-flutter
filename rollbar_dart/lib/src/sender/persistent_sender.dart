@@ -30,13 +30,12 @@ class PersistentSender implements Sender {
   /// Sends the provided payload as the body of POST request to
   /// the configured endpoint.
   @override
-  Future<bool> send(JsonMap payload, PayloadProcessing? processor) async =>
-      sendString(jsonEncode(payload), processor);
+  Future<bool> send(JsonMap payload) async => sendString(jsonEncode(payload));
 
   @override
-  Future<bool> sendString(String payload, PayloadProcessing? processor) async {
+  Future<bool> sendString(String payload) async {
     try {
-      processor?.process(
+      Rollbar.infrastructure.process(
           record: PayloadRecord.create(
               configJson: jsonEncode(_config.toMap()),
               payloadJson: payload,

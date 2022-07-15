@@ -11,9 +11,9 @@ void main() {
       var frames = [
         Frame()
           ..className = 'ignore.this.Class'
-          ..colno = 3
+          ..column = 3
           ..filename = 'test.dart'
-          ..lineno = 100
+          ..line = 100
           ..method = 'someMethod',
         Frame()
           ..className = 'ignore.this.AsWell'
@@ -48,9 +48,9 @@ void main() {
       var frames = [
         Frame()
           ..className = 'ignore.this.Class'
-          ..colno = 3
+          ..column = 3
           ..filename = 'test.dart'
-          ..lineno = 100
+          ..line = 100
           ..method = 'inAChain',
         Frame()
           ..className = 'ignore.this.AsWell'

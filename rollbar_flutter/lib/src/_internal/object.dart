@@ -9,7 +9,7 @@ T Function(U Function(T)) constant<T, U>(T x) => (U Function(T) f) {
 
 extension TryAs on Object? {
   /// Turns this `Object?` into an `Object`.
-  T as<T>() => this as T;
+  T unwrap<T>() => this as T;
 
   /// Safely casts `this` to `T` if `this` is `T`,
   /// otherwise returns `null`.
@@ -21,8 +21,6 @@ extension TryAs on Object? {
 extension HigherOrderMap<T> on T? {
   /// Applies a transformation `f` to `this` if `this` is not `null`.
   U? map<U>(U Function(T) f) => this != null ? f(this as T) : null;
-
-  U? flatMap<U>(U? Function(T) f) => this != null ? f(this as T) : null;
 
   T or(T alt) => this == null ? alt : this as T;
 

@@ -65,7 +65,7 @@ void main() {
 
         var frames = [
           Frame()
-            ..lineno = 3
+            ..line = 3
             ..method = 'onTheDartSide'
         ];
 
@@ -143,7 +143,7 @@ void main() {
 
         var frames = [
           Frame()
-            ..lineno = 3
+            ..line = 3
             ..method = 'attachedFailureChain'
         ];
 
