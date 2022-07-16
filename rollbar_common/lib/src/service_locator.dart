@@ -1,6 +1,5 @@
 import 'dart:core';
 import '_internal/module.dart';
-import '_internal/object.dart';
 
 /// [ServiceLocatorByType]
 ///
@@ -105,7 +104,12 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
   @override
   TService? tryResolve<TService>() {
     _assertSafeTransitionTo(ServiceLocatorState.queryPhase);
-    return _servicesByType[TService].tryAs<TService>();
+
+    Object? result = _servicesByType[TService];
+    if (result == null) {
+      return null;
+    }
+    return result as TService;
   }
 
   @override
