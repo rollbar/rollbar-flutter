@@ -1,7 +1,6 @@
 library rollbar;
 
 export 'src/config.dart';
-export 'src/platform.dart';
 export 'src/rollbar.dart';
 export 'src/rollbar_infrastructure.dart';
 export 'src/sender/sender.dart';
