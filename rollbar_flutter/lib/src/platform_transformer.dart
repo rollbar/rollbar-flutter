@@ -5,7 +5,7 @@ import 'package:flutter/services.dart' show PlatformException;
 import 'package:rollbar_dart/rollbar.dart'
     show Body, Data, TraceChain, TraceInfo, Transformer;
 
-import '_internal/collections.dart';
+typedef JsonMap = Map<String, dynamic>;
 
 /// Free function to create the transformer.
 ///
