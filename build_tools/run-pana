@@ -12,7 +12,7 @@ function run-pana-checks {
         PUB_CACHE=$HOME/.pub-cache
     fi
 
-    flutter pub global activate pana
+    flutter pub global activate pana 0.21.12
 
     mkdir -p pana-report
 
