@@ -5,7 +5,6 @@ import 'package:meta/meta.dart';
 import 'config.dart';
 import 'rollbar_infrastructure.dart';
 import 'core_notifier.dart';
-//import 'uncaught_error_handler.dart';
 import 'payload_repository/payload_record.dart';
 import 'api/payload/level.dart';
 
@@ -21,7 +20,6 @@ class Rollbar {
 
   final RollbarInfrastructure _infra;
   final CoreNotifier _notifier;
-  //final Future<UncaughtErrorHandler?> errorHandler;
 
   Rollbar._(this._infra, this._notifier);
 
@@ -33,14 +31,6 @@ class Rollbar {
     final infra = await RollbarInfrastructure.start(config: config);
     final notifier = CoreNotifier(config: config);
     _current = Rollbar._(infra, notifier);
-
-    // if (config.handleUncaughtErrors) {
-    //   await UncaughtErrorHandler.start(
-    //     config,
-    //     rollbar._coreNotifier,
-    //     infrastructure,
-    //   );
-    // }
   }
 
   @internal
