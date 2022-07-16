@@ -61,32 +61,15 @@ import 'package:rollbar_dart/rollbar_dart.dart';
 ////// Service aiding in optimizing network operations.
 /// [FlutterConnectivityMonitor] is designed to work as a singleton.
 class FlutterConnectivityMonitor extends ConnectivityMonitor {
-  late final Connectivity _connectivity;
+  final Connectivity _connectivity = Connectivity();
   late final StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   FlutterConnectivityMonitor() {
-    _connectivity = Connectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-        _processConnectivityEvent,
-        onDone: _processConnectivityStreamCompletion,
-        onError: _processConnectivityDetectionError);
-  }
-
-  void _processConnectivityEvent(ConnectivityResult connectivityResult) {
-    switch (connectivityResult) {
-      case ConnectivityResult.none:
-        connectivityOn = false;
-        break;
-      case ConnectivityResult.ethernet:
-      case ConnectivityResult.wifi:
-      case ConnectivityResult.mobile:
-      default:
-        connectivityOn = true;
-        break;
-    }
-  }
-
-  void _processConnectivityStreamCompletion() {
+      (status) {
+        connectivityOn = status != ConnectivityResult.none;
+      },
+    );
   }
 
   @override
