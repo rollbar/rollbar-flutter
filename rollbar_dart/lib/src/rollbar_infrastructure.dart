@@ -5,7 +5,6 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart' as common;
 import 'package:rollbar_dart/rollbar_dart.dart';
 
-import 'ext/module.dart';
 import 'sender/http_sender.dart';
 
 class RollbarInfrastructure {
@@ -96,7 +95,6 @@ class RollbarInfrastructure {
       repo.addPayloadRecord(payloadRecord);
       await _processDestinationPendingRecords(payloadRecord.destination, repo);
     } else {
-      ModuleLogger.moduleLogger.severe('PayloadRepository not registered');
       await HttpSender(
         endpoint: payloadRecord.destination.endpoint,
         accessToken: payloadRecord.destination.accessToken,

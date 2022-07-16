@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 
-import '../ext/module.dart';
 import '../ext/collections.dart';
 import '../api/response.dart';
+import '../logging.dart';
 import 'sender.dart';
 
 /// HTTP [Sender] implementation.
@@ -38,15 +38,8 @@ class HttpSender implements Sender {
       );
 
       return !Response.from(response).isError;
-    } on SocketException catch (_) {
-      ModuleLogger.moduleLogger
-          .info('SocketException while posting payload: $_');
-
-      return false;
     } catch (error, stackTrace) {
-      ModuleLogger.moduleLogger
-          .info('Error posting payload: $error. Stack trace: $stackTrace');
-
+      err('Error posting payload', error, stackTrace);
       return false;
     }
   }

@@ -1,5 +1,4 @@
 import 'dart:core';
-import '_internal/module.dart';
 
 /// [ServiceLocatorByType]
 ///
@@ -60,9 +59,8 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
   final Map<Type, Object> _servicesByType = {};
   final Map<Enum, Service> _servicesByID = {};
 
-  ServiceLocator._() {
-    ModuleLogger.moduleLogger.finer('Created $ServiceLocator instance.');
-  }
+  ServiceLocator._();
+
   bool _assertSafeTransitionTo(ServiceLocatorState state) {
     switch (state.index - _state.index) {
       case 1:

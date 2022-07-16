@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'package:rollbar_dart/rollbar_dart.dart';
-import 'package:rollbar_flutter/src/_internal/module.dart';
 
 /// Service aiding in optimizing network operations.
 /// [FlutterConnectivityMonitor] is designed to work as a singleton.
@@ -87,14 +86,7 @@ class FlutterConnectivityMonitor extends ConnectivityMonitor {
     }
   }
 
-  void _processConnectivityDetectionError(Object error, StackTrace stackTrace) {
-    ModuleLogger.moduleLogger
-        .warning('Connectivity Detection Error:', error, stackTrace);
-  }
-
   void _processConnectivityStreamCompletion() {
-    ModuleLogger.moduleLogger
-        .info('Connectivity Detection Event Stream completed!');
   }
 
   @override
