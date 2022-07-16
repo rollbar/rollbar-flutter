@@ -57,11 +57,6 @@ class RollbarInfrastructure {
   }
 
   static Future<bool> _process(dynamic message) async {
-    // [HACK] This delay helps to avoid occasional sqlite's "db locked"
-    // errors/exceptions. Keep it until we figure out why sqlite has these
-    // errors randomly:
-    await Future.delayed(Duration(milliseconds: 25));
-
     if (message == null) {
       await _processAllPendingRecords();
       return false;
