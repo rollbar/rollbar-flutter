@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-import 'package:rollbar_dart/rollbar_dart.dart' as rdart;
+import 'package:rollbar_dart/rollbar_dart.dart';
 import 'package:rollbar_flutter/src/_internal/module.dart';
 
 /// Service aiding in optimizing network operations.
-/// [ConnectivityMonitor] is designed to work as a singleton.
+/// [FlutterConnectivityMonitor] is designed to work as a singleton.
 ///
 /// Usage:
 ///
@@ -60,12 +60,12 @@ import 'package:rollbar_flutter/src/_internal/module.dart';
 /// ```
 ///
 ////// Service aiding in optimizing network operations.
-/// [ConnectivityMonitor] is designed to work as a singleton.
-class ConnectivityMonitor extends rdart.ConnectivityMonitor {
+/// [FlutterConnectivityMonitor] is designed to work as a singleton.
+class FlutterConnectivityMonitor extends ConnectivityMonitor {
   late final Connectivity _connectivity;
   late final StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
-  ConnectivityMonitor() {
+  FlutterConnectivityMonitor() {
     _connectivity = Connectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
         _processConnectivityEvent,

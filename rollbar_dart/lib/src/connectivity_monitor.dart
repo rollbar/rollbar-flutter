@@ -17,7 +17,7 @@ class ConnectivityMonitor extends ConnectivityMonitorBase {
   Future<void> checkConnectivity() async {
     // we cannot judge the connectivity status based on unknown
     // active interfaces status, hence, let's consider it as connected:
-    connectivityOn = (await hasActiveNetworkInterface()) ?? true;
+    connectivityOn = await hasActiveNetworkInterface() ?? true;
   }
 
   /// Tests on availability of an active network interface.

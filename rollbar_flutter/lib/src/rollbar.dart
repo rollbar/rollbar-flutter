@@ -4,7 +4,6 @@ import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-export 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_dart/rollbar.dart';
 
 import 'platform_transformer.dart';

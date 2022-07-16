@@ -1,4 +1,6 @@
 library rollbar;
 
-export 'src/rollbar.dart' hide ConnectivityMonitor;
+export 'package:rollbar_dart/rollbar.dart';
+
+export 'src/rollbar.dart';
 export 'src/connectivity_monitor.dart';

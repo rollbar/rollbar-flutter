@@ -64,14 +64,14 @@ void main() {
     test('Basic operation test', () {});
 
     test('Test active network interface', () async {
-      var cm = ConnectivityMonitor();
+      var cm = FlutterConnectivityMonitor();
       // here we assume that the tests are always ran on a dev machine or
       // a CI server that have an active network interface:
       expect(await cm.hasActiveNetworkInterface(), true);
     });
 
     test('Test connectivity to Rollbar.com', () async {
-      var cm = ConnectivityMonitor();
+      var cm = FlutterConnectivityMonitor();
       // here we assume that the tests are always ran on a dev machine or
       // a CI server that have an active network interface:
       expect(await cm.hasInternetConnectionToRollbar(), true);
@@ -81,7 +81,7 @@ void main() {
       int offCount = 0;
       int onCount = 0;
 
-      var cm = ConnectivityMonitor();
+      var cm = FlutterConnectivityMonitor();
       cm.onConnectivityChanged.listen(
           (state) => {state.connectivityOn ? onCount++ : offCount++},
           onDone: () => {expect(onCount + offCount, 2)});
@@ -94,7 +94,7 @@ void main() {
     });
 
     test('Test connectivity events stream', () async {
-      final connectivityMonitor = ConnectivityMonitor();
+      final connectivityMonitor = FlutterConnectivityMonitor();
 
       var count = 0;
       connectivityMonitor.onConnectivityChanged.listen((state) {
