@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/core_notifier.dart';
 import 'package:rollbar_dart/src/uncaught_error_handler.dart';
 import 'package:test/test.dart';
 
@@ -12,6 +11,7 @@ import 'client_server_utils.dart';
 Future<void> main() async {
   group('UncaughtErrorHandler tests', () {
     late RawTextSocket server;
+    // ignore: deprecated_member_use_from_same_package
     late UncaughtErrorHandler handler;
 
     setUp(() async {
@@ -26,6 +26,7 @@ Future<void> main() async {
           handleUncaughtErrors: true,
           sender: createTextSender);
 
+      // ignore: deprecated_member_use_from_same_package
       handler = await UncaughtErrorHandler.run(config: config);
     });
 

@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 import 'config.dart';
 import 'rollbar_infrastructure.dart';
 import 'core_notifier.dart';
-import 'uncaught_error_handler.dart';
+//import 'uncaught_error_handler.dart';
 import 'payload_repository/payload_record.dart';
 import 'api/payload/level.dart';
 

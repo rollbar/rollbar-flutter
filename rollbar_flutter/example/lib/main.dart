@@ -7,15 +7,17 @@ import 'package:rollbar_flutter/rollbar.dart';
 
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
-  final config = Config(
+  const config = Config(
     accessToken: '71ec6c76a22f46f0be567c633a3fb894',
     package: 'rollbar_flutter_example',
   );
 
-  await RollbarFlutter.run(config, () => runApp(MyApp()));
+  await RollbarFlutter.run(config, () => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,25 +26,18 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Rollbar Flutter Example'),
+      home: const MyHomePage(title: 'Rollbar Flutter Example'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
-}
-
-void classlessException(MethodChannel platform) {
-  platform.invokeMethod('faultyMethod').catchError(
-        (e) => print('$e'),
-        test: (_) => false,
-      );
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -103,39 +98,39 @@ class _MyHomePageState extends State<MyHomePage> {
     final bodyChildren = <Widget>[
       ElevatedButton(
         onPressed: batteryLevel,
-        child: Text('Get Battery Level'),
+        child: const Text('Get Battery Level'),
       ),
       Text(_batteryLevel),
       ElevatedButton(
         onPressed: faultyMethod,
-        child: Text('Call Faulty Method'),
+        child: const Text('Call Faulty Method'),
       ),
       Text(_faultyMsg),
       ElevatedButton(
         onPressed: divideByZero,
-        child: Text('Divide by zero'),
+        child: const Text('Divide by zero'),
       ),
       if (Platform.isIOS)
         ElevatedButton(
           onPressed: crash,
-          child: Text('Crash application'),
+          child: const Text('Crash application'),
         ),
-      Divider(),
-      Text('Times you have pushed the plus button:'),
+      const Divider(),
+      const Text('Times you have pushed the plus button:'),
       Text(
         '$_counter',
         style: Theme.of(context).textTheme.headline4,
       ),
-      Divider(height: 10),
+      const Divider(height: 10),
       Text(
         'Most recent Flutter error:',
         style: Theme.of(context).textTheme.headline6,
       ),
       Padding(
-        padding: EdgeInsets.only(top: 16),
+        padding: const EdgeInsets.only(top: 16),
         child: Text(
           _lastError,
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: Theme.of(context).textTheme.headline4,
         ),
       )
     ];
@@ -153,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: incrementCounter,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

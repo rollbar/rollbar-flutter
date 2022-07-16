@@ -2,7 +2,7 @@ import 'dart:core';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
-import 'package:rollbar_common/rollbar_common.dart';
+import 'package:rollbar_common/rollbar_common.dart' as common;
 import 'package:rollbar_dart/rollbar_dart.dart';
 
 import 'ext/module.dart';
@@ -80,22 +80,23 @@ class RollbarInfrastructure {
   }
 
   static void _processConfig(Config config) {
-    if (ServiceLocator.instance.registrationsCount > 0) return;
+    if (common.ServiceLocator.instance.registrationsCount > 0) return;
 
-    ServiceLocator.instance.register<PayloadRepository, PayloadRepository>(
+    common.ServiceLocator.instance
+        .register<PayloadRepository, PayloadRepository>(
       PayloadRepository.create(config.persistPayloads),
     );
-    ServiceLocator.instance.register<Sender, HttpSender>(
+    common.ServiceLocator.instance.register<Sender, HttpSender>(
       HttpSender(endpoint: config.endpoint, accessToken: config.accessToken),
     );
-    ServiceLocator.instance
-        .register<ConnectivityMonitoring, ConnectivityMonitor>(
+    common.ServiceLocator.instance
+        .register<ConnectivityMonitor, ConnectivityMonitor>(
       ConnectivityMonitor(),
     );
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
-    final repo = ServiceLocator.instance.tryResolve<PayloadRepository>();
+    final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo != null) {
       repo.addPayloadRecord(payloadRecord);
       await _processDestinationPendingRecords(payloadRecord.destination, repo);
@@ -136,7 +137,7 @@ class RollbarInfrastructure {
     PayloadRepository repo,
   ) async {
     final connectivityMonitor =
-        ServiceLocator.instance.tryResolve<ConnectivityMonitoring>();
+        common.ServiceLocator.instance.tryResolve<ConnectivityMonitor>();
     if (connectivityMonitor?.connectivityState.connectivityOn != true) {
       return false;
     }
@@ -160,7 +161,8 @@ class RollbarInfrastructure {
   }
 
   static Future<void> _processAllPendingRecords() async {
-    final repository = ServiceLocator.instance.tryResolve<PayloadRepository>();
+    final repository =
+        common.ServiceLocator.instance.tryResolve<PayloadRepository>();
 
     if (repository != null && repository.destinations.isNotEmpty == true) {
       for (final destination in repository.destinations) {

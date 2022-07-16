@@ -123,7 +123,7 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
 
   @override
   bool registerIfNone<TService extends Object, T extends TService>(
-      T singleton,
+    T singleton,
   ) {
     if (!_servicesByType.containsKey(TService)) {
       _servicesByType[TService] = singleton;

@@ -18,4 +18,5 @@ dependency_overrides:
     path: ..
 
 dev_dependencies:
+  lints: '>=1.0.0 <3.0.0'
   pedantic: '>=1.9.2 <1.12.0'
