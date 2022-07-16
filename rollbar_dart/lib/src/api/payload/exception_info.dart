@@ -40,6 +40,10 @@ class ExceptionInfo {
           message: message ?? this.message,
           description: description ?? this.description);
 
+  @override
+  String toString() =>
+      'ExceptionInfo(type: $type, message: $message, description: $description)';
+
   JsonMap toMap() => {
         'class': type,
         'message': message,

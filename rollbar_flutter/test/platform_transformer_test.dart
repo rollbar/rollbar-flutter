@@ -34,8 +34,8 @@ void main() {
         );
 
         const frames = [
-          Frame(filename: filename, member: 'testThis'),
-          Frame(filename: filename, member: 'what'),
+          Frame(filename: filename, method: 'testThis'),
+          Frame(filename: filename, method: 'what'),
         ];
 
         final body = platformTraceInfo(exception, frames);
@@ -51,8 +51,8 @@ void main() {
 
         final dartTrace = traces[1];
         expect(dartTrace.frames, hasLength(2));
-        expect(dartTrace.frames[0].member, equals('testThis'));
-        expect(dartTrace.frames[1].member, equals('what'));
+        expect(dartTrace.frames[0].method, equals('testThis'));
+        expect(dartTrace.frames[1].method, equals('what'));
 
         // The message was temporarily hijacked to transfer the platform
         // payload, let's make sure it's been restored
@@ -67,7 +67,7 @@ void main() {
         );
 
         const frames = [
-          Frame(filename: filename, member: 'onTheDartSide', line: 3)
+          Frame(filename: filename, method: 'onTheDartSide', line: 3)
         ];
 
         final body = platformTraceInfo(exception, frames);
@@ -80,16 +80,16 @@ void main() {
 
         final rootCause = traces.first;
         expect(rootCause.frames.length, greaterThan(1));
-        expect(rootCause.frames.first.member, equals('thisWillBeRethrown'));
+        expect(rootCause.frames.first.method, equals('thisWillBeRethrown'));
 
         final rethrownTrace = traces[1];
         expect(rethrownTrace.frames, hasLength(2));
-        expect(rethrownTrace.frames[0].member, equals('processError'));
-        expect(rethrownTrace.frames[1].member, equals('catchAndThrow'));
+        expect(rethrownTrace.frames[0].method, equals('processError'));
+        expect(rethrownTrace.frames[1].method, equals('catchAndThrow'));
 
         final dartTrace = traces[2];
         expect(dartTrace.frames, hasLength(1));
-        expect(dartTrace.frames.first.member, equals('onTheDartSide'));
+        expect(dartTrace.frames.first.method, equals('onTheDartSide'));
 
         expect(dartTrace.exception.message, equals(expectedMessage));
       });
@@ -108,7 +108,7 @@ void main() {
           includeLineNumber: true,
         );
 
-        const frames = [Frame(filename: filename, member: 'thisFails')];
+        const frames = [Frame(filename: filename, method: 'thisFails')];
 
         final body = platformTraceInfo(exception, frames);
         final original = data(body: body);
@@ -120,7 +120,7 @@ void main() {
 
         final dartTrace = traces.first;
         expect(dartTrace.frames, hasLength(1));
-        expect(dartTrace.frames.first.member, equals('thisFails'));
+        expect(dartTrace.frames.first.method, equals('thisFails'));
 
         expect(dartTrace.exception.message, equals(expectedMessage));
 
@@ -141,7 +141,7 @@ void main() {
         );
 
         const frames = [
-          Frame(filename: filename, member: 'attachedFailureChain', line: 3)
+          Frame(filename: filename, method: 'attachedFailureChain', line: 3)
         ];
 
         final body = platformTraceInfo(exception, frames);
@@ -154,7 +154,7 @@ void main() {
 
         final dartTrace = traces.first;
         expect(dartTrace.frames, hasLength(1));
-        expect(dartTrace.frames.first.member, equals('attachedFailureChain'));
+        expect(dartTrace.frames.first.method, equals('attachedFailureChain'));
 
         expect(dartTrace.exception.message, equals(expectedMessage));
 

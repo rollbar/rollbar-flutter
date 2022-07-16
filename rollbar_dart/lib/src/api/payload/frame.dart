@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart' as trace;
+
+import '../../ext/trace.dart';
 import '../../ext/collections.dart';
 
 /// Contains the information of a single frame in a stack trace.
@@ -8,46 +10,56 @@ import '../../ext/collections.dart';
 class Frame {
   final String filename;
   final String? type;
-  final String? member;
+  final String? method;
   final int? line;
   final int? column;
 
   const Frame({
     required this.filename,
     this.type,
-    this.member,
+    this.method,
     this.line,
     this.column,
   });
 
-  factory Frame.from(trace.Frame frame) {
-    final filename = Uri.parse(frame.uri.toString()).path;
-    final typeAndMember = frame.member?.splitOnce('.');
-    return Frame(
-        filename: filename,
-        type: typeAndMember?.first,
-        member: typeAndMember?.second,
-        line: frame.line,
-        column: frame.column);
-  }
+  factory Frame.from(trace.Frame frame) => Frame(
+      filename: frame.path,
+      type: frame.type,
+      method: frame.method,
+      line: frame.line,
+      column: frame.column);
 
+  @override
   factory Frame.fromMap(JsonMap map) => Frame(
       filename: map['filename'],
-      member: map['method'],
+      method: map['method'],
       type: map['class_name'],
       line: map['lineno'],
       column: map['colno']);
 
+  String get location => [
+        filename,
+        line == null && column != null ? '???' : line,
+        column,
+      ].where(isNotNull).join(':');
+
+  String get member => [
+        type,
+        method ?? '???',
+      ].where(isNotNull).join('.');
+
   @override
-  String toString() => 'Frame($type.$member($filename:$line:$column))';
+  String toString() => [
+        'Frame: ',
+        if (member.isNotEmpty) '$member ',
+        '($location)',
+      ].join();
 
   JsonMap toMap() => {
         'filename': filename,
         'class_name': type,
-        'method': member,
+        'method': method,
         'lineno': line,
         'colno': column,
-      }..compact();
+      }.compact();
 }
-
-extension _Attributes on JsonMap {}

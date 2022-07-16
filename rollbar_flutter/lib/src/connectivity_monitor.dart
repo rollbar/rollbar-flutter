@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'package:rollbar_dart/rollbar_dart.dart' as rdart;
-
 import 'package:rollbar_flutter/src/_internal/module.dart';
 
 /// Service aiding in optimizing network operations.

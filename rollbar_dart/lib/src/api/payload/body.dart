@@ -108,9 +108,9 @@ class TraceChain implements Body {
 @sealed
 @immutable
 class Message implements Body {
-  final String body;
+  final String text;
 
-  const Message([this.body = '']);
+  const Message([this.text = '']);
 
   factory Message.fromMap(JsonMap attributes) => Message(attributes.message);
 
@@ -120,7 +120,7 @@ class Message implements Body {
   @override
   JsonMap toMap() => {
         'message': {
-          'body': body,
+          'body': text,
         }
       };
 }

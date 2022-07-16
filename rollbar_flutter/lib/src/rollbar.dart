@@ -26,9 +26,10 @@ class RollbarFlutter {
     Config config,
     RollbarClosure appRunner,
   ) async {
-    await Rollbar.run(
-        config: config.copyWith(
-            framework: 'flutter', transformer: platformTransformer));
+    await Rollbar.run(config.copyWith(
+      framework: 'flutter',
+      transformer: platformTransformer,
+    ));
 
     if (!config.handleUncaughtErrors) {
       WidgetsFlutterBinding.ensureInitialized();

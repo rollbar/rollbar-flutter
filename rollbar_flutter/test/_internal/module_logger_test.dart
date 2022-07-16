@@ -20,11 +20,13 @@ void main() {
 
     test('Module Logger Name', () {
       expect(
-          ModuleLogger.moduleLogger.fullName ==
-              'com.rollbar.sdk.${Module.name}',
-          true);
-      expect(ModuleLogger.moduleLogger.fullName == expectedModuleLoggerFullName,
-          true);
+        ModuleLogger.moduleLogger.fullName == 'com.rollbar.sdk.${Module.name}',
+        true,
+      );
+      expect(
+        ModuleLogger.moduleLogger.fullName == expectedModuleLoggerFullName,
+        true,
+      );
       expect(ModuleLogger.moduleLogger.name == Module.name, true);
       expect(ModuleLogger.moduleLogger.name == expectedModuleLoggerName, true);
     });

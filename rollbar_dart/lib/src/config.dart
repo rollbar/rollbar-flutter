@@ -79,9 +79,7 @@ class Config {
       package: map['package'],
       persistPayloads: map['persistPayloads'],
       handleUncaughtErrors: map['handleUncaughtErrors'],
-      includePlatformLogs: map['includePlatformLogs'],
-      transformer: map['transformer'],
-      sender: map['sender']);
+      includePlatformLogs: map['includePlatformLogs']);
 
   JsonMap toMap() => {
         'accessToken': accessToken,

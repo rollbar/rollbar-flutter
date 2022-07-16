@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:stack_trace/stack_trace.dart';
+import 'package:stack_trace/stack_trace.dart' as stacktrace;
 import 'package:meta/meta.dart';
+import 'object.dart';
 import 'collections.dart';
 import '../api/payload/frame.dart' as rollbar;
 
@@ -22,15 +23,28 @@ extension TraceAdapter on StackTrace {
   List<rollbar.Frame> get frames =>
       toTrace().frames.map(rollbar.Frame.from).toList();
 
-  Trace toTrace() {
+  stacktrace.Trace toTrace() {
     if (isNative) {
       final frames = LineSplitter.split(toString())
           .where((line) => line.contains(_Sig.nativeFrame))
-          .map((line) => Frame.parseVM(line.trimLeft()));
+          .map((line) => stacktrace.Frame.parseVM(line.trimLeft()));
 
-      return Trace(frames);
+      return stacktrace.Trace(frames);
     }
 
-    return Trace.from(this);
+    return stacktrace.Trace.from(this);
   }
+}
+
+@internal
+extension FrameExtensions on stacktrace.Frame {
+  /// The full path to the file in which the code is located.
+  String get path => Uri.parse(uri.toString()).path;
+
+  /// The type the member belongs to.
+  String? get type => member.flatMap(
+      (member) => member.contains('.') ? member.splitOnce('.').first : null);
+
+  String? get method => member.flatMap(
+      (member) => member.contains('.') ? member.splitOnce('.').second : member);
 }

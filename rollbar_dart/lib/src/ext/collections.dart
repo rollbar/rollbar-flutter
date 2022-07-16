@@ -2,16 +2,42 @@ import 'dart:core';
 import 'package:meta/meta.dart';
 import 'package:rollbar_dart/src/ext/tuple.dart';
 
-@internal
 typedef JsonMap = Map<String, dynamic>;
 
 typedef Predicate<E> = bool Function(E);
 typedef Transform<T, E> = T Function(E);
 
+/// Tests whether the given argument [x] is `null`.
+///
+/// Useful as a predicate for filter-type higher-order functions.
+///
+/// ```dart
+/// ['a', 'null', 'c', null, 'd'].any(isNull) // true
+/// ```
+bool isNull<T>(T? x) => x == null;
+
+/// Tests whether the given argument [x] is not `null`.
+///
+/// Useful as a predicate for filter-type higher-order functions.
+///
+/// ```dart
+/// ['a', 'null', 'c', null, 'd'].where(isNotNull) // ['a', 'c', 'd']
+/// ```
+bool isNotNull<T>(T? x) => x != null;
+
 extension TryFirst<E> on Iterable<E> {
   /// Returns the first element or `null` if the list is empty.
   @internal
   E? get tryFirst => isNotEmpty ? first : null;
+
+  /// Returns the [index]th element or `null` if out of bounds.
+  E? tryElementAt(int index) {
+    try {
+      return elementAt(index);
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 @internal

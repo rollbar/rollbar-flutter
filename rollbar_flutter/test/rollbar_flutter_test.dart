@@ -67,9 +67,6 @@ void main() {
   });
 
   test('Add platform_payload if PlatformException is enriched', () async {
-    // await RollbarInfrastructure.instance
-    //     .initialize(withPersistentPayloadStore: true);
-
     // Disable uncaught error handling, otherwise we initialize an error
     // handling isolate and we're forced to use a serializable sender factory,
     // instead of the closure

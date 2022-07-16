@@ -1,6 +1,5 @@
 import 'dart:core';
 import 'dart:isolate';
-import 'dart:developer';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
@@ -20,7 +19,13 @@ class RollbarInfrastructure {
     final receivePort = ReceivePort();
     final isolate = await Isolate.spawn(work, receivePort.sendPort);
     final sendPort = await receivePort.first;
-    sendPort.send(config.toMap());
+    // [todo] figure a cleanear way of removing the sender/transformer
+    // before, isolates imposes limitations where the transformer/senders
+    // functions must be free functions, but the latest architecture changes
+    // allow us to init everything that requires these functions before the
+    // isolates, so there's no more need for the Config at this point to carry
+    // these functions, thus eliminating the restriction/limitations.
+    sendPort.send(Config.fromMap(config.toMap()));
     return RollbarInfrastructure._(isolate, receivePort, sendPort);
   }
 
@@ -49,9 +54,6 @@ class RollbarInfrastructure {
         break;
       }
     }
-
-    //Isolate.current.kill(priority: Isolate.immediate);
-    //Isolate.exit();
   }
 
   static Future<bool> _process(dynamic message) async {

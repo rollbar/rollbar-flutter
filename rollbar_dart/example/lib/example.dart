@@ -14,7 +14,7 @@ void main() async {
     persistPayloads: true,
   );
 
-  await Rollbar.run(config: config);
+  await Rollbar.run(config);
 
   for (var i = 10; i > 0; i--) {
     try {
