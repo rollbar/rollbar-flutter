@@ -54,7 +54,6 @@ extension Predicates<E> on Iterable<E> {
   /// var result = numbers.all((n) => n >= 5); // false;
   /// result = numbers.all((n) => n < 10); // true;
   /// ```
-  @internal
   bool all(Predicate<E> p) {
     for (E e in this) {
       if (!p(e)) return false;
@@ -73,8 +72,8 @@ extension SplitString on String {
   Tuple2<String, String> splitOnce(Pattern p) {
     final it = p.allMatches(this).iterator;
     if (it.moveNext()) {
-      final m = it.current;
-      return Tuple2(substring(0, m.start), substring(m.end));
+      final match = it.current;
+      return Tuple2(substring(0, match.start), substring(match.end));
     }
 
     return Tuple2('', '');
@@ -84,14 +83,12 @@ extension SplitString on String {
 @internal
 extension CompactList<E> on List<E?> {
   /// Returns a new non-null List by filtering out null values in the this List.
-  @internal
   List<E> compact() => whereType<E>().toList();
 }
 
 @internal
 extension WhereMap<K, V> on Map<K, V> {
   /// Returns a new Map by filtering its elements using the given predicate.
-  @internal
   Map<K, V> where(bool Function(K, V) p) {
     Map<K, V> map = {};
 
@@ -108,7 +105,6 @@ extension WhereMap<K, V> on Map<K, V> {
 @internal
 extension CompactMap<K, V> on Map<K, V?> {
   /// Returns a new non-null Map by filtering out null values in the this Map.
-  @internal
   Map<K, V> compact() {
     Map<K, V> map = {};
 
