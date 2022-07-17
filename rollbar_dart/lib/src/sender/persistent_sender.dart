@@ -27,10 +27,11 @@ class PersistentSender implements Sender {
   Future<bool> sendString(String payload) async {
     try {
       Rollbar.process(
-          record: PayloadRecord.create(
+          record: PayloadRecord(
               configJson: jsonEncode(config.toMap()),
               payloadJson: payload,
-              destination: destination));
+              destination: destination,
+              timestamp: DateTime.now().toUtc()));
 
       return true;
     } catch (error, stackTrace) {

@@ -1,54 +1,45 @@
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
+import 'package:rollbar_dart/src/ext/identifiable.dart';
 
 import '../ext/collections.dart';
 
 @sealed
 @immutable
-class Destination {
-  final int id;
+class Destination implements IdentifiableById {
   final String endpoint;
   final String accessToken;
 
-  // Destination.create({
-  //   required String endpoint,
-  //   required String accessToken,
-  // }) : this(endpoint: endpoint, accessToken: accessToken);
+  /// This Destination id.
+  ///
+  /// Computed from the [endpoint] and [accessToken] hashCodes which are
+  /// stable between executions.
+  @override
+  int get id => endpoint.hashCode ^ accessToken.hashCode;
 
-  Destination({
+  const Destination({
     required this.endpoint,
     required this.accessToken,
-    required this.id,
   });
 
-  // int? get id => _id;
-
-  // @protected
-  // void assignID(int? value) {
-  //   _id = value;
-  // }
-
   Destination copyWith({
-    int? id,
     String? endpoint,
     String? accessToken,
   }) =>
       Destination(
           endpoint: endpoint ?? this.endpoint,
-          accessToken: accessToken ?? this.accessToken,
-          id: id ?? this.id);
+          accessToken: accessToken ?? this.accessToken);
 
   JsonMap toMap() => {
-        '_id': id,
         'endpoint': endpoint,
         'accessToken': accessToken,
       };
 
-  factory Destination.fromMap(Map<String, dynamic> map) => Destination(
-      id: map['id']?.toInt(),
-      endpoint: map['endpoint'],
-      accessToken: map['accessToken']);
+  factory Destination.fromMap(JsonMap map) => Destination(
+        endpoint: map['accessToken'],
+        accessToken: map['accessToken'],
+      );
 
   String toJson() => jsonEncode(toMap());
 
@@ -57,16 +48,15 @@ class Destination {
 
   @override
   String toString() =>
-      'Destination(_id: $id, endpoint: $endpoint, accessToken: $accessToken)';
+      'Destination(endpoint: $endpoint, accessToken: $accessToken)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Destination &&
-          other.id == id &&
           other.endpoint == endpoint &&
           other.accessToken == accessToken);
 
   @override
-  int get hashCode => id.hashCode ^ endpoint.hashCode ^ accessToken.hashCode;
+  int get hashCode => Object.hash(endpoint, accessToken);
 }

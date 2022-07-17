@@ -32,8 +32,8 @@ void main() {
       expect(dbAccess.selectAllDestinations().length, 0);
 
       // insert new destination:
-      var destination =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
+      const destination =
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
       var id = dbAccess.insertDestination(destination);
       expect(id, 1);
 
@@ -41,15 +41,15 @@ void main() {
       expect(() => dbAccess.insertDestination(destination), throwsException);
 
       // insert another destination:
-      destination =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
-      id = dbAccess.insertDestination(destination);
+      const destination2 =
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
+      id = dbAccess.insertDestination(destination2);
       expect(id, 2);
 
       // refuses to insert similar destination:
-      destination =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
-      expect(() => dbAccess.insertDestination(destination), throwsException);
+      const destination3 =
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
+      expect(() => dbAccess.insertDestination(destination3), throwsException);
 
       // verify total count of inserted destinations:
       expect(dbAccess.selectAllDestinations().length, 2);
@@ -66,13 +66,13 @@ void main() {
 
       // insert new destination:
       final destination1 =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
       var id = dbAccess.insertDestination(destination1);
       expect(id, 1);
 
       // insert another destination:
       final destination2 =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
       id = dbAccess.insertDestination(destination2);
       expect(id, 2);
 
@@ -91,10 +91,11 @@ void main() {
               .length,
           destination2RecordsCount);
 
-      final record11 = PayloadRecord.create(
+      final record11 = PayloadRecord(
           configJson: 'CONFIG1',
           payloadJson: 'PAYLOAD1',
-          destination: destination1);
+          destination: destination1,
+          timestamp: DateTime.now().toUtc());
       id = dbAccess.insertPayloadRecord(record11);
       expect(id, 1);
       expect(dbAccess.selectAllPayloadRecords().length, ++recordsCount);
@@ -104,10 +105,11 @@ void main() {
               .length,
           ++destination1RecordsCount);
 
-      final record12 = PayloadRecord.create(
+      final record12 = PayloadRecord(
           configJson: 'CONFIG1',
           payloadJson: 'PAYLOAD1',
-          destination: destination1);
+          destination: destination1,
+          timestamp: DateTime.now().toUtc());
       id = dbAccess.insertPayloadRecord(record12);
       expect(id, 2);
       expect(dbAccess.selectAllPayloadRecords().length, ++recordsCount);
@@ -117,10 +119,11 @@ void main() {
               .length,
           ++destination1RecordsCount);
 
-      final record21 = PayloadRecord.create(
+      final record21 = PayloadRecord(
           configJson: 'CONFIG2',
           payloadJson: 'PAYLOAD21',
-          destination: destination2);
+          destination: destination2,
+          timestamp: DateTime.now().toUtc());
       id = dbAccess.insertPayloadRecord(record21);
       expect(id, 3);
       expect(dbAccess.selectAllPayloadRecords().length, ++recordsCount);
@@ -130,10 +133,11 @@ void main() {
               .length,
           ++destination2RecordsCount);
 
-      final record22 = PayloadRecord.create(
+      final record22 = PayloadRecord(
           configJson: 'CONFIG2',
           payloadJson: 'PAYLOAD22',
-          destination: destination2);
+          destination: destination2,
+          timestamp: DateTime.now().toUtc());
       id = dbAccess.insertPayloadRecord(record22);
       expect(id, 4);
       expect(dbAccess.selectAllPayloadRecords().length, ++recordsCount);

@@ -34,25 +34,26 @@ void main() {
       expect(repo.destinations.length, 0);
 
       // insert new destination:
-      var destination =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
-      var id = await repo.addDestinationAsync(destination);
-      expect(id, 1);
+      const destination =
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
+      await repo.addDestinationAsync(destination);
+
+      repo.expect(id, 1);
 
       // refuses to insert the same destination more than once:
       expect(() async => await repo.addDestinationAsync(destination),
           throwsException);
 
       // insert another destination:
-      destination =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
-      id = await repo.addDestinationAsync(destination);
+      const destination2 =
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
+      id = await repo.addDestinationAsync(destination2);
       expect(id, 2);
 
       // refuses to insert similar destination:
-      destination =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
-      expect(() async => await repo.addDestinationAsync(destination),
+      const destination3 =
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
+      expect(() async => await repo.addDestinationAsync(destination3),
           throwsException);
 
       // verify total count of inserted destinations:
@@ -69,14 +70,14 @@ void main() {
       expect((await repo.getPayloadRecordsAsync()).length, 0);
 
       // insert new destination:
-      final destination1 =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
+      const destination1 =
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN1');
       var id = await repo.addDestinationAsync(destination1);
       expect(id, 1);
 
       // insert another destination:
-      final destination2 =
-          Destination.create(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
+      const destination2 =
+          Destination(endpoint: 'wwww.site.com', accessToken: 'TOKEN2');
       id = await repo.addDestinationAsync(destination2);
       expect(id, 2);
 
@@ -95,10 +96,11 @@ void main() {
               .length,
           destination2RecordsCount);
 
-      final record11 = PayloadRecord.create(
+      final record11 = PayloadRecord(
           configJson: 'CONFIG1',
           payloadJson: 'PAYLOAD1',
-          destination: destination1);
+          destination: destination1,
+          timestamp: DateTime.now().toUtc());
       id = await repo.addPayloadRecordAsync(record11);
       expect(id, 1);
       expect((await repo.getPayloadRecordsAsync()).length, ++recordsCount);
@@ -108,10 +110,11 @@ void main() {
               .length,
           ++destination1RecordsCount);
 
-      final record12 = PayloadRecord.create(
+      final record12 = PayloadRecord(
           configJson: 'CONFIG1',
           payloadJson: 'PAYLOAD1',
-          destination: destination1);
+          destination: destination1,
+          timestamp: DateTime.now().toUtc());
       id = await repo.addPayloadRecordAsync(record12);
       expect(id, 2);
       expect((await repo.getPayloadRecordsAsync()).length, ++recordsCount);
@@ -121,10 +124,11 @@ void main() {
               .length,
           ++destination1RecordsCount);
 
-      final record21 = PayloadRecord.create(
+      final record21 = PayloadRecord(
           configJson: 'CONFIG2',
           payloadJson: 'PAYLOAD21',
-          destination: destination2);
+          destination: destination2,
+          timestamp: DateTime.now().toUtc());
       id = await repo.addPayloadRecordAsync(record21);
       expect(id, 3);
       expect((await repo.getPayloadRecordsAsync()).length, ++recordsCount);
@@ -134,10 +138,11 @@ void main() {
               .length,
           ++destination2RecordsCount);
 
-      final record22 = PayloadRecord.create(
+      final record22 = PayloadRecord(
           configJson: 'CONFIG2',
           payloadJson: 'PAYLOAD22',
-          destination: destination2);
+          destination: destination2,
+          timestamp: DateTime.now().toUtc());
       id = await repo.addPayloadRecordAsync(record22);
       expect(id, 4);
       expect((await repo.getPayloadRecordsAsync()).length, ++recordsCount);
