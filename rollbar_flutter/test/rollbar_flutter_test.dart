@@ -71,7 +71,6 @@ void main() {
     // handling isolate and we're forced to use a serializable sender factory,
     // instead of the closure
     final config = defaultConfig().copyWith(
-      handleUncaughtErrors: false,
       sender: (_) => sender,
     );
 
