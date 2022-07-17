@@ -7,35 +7,45 @@ import '../ext/object.dart';
 import '../ext/collections.dart';
 
 /// Represents the response from the Rollbar API.
+///
+/// Rollbar will respond with either an error [message] xor a [Result].
+///
+/// [todo] if we ever drop support for Dart <2.17.0, turn this into an
+/// [Either monad](https://hackage.haskell.org/package/base-4.16.2.0/docs/Data-Either.html)
+/// [Result](https://doc.rust-lang.org/std/result/)
 @sealed
 @immutable
 class Response {
-  final int? err;
+  final int error;
   final String? message;
   final Result? result;
 
-  Response({
-    this.err,
+  const Response({
+    required this.error,
     this.message,
     this.result,
   });
 
-  bool get isError => err != null && err != 0;
+  bool get isError => error != 0;
 
-  Response copyWith({int? err, String? message, Result? result}) => Response(
-        err: err ?? this.err,
-        message: message ?? this.message,
-        result: result ?? this.result,
-      );
+  Response copyWith({
+    int? error,
+    String? message,
+    Result? result,
+  }) =>
+      Response(
+          error: error ?? this.error,
+          message: message ?? this.message,
+          result: result ?? this.result);
 
   JsonMap toMap() => {
-        'err': err,
+        'err': error,
         'message': message,
         'result': result?.toMap(),
       };
 
   factory Response.fromMap(JsonMap map) => Response(
-        err: map['err']?.toInt(),
+        error: map['err']?.toInt() ?? 0,
         message: map['message'],
         result: (map['result'] as JsonMap?).map(Result.fromMap),
       );
@@ -47,20 +57,18 @@ class Response {
 
   @override
   String toString() =>
-      'Response(err: $err, message: $message, result: $result)';
+      'Response(err: $error, message: $message, result: $result)';
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Response &&
-        other.err == err &&
-        other.message == message &&
-        other.result == result;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Response &&
+          other.error == error &&
+          other.message == message &&
+          other.result == result);
 
   @override
-  int get hashCode => err.hashCode ^ message.hashCode ^ result.hashCode;
+  int get hashCode => error.hashCode ^ message.hashCode ^ result.hashCode;
 }
 
 @sealed
@@ -83,11 +91,8 @@ class Result {
   String toJson() => json.encode(toMap());
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Result && other.uuid == uuid;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is Result && other.uuid == uuid);
 
   @override
   int get hashCode => uuid.hashCode;

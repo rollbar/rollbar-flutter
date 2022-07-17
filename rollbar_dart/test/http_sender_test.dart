@@ -20,7 +20,7 @@ void main() {
 }''');
       final rollbarResponse = Response.from(response);
 
-      expect(rollbarResponse.err, equals(0));
+      expect(rollbarResponse.error, equals(0));
       expect(rollbarResponse.result, isNotNull);
       expect(rollbarResponse.result!.uuid,
           equals('67ce3d7bfab14fd99218ae5c985071e7'));
@@ -34,7 +34,7 @@ void main() {
 }''');
       final rollbarResponse = Response.from(response);
 
-      expect(rollbarResponse.err, equals(1));
+      expect(rollbarResponse.error, equals(1));
       expect(rollbarResponse.message, equals('invalid token'));
       expect(rollbarResponse.result, isNull);
     });

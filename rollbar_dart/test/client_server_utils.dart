@@ -123,7 +123,7 @@ class RawTextSender implements Sender {
       socket.destroy();
     }
 
-    return !Response(err: 0, result: Result(uuid: '1234')).isError;
+    return !Response(error: 0, result: Result(uuid: '1234')).isError;
   }
 }
 
