@@ -7,13 +7,6 @@ import 'package:rollbar_dart/rollbar.dart'
 
 typedef JsonMap = Map<String, dynamic>;
 
-/// Free function to create the transformer.
-///
-/// Free and static functions are the only way we can pass factories to
-/// different isolates, which we need to be able to do to register uncaught
-/// error handlers.
-Transformer platformTransformer(_) => PlatformTransformer();
-
 /// This trasformer inspects some platform specific exception types, which
 /// carry additional occurrence details in their exception messages.
 /// This allows the Rollbar Dart notifier to report a complete trace including

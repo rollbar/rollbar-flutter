@@ -20,11 +20,8 @@ Future<void> main() async {
       final config = Config(
           accessToken: 'BlaBlaAccessToken',
           endpoint: server.endpoint,
-          environment: 'production',
           package: 'some_package_name',
-          codeVersion: '1.0.0',
-          handleUncaughtErrors: true,
-          sender: createTextSender);
+          sender: (config) => RawTextSender(config.port));
 
       // ignore: deprecated_member_use_from_same_package
       handler = await UncaughtErrorHandler.run(config: config);

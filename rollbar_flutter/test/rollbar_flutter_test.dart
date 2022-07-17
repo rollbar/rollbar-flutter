@@ -13,12 +13,12 @@ void main() {
   late List<MethodCall> callsReceived;
   late MockSender sender;
 
-  Config defaultConfig() => const Config(
+  Config defaultConfig() => Config(
       accessToken: 'SomeAccessToken',
       package: 'some_package_name',
       includePlatformLogs: true,
       handleUncaughtErrors: true,
-      sender: mockSender);
+      sender: (_) => sender);
 
   setUp(() async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -67,14 +67,7 @@ void main() {
   });
 
   test('Add platform_payload if PlatformException is enriched', () async {
-    // Disable uncaught error handling, otherwise we initialize an error
-    // handling isolate and we're forced to use a serializable sender factory,
-    // instead of the closure
-    final config = defaultConfig().copyWith(
-      sender: (_) => sender,
-    );
-
-    await RollbarFlutter.run(config, () async {
+    await RollbarFlutter.run(defaultConfig(), () async {
       final exception = androidPlatformException(
         topFrameMethod: 'platformSpecificStuff',
       );
@@ -104,9 +97,4 @@ class MockSender extends Mock implements Sender {
       returnValue: Future<bool>.value(true),
     );
   }
-
-  @override
-  Future<bool> sendString(String _) async => true;
 }
-
-MockSender mockSender(Config _) => MockSender();
