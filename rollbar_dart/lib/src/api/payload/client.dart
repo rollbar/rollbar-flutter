@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import '../../ext/collections.dart';
 
+@sealed
 @immutable
 class Client {
   final String locale;

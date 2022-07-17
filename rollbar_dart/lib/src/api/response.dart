@@ -1,9 +1,14 @@
 import 'dart:convert';
+
+import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
+
 import '../ext/object.dart';
 import '../ext/collections.dart';
 
 /// Represents the response from the Rollbar API.
+@sealed
+@immutable
 class Response {
   final int? err;
   final String? message;
@@ -58,10 +63,12 @@ class Response {
   int get hashCode => err.hashCode ^ message.hashCode ^ result.hashCode;
 }
 
+@sealed
+@immutable
 class Result {
-  final String? uuid;
+  final String uuid;
 
-  Result({this.uuid});
+  const Result({required this.uuid});
 
   Result copyWith({String? uuid}) => Result(uuid: uuid ?? this.uuid);
 
@@ -72,6 +79,7 @@ class Result {
 
   @override
   String toString() => 'Result(uuid: $uuid)';
+
   String toJson() => json.encode(toMap());
 
   @override
