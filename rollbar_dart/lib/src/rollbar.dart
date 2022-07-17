@@ -18,24 +18,25 @@ class Rollbar {
     return _current!;
   }
 
-  final RollbarInfrastructure _infra;
+  final Infrastructure _infrastructure;
   final CoreNotifier _notifier;
 
-  Rollbar._(this._infra, this._notifier);
+  Rollbar._(this._infrastructure, this._notifier);
 
   static Future<void> run(Config config) async {
     if (_current != null) {
-      await current._infra.dispose();
+      await current._infrastructure.dispose();
     }
 
-    final infra = await RollbarInfrastructure.start(config: config);
-    final notifier = CoreNotifier(config: config);
-    _current = Rollbar._(infra, notifier);
+    _current = Rollbar._(
+      await InfrastructureIsolate.spawn(config: config),
+      CoreNotifier(config: config),
+    );
   }
 
   @internal
   static void process({required PayloadRecord record}) {
-    current._infra.process(record: record);
+    current._infrastructure.process(record: record);
   }
 
   /// Logs a message as an occurrence.
