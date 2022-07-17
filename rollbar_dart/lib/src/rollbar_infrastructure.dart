@@ -40,8 +40,8 @@ class RollbarInfrastructure {
 }
 
 extension InfrastructureIsolate on RollbarInfrastructure {
-  static late ConnectivityMonitor connectivityMonitor;
-  static late PayloadRepository repo;
+  static late ConnectivityMonitor connectivity;
+  static late PayloadRepository repository;
 
   @internal
   static Future<void> work(Tuple2<SendPort, bool> initial) async {
@@ -50,8 +50,8 @@ extension InfrastructureIsolate on RollbarInfrastructure {
     sendPort.send(infrastructurePort.sendPort);
 
     final shouldPersistPayloads = initial.second;
-    connectivityMonitor = ConnectivityMonitor();
-    repo = PayloadRepository(persistent: shouldPersistPayloads);
+    connectivity = ConnectivityMonitor();
+    repository = PayloadRepository(persistent: shouldPersistPayloads);
 
     await _processAllPendingRecords();
 
@@ -79,8 +79,9 @@ extension InfrastructureIsolate on RollbarInfrastructure {
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
-    repo.addPayloadRecord(payloadRecord);
-    await _processDestinationPendingRecords(payloadRecord.destination, repo);
+    repository.addPayloadRecord(payloadRecord);
+    await _processDestinationPendingRecords(
+        payloadRecord.destination, repository);
   }
 
   static Future<void> _processDestinationPendingRecords(
@@ -110,7 +111,7 @@ extension InfrastructureIsolate on RollbarInfrastructure {
     Sender sender,
     PayloadRepository repo,
   ) async {
-    if (!connectivityMonitor.connectivityState.connectivityOn) {
+    if (!connectivity.connectivityState.connectivityOn) {
       return false;
     }
 
@@ -119,8 +120,8 @@ extension InfrastructureIsolate on RollbarInfrastructure {
       repo.removePayloadRecord(record);
       return true;
     } else {
-      if (connectivityMonitor.connectivityState.connectivityOn) {
-        connectivityMonitor.overrideAsOffFor(duration: Duration(seconds: 30));
+      if (connectivity.connectivityState.connectivityOn) {
+        connectivity.overrideAsOffFor(duration: Duration(seconds: 30));
       }
       final cutoffTime =
           DateTime.now().toUtc().subtract(const Duration(days: 1));
@@ -132,12 +133,12 @@ extension InfrastructureIsolate on RollbarInfrastructure {
   }
 
   static Future<void> _processAllPendingRecords() async {
-    if (repo.destinations.isNotEmpty) {
-      for (final destination in repo.destinations) {
-        await _processDestinationPendingRecords(destination, repo);
+    if (repository.destinations.isNotEmpty) {
+      for (final destination in repository.destinations) {
+        await _processDestinationPendingRecords(destination, repository);
       }
 
-      await repo.removeUnusedDestinationsAsync();
+      await repository.removeUnusedDestinationsAsync();
     }
   }
 }
