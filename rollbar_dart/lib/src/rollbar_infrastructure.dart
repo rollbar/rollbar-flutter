@@ -2,9 +2,9 @@ import 'dart:core';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
-import 'package:rollbar_common/rollbar_common.dart' as common;
 import 'package:rollbar_dart/rollbar_dart.dart';
 
+import 'ext/tuple.dart';
 import 'sender/http_sender.dart';
 
 class RollbarInfrastructure {
@@ -16,15 +16,12 @@ class RollbarInfrastructure {
 
   static Future<RollbarInfrastructure> start({required Config config}) async {
     final receivePort = ReceivePort();
-    final isolate = await Isolate.spawn(work, receivePort.sendPort);
+    final isolate = await Isolate.spawn(
+      work,
+      Tuple2(receivePort.sendPort, config.persistPayloads),
+    );
+
     final sendPort = await receivePort.first;
-    // [todo] figure a cleanear way of removing the sender/transformer
-    // before, isolates imposes limitations where the transformer/senders
-    // functions must be free functions, but the latest architecture changes
-    // allow us to init everything that requires these functions before the
-    // isolates, so there's no more need for the Config at this point to carry
-    // these functions, thus eliminating the restriction/limitations.
-    sendPort.send(Config.fromMap(config.toMap()));
     return RollbarInfrastructure._(isolate, receivePort, sendPort);
   }
 
@@ -47,9 +44,16 @@ extension InfrastructureIsolate on RollbarInfrastructure {
   static late PayloadRepository repo;
 
   @internal
-  static Future<void> work(SendPort sendPort) async {
+  static Future<void> work(Tuple2<SendPort, bool> initial) async {
+    final sendPort = initial.first;
     final infrastructurePort = ReceivePort();
     sendPort.send(infrastructurePort.sendPort);
+
+    final shouldPersistPayloads = initial.second;
+    connectivityMonitor = ConnectivityMonitor();
+    repo = PayloadRepository(persistent: shouldPersistPayloads);
+
+    await _processAllPendingRecords();
 
     // Wait for messages from the main isolate.
     await for (final message in infrastructurePort) {
@@ -67,20 +71,11 @@ extension InfrastructureIsolate on RollbarInfrastructure {
     }
 
     switch (message.runtimeType) {
-      case Config:
-        _processConfig(message);
-        await _processAllPendingRecords();
-        break;
       case PayloadRecord:
         await _processPayloadRecord(message);
     }
 
     return true;
-  }
-
-  static void _processConfig(Config config) {
-    connectivityMonitor = ConnectivityMonitor();
-    repo = PayloadRepository(persistent: config.persistPayloads);
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
