@@ -40,6 +40,11 @@ class RollbarInfrastructure {
   void process({required PayloadRecord record}) {
     _sendPort.send(record);
   }
+}
+
+extension InfrastructureIsolate on RollbarInfrastructure {
+  static late ConnectivityMonitor connectivityMonitor;
+  static late PayloadRepository repo;
 
   @internal
   static Future<void> work(SendPort sendPort) async {
@@ -74,23 +79,11 @@ class RollbarInfrastructure {
   }
 
   static void _processConfig(Config config) {
-    if (common.ServiceLocator.instance.registrationsCount > 0) return;
-
-    common.ServiceLocator.instance
-        .register<PayloadRepository, PayloadRepository>(
-      PayloadRepository.create(config.persistPayloads),
-    );
-    common.ServiceLocator.instance.register<Sender, HttpSender>(
-      HttpSender(endpoint: config.endpoint, accessToken: config.accessToken),
-    );
-    common.ServiceLocator.instance
-        .register<ConnectivityMonitor, ConnectivityMonitor>(
-      ConnectivityMonitor(),
-    );
+    connectivityMonitor = ConnectivityMonitor();
+    repo = PayloadRepository(persistent: config.persistPayloads);
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
-    final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo != null) {
       repo.addPayloadRecord(payloadRecord);
       await _processDestinationPendingRecords(payloadRecord.destination, repo);
@@ -129,8 +122,6 @@ class RollbarInfrastructure {
     Sender sender,
     PayloadRepository repo,
   ) async {
-    final connectivityMonitor =
-        common.ServiceLocator.instance.tryResolve<ConnectivityMonitor>();
     if (connectivityMonitor?.connectivityState.connectivityOn != true) {
       return false;
     }
@@ -154,15 +145,12 @@ class RollbarInfrastructure {
   }
 
   static Future<void> _processAllPendingRecords() async {
-    final repository =
-        common.ServiceLocator.instance.tryResolve<PayloadRepository>();
-
-    if (repository != null && repository.destinations.isNotEmpty == true) {
-      for (final destination in repository.destinations) {
-        await _processDestinationPendingRecords(destination, repository);
+    if (repo != null && repo.destinations.isNotEmpty == true) {
+      for (final destination in repo.destinations) {
+        await _processDestinationPendingRecords(destination, repo);
       }
 
-      await repository.removeUnusedDestinationsAsync();
+      await repo.removeUnusedDestinationsAsync();
     }
   }
 }
