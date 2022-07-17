@@ -84,15 +84,8 @@ extension InfrastructureIsolate on RollbarInfrastructure {
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
-    if (repo != null) {
-      repo.addPayloadRecord(payloadRecord);
-      await _processDestinationPendingRecords(payloadRecord.destination, repo);
-    } else {
-      await HttpSender(
-        endpoint: payloadRecord.destination.endpoint,
-        accessToken: payloadRecord.destination.accessToken,
-      ).sendString(payloadRecord.payloadJson);
-    }
+    repo.addPayloadRecord(payloadRecord);
+    await _processDestinationPendingRecords(payloadRecord.destination, repo);
   }
 
   static Future<void> _processDestinationPendingRecords(
@@ -122,7 +115,7 @@ extension InfrastructureIsolate on RollbarInfrastructure {
     Sender sender,
     PayloadRepository repo,
   ) async {
-    if (connectivityMonitor?.connectivityState.connectivityOn != true) {
+    if (!connectivityMonitor.connectivityState.connectivityOn) {
       return false;
     }
 
@@ -131,8 +124,7 @@ extension InfrastructureIsolate on RollbarInfrastructure {
       repo.removePayloadRecord(record);
       return true;
     } else {
-      if (connectivityMonitor != null &&
-          connectivityMonitor.connectivityState.connectivityOn) {
+      if (connectivityMonitor.connectivityState.connectivityOn) {
         connectivityMonitor.overrideAsOffFor(duration: Duration(seconds: 30));
       }
       final cutoffTime =
@@ -145,7 +137,7 @@ extension InfrastructureIsolate on RollbarInfrastructure {
   }
 
   static Future<void> _processAllPendingRecords() async {
-    if (repo != null && repo.destinations.isNotEmpty == true) {
+    if (repo.destinations.isNotEmpty) {
       for (final destination in repo.destinations) {
         await _processDestinationPendingRecords(destination, repo);
       }
