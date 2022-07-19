@@ -10,7 +10,7 @@ import '../../rollbar.dart';
 @immutable
 class PersistentSender implements Sender {
   final Config config;
-  late final Destination destination;
+  final Destination destination;
 
   PersistentSender(this.config)
       : destination = Destination(

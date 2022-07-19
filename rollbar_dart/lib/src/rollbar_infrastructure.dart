@@ -67,8 +67,7 @@ extension InfrastructureIsolate on Infrastructure {
   static Future<void> processDestinationPendingRecords(
     Destination destination,
   ) async {
-    final records =
-        await repository.getPayloadRecordsForDestinationAsync(destination);
+    final records = repository.payloadRecordsForDestination(destination);
     if (records.isEmpty) return;
 
     final sender = HttpSender(
@@ -113,7 +112,7 @@ extension InfrastructureIsolate on Infrastructure {
     repository.destinations.forEach(processDestinationPendingRecords);
 
     if (repository.destinations.isNotEmpty) {
-      await repository.removeUnusedDestinationsAsync();
+      repository.removeUnusedDestinations();
     }
   }
 }

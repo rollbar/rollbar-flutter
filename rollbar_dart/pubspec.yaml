@@ -13,6 +13,7 @@ dependencies:
   meta: ^1.7.0
   stack_trace: ^1.10.0
   sqlite3: ^1.5.1
+  uuid: ^3.0.0
   logging: ^1.0.2
   rollbar_common: ^0.3.0-beta
 

@@ -6,7 +6,7 @@ import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_dart/src/uncaught_error_handler.dart';
 import 'package:test/test.dart';
 
-import 'client_server_utils.dart';
+import 'utils/client_server_utils.dart';
 
 Future<void> main() async {
   group('UncaughtErrorHandler tests', () {
