@@ -25,7 +25,7 @@ Sender createTextSender(Config c) {
 class RawTextSocket {
   late Isolate _isolate;
   late ReceivePort _receivePort;
-  late int port = 0;
+  int port = 0;
 
   RawTextSocket._();
 
