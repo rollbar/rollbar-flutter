@@ -32,10 +32,7 @@ void main() {
 
       final asJson = jsonEncode(traceInfo.toMap());
 
-      for (final fromMap in [
-        (map) => TraceInfo.fromMap(map),
-        (map) => Body.fromMap(map),
-      ]) {
+      for (final fromMap in [TraceInfo.fromMap, Body.fromMap]) {
         final ti = fromMap(jsonDecode(asJson)) as TraceInfo;
         expect(ti.exception.type, equals('TestException'));
         expect(ti.exception.message, equals('Attempted to test some code'));
@@ -75,10 +72,7 @@ void main() {
 
       final asJson = jsonEncode(TraceChain(traces).toMap());
 
-      for (final fromMap in [
-        (map) => TraceChain.fromMap(map),
-        (map) => Body.fromMap(map),
-      ]) {
+      for (final fromMap in [TraceChain.fromMap, Body.fromMap]) {
         final tc = fromMap(jsonDecode(asJson)) as TraceChain;
 
         expect(tc.traces.length, equals(2));
@@ -94,10 +88,7 @@ void main() {
       const message = Message('This is a test message');
       final asJson = jsonEncode(message.toMap());
 
-      for (final fromMap in [
-        (map) => Message.fromMap(map),
-        (map) => Body.fromMap(map),
-      ]) {
+      for (final fromMap in [Message.fromMap, Body.fromMap]) {
         final recovered = fromMap(jsonDecode(asJson)) as Message;
         expect(recovered.text, equals('This is a test message'));
       }
