@@ -1,6 +1,3 @@
-//import 'dart:ffi';
-//import 'dart:io';
-
 import 'package:test/test.dart';
 
 import 'package:rollbar_dart/src/connectivity_monitor.dart';

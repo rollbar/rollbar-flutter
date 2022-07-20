@@ -9,7 +9,7 @@ void main() async {
 
   // NOTE: Use your Rollbar Project access token:
   final config = Config(
-    accessToken: '17965fa5041749b6bf7095a190001ded',
+    accessToken: 'YOUR-ROLLBAR-ACCESSTOKEN',
     package: 'rollbar_dart_example',
     persistPayloads: true,
   );
@@ -25,5 +25,4 @@ void main() async {
   }
 
   await Future.delayed(Duration(seconds: 10));
-  //await RollbarInfrastructure.dispose();
 }
