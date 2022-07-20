@@ -12,7 +12,7 @@ typedef Transform<T, E> = T Function(E);
 /// Useful as a predicate for filter-type higher-order functions.
 ///
 /// ```dart
-/// ['a', 'null', 'c', null, 'd'].any(isNull) // true
+/// ['a', null, 'c', null, 'd'].any(isNull) // true
 /// ```
 bool isNull<T>(T? x) => x == null;
 
@@ -21,13 +21,13 @@ bool isNull<T>(T? x) => x == null;
 /// Useful as a predicate for filter-type higher-order functions.
 ///
 /// ```dart
-/// ['a', 'null', 'c', null, 'd'].where(isNotNull) // ['a', 'c', 'd']
+/// ['a', null, 'c', null, 'd'].where(isNotNull) // ['a', 'c', 'd']
 /// ```
 bool isNotNull<T>(T? x) => x != null;
 
+@internal
 extension TryFirst<E> on Iterable<E> {
   /// Returns the first element or `null` if the list is empty.
-  @internal
   E? get tryFirst => isNotEmpty ? first : null;
 
   /// Returns the [index]th element or `null` if out of bounds.

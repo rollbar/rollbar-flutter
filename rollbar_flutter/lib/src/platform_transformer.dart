@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:rollbar_dart/rollbar.dart'
-    show Body, Data, TraceChain, TraceInfo, Transformer;
+    show Body, Data, TraceChain, Traces, Transformer;
 
 typedef JsonMap = Map<String, dynamic>;
 
@@ -77,10 +77,7 @@ extension _AndroidPlatform on PlatformTransformer {
   }
 
   // Fix message, we hijacked it on the platform side to carry the payload
-  void _restoreDartChainMessage(
-    List<TraceInfo> dartChain,
-    List<TraceInfo> embeddedChain,
-  ) {
+  void _restoreDartChainMessage(Traces dartChain, Traces embeddedChain) {
     if (embeddedChain.isEmpty) return;
     final originalMessage = embeddedChain.first.exception.message;
     final message = 'PlatformException(error, "$originalMessage")';

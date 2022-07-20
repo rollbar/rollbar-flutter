@@ -23,8 +23,9 @@ class Tuple2<T1, T2> {
 
   @override
   bool operator ==(Object other) =>
-      other is Tuple2 && other.first == first && other.second == second;
+      identical(this, other) ||
+      (other is Tuple2 && other.first == first && other.second == second);
 
   @override
-  int get hashCode => first.hashCode ^ second.hashCode;
+  int get hashCode => Object.hash(first, second);
 }
