@@ -9,24 +9,17 @@ import 'db_data_access.dart';
 class PayloadRepository {
   final DbDataAccess _dataAccess;
 
-  PayloadRepository(this._dataAccess);
+  PayloadRepository({required bool persistent})
+      : _dataAccess = DbDataAccess().initialize(asPersistent: persistent);
 
   // Factory methods:
   ///////////////////
 
-  static PayloadRepository create(bool persistent) {
-    var dataAccess = DbDataAccess().initialize(asPersistent: persistent);
-    //dataAccess.deleteUnusedDestinations();
-    return PayloadRepository(dataAccess);
-  }
+  static PayloadRepository createInMemory() =>
+      PayloadRepository(persistent: false);
 
-  static PayloadRepository createInMemory() {
-    return create(false);
-  }
-
-  static PayloadRepository createPersistent() {
-    return create(true);
-  }
+  static PayloadRepository createPersistent() =>
+      PayloadRepository(persistent: true);
 
   // Entities manipulation methods:
   /////////////////////////////////
@@ -99,21 +92,6 @@ class PayloadRepository {
 
   void removePayloadRecordsOlderThan(DateTime utcExpirationTime) {
     _dataAccess.deletePayloadRecordsOlderThan(utcExpirationTime);
-  }
-
-  // Async factory methods:
-  /////////////////////////
-
-  static Future<PayloadRepository> createAsync(bool persistent) async {
-    return create(persistent);
-  }
-
-  static Future<PayloadRepository> createInMemoryAsync() async {
-    return createInMemory();
-  }
-
-  static Future<PayloadRepository> createPersistentAsync() async {
-    return createPersistent();
   }
 
   // Async entities manipulation methods:

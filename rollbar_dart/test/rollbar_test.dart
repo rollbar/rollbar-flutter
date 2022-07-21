@@ -77,7 +77,7 @@ Future<void> main() async {
           environment: 'production',
           codeVersion: '1.0.0',
           package: 'some_package_name',
-          handleUncaughtErrors: false,
+          handleUncaughtErrors: true,
           transformer: ((_) => ExpandableTransformer()),
           sender: ((_) => sender));
 

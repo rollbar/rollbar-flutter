@@ -27,7 +27,7 @@ class RollbarFlutter {
   ) async {
     await Rollbar.run(config.copyWith(
       framework: 'flutter',
-      transformer: platformTransformer,
+      transformer: (_) => PlatformTransformer(),
     ));
 
     if (!config.handleUncaughtErrors) {

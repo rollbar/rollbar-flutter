@@ -2,166 +2,117 @@ import 'dart:core';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
-import 'package:rollbar_common/rollbar_common.dart' as common;
 import 'package:rollbar_dart/rollbar_dart.dart';
 
+import 'ext/tuple.dart';
+import 'ext/math.dart';
 import 'sender/http_sender.dart';
 
-class RollbarInfrastructure {
+@sealed
+@immutable
+class Infrastructure {
   final ReceivePort _receivePort;
   final SendPort _sendPort;
   final Isolate _isolate;
 
-  RollbarInfrastructure._(this._isolate, this._receivePort, this._sendPort);
-
-  static Future<RollbarInfrastructure> start({required Config config}) async {
-    final receivePort = ReceivePort();
-    final isolate = await Isolate.spawn(work, receivePort.sendPort);
-    final sendPort = await receivePort.first;
-    // [todo] figure a cleanear way of removing the sender/transformer
-    // before, isolates imposes limitations where the transformer/senders
-    // functions must be free functions, but the latest architecture changes
-    // allow us to init everything that requires these functions before the
-    // isolates, so there's no more need for the Config at this point to carry
-    // these functions, thus eliminating the restriction/limitations.
-    sendPort.send(Config.fromMap(config.toMap()));
-    return RollbarInfrastructure._(isolate, receivePort, sendPort);
-  }
+  Infrastructure._(this._isolate, this._receivePort, this._sendPort);
 
   Future<void> dispose() async {
-    // Send a signal to the spawned isolate indicating that it should exit:
     _sendPort.send(null);
     _receivePort.close();
     _isolate.kill(priority: Isolate.beforeNextEvent);
   }
 
-  //static final RollbarInfrastructure instance = RollbarInfrastructure._();
-
   void process({required PayloadRecord record}) {
     _sendPort.send(record);
   }
+}
 
-  @internal
-  static Future<void> work(SendPort sendPort) async {
-    final infrastructurePort = ReceivePort();
-    sendPort.send(infrastructurePort.sendPort);
+extension InfrastructureIsolate on Infrastructure {
+  static late ConnectivityMonitor connectivity;
+  static late PayloadRepository repository;
 
-    // Wait for messages from the main isolate.
-    await for (final message in infrastructurePort) {
-      bool continueProcessing = await _process(message);
-      if (!continueProcessing) {
+  static Future<Infrastructure> spawn({required Config config}) async {
+    final receivePort = ReceivePort();
+    final isolate = await Isolate.spawn(
+      work,
+      Tuple2(receivePort.sendPort, config.persistPayloads),
+    );
+    final sendPort = await receivePort.first;
+    return Infrastructure._(isolate, receivePort, sendPort);
+  }
+
+  static Future<void> work(Tuple2<SendPort, bool> initial) async {
+    final sendPort = initial.first;
+    final receivePort = ReceivePort();
+    sendPort.send(receivePort.sendPort);
+
+    final shouldPersistPayloads = initial.second;
+    connectivity = ConnectivityMonitor();
+    repository = PayloadRepository(persistent: shouldPersistPayloads);
+
+    await processAllPendingRecords();
+
+    await for (final PayloadRecord? record in receivePort) {
+      if (record == null) {
+        await processAllPendingRecords();
         break;
       }
+
+      repository.addPayloadRecord(record);
+      await processDestinationPendingRecords(record.destination);
     }
   }
 
-  static Future<bool> _process(dynamic message) async {
-    if (message == null) {
-      await _processAllPendingRecords();
-      return false;
-    }
-
-    switch (message.runtimeType) {
-      case Config:
-        _processConfig(message);
-        await _processAllPendingRecords();
-        break;
-      case PayloadRecord:
-        await _processPayloadRecord(message);
-    }
-
-    return true;
-  }
-
-  static void _processConfig(Config config) {
-    if (common.ServiceLocator.instance.registrationsCount > 0) return;
-
-    common.ServiceLocator.instance
-        .register<PayloadRepository, PayloadRepository>(
-      PayloadRepository.create(config.persistPayloads),
-    );
-    common.ServiceLocator.instance.register<Sender, HttpSender>(
-      HttpSender(endpoint: config.endpoint, accessToken: config.accessToken),
-    );
-    common.ServiceLocator.instance
-        .register<ConnectivityMonitor, ConnectivityMonitor>(
-      ConnectivityMonitor(),
-    );
-  }
-
-  static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
-    final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
-    if (repo != null) {
-      repo.addPayloadRecord(payloadRecord);
-      await _processDestinationPendingRecords(payloadRecord.destination, repo);
-    } else {
-      await HttpSender(
-        endpoint: payloadRecord.destination.endpoint,
-        accessToken: payloadRecord.destination.accessToken,
-      ).sendString(payloadRecord.payloadJson);
-    }
-  }
-
-  static Future<void> _processDestinationPendingRecords(
+  static Future<void> processDestinationPendingRecords(
     Destination destination,
-    PayloadRepository repo,
   ) async {
     final records =
-        await repo.getPayloadRecordsForDestinationAsync(destination);
-    if (records.isEmpty) {
-      return;
-    }
+        await repository.getPayloadRecordsForDestinationAsync(destination);
+    if (records.isEmpty) return;
 
     final sender = HttpSender(
       endpoint: destination.endpoint,
       accessToken: destination.accessToken,
     );
 
-    for (var record in records) {
-      if (!await _processPendingRecord(record, sender, repo)) {
+    for (final record in records) {
+      if (!await processPendingRecord(record, sender)) {
         break;
       }
     }
   }
 
-  static Future<bool> _processPendingRecord(
+  static Future<bool> processPendingRecord(
     PayloadRecord record,
     Sender sender,
-    PayloadRepository repo,
   ) async {
-    final connectivityMonitor =
-        common.ServiceLocator.instance.tryResolve<ConnectivityMonitor>();
-    if (connectivityMonitor?.connectivityState.connectivityOn != true) {
+    if (!connectivity.connectivityState.connectivityOn) {
       return false;
     }
 
     final success = await sender.sendString(record.payloadJson);
     if (success) {
-      repo.removePayloadRecord(record);
+      repository.removePayloadRecord(record);
       return true;
     } else {
-      if (connectivityMonitor != null &&
-          connectivityMonitor.connectivityState.connectivityOn) {
-        connectivityMonitor.overrideAsOffFor(duration: Duration(seconds: 30));
+      if (connectivity.connectivityState.connectivityOn) {
+        connectivity.overrideAsOffFor(duration: 30.seconds);
       }
-      final cutoffTime =
-          DateTime.now().toUtc().subtract(const Duration(days: 1));
+
+      final cutoffTime = DateTime.now().toUtc().subtract(1.days);
       if (record.timestamp.compareTo(cutoffTime) < 0) {
-        repo.removePayloadRecord(record);
+        repository.removePayloadRecord(record);
       }
+
       return false;
     }
   }
 
-  static Future<void> _processAllPendingRecords() async {
-    final repository =
-        common.ServiceLocator.instance.tryResolve<PayloadRepository>();
+  static Future<void> processAllPendingRecords() async {
+    repository.destinations.forEach(processDestinationPendingRecords);
 
-    if (repository != null && repository.destinations.isNotEmpty == true) {
-      for (final destination in repository.destinations) {
-        await _processDestinationPendingRecords(destination, repository);
-      }
-
+    if (repository.destinations.isNotEmpty) {
       await repository.removeUnusedDestinationsAsync();
     }
   }

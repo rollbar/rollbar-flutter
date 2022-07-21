@@ -22,15 +22,15 @@ void main() {
       var dbFile = File(DbDataAccess.dbFileName);
       expect(dbFile.existsSync(), false);
 
-      await PayloadRepository.createInMemoryAsync()
-          .then((value) => expect(dbFile.existsSync(), false));
+      PayloadRepository(persistent: false);
+      expect(dbFile.existsSync(), false);
 
-      await PayloadRepository.createPersistentAsync()
-          .then((value) => expect(dbFile.existsSync(), true));
+      PayloadRepository(persistent: true);
+      expect(dbFile.existsSync(), true);
     });
 
     test('Basic Destination entities manipulation...', () async {
-      final repo = await PayloadRepository.createInMemoryAsync();
+      final repo = PayloadRepository(persistent: false);
       expect(repo.destinations.length, 0);
 
       // insert new destination:
@@ -64,7 +64,7 @@ void main() {
     });
 
     test('Basic PayloadRecord entities manipulation...', () async {
-      final repo = await PayloadRepository.createInMemoryAsync();
+      final repo = PayloadRepository(persistent: false);
       expect((await repo.getDestinationsAsync()).length, 0);
       expect((await repo.getPayloadRecordsAsync()).length, 0);
 

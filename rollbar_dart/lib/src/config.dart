@@ -18,14 +18,7 @@ class Config {
   final bool handleUncaughtErrors;
   final bool includePlatformLogs;
 
-  /// If [handleUncaughtErrors] is enabled, the transformer function *must* be
-  /// a static or free function, and cannot be a closure or instance function,
-  /// since it will need to be passed to an error handler isolate as a message.
   final Transformer Function(Config)? transformer;
-
-  /// If [handleUncaughtErrors] is enabled, the sender factory *must* be
-  /// a static or free function, and cannot be a closure or instance function,
-  /// since it will need to be passed to an error handler isolate as a message.
   final Sender Function(Config) sender;
 
   const Config({
@@ -39,7 +32,7 @@ class Config {
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
     this.transformer,
-    this.sender = persistentSender,
+    this.sender = PersistentSender.new,
   });
 
   Config copyWith({

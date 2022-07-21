@@ -6,26 +6,17 @@ import 'package:meta/meta.dart';
 import '../ext/collections.dart';
 import '../../rollbar.dart';
 
-@internal
-Sender persistentSender(Config config) => PersistentSender(
-      config: config,
-      destination: Destination(
-        endpoint: config.endpoint,
-        accessToken: config.accessToken,
-      ),
-    );
-
 /// Persistent [Sender]. Default [Sender] implementation.
 @immutable
 class PersistentSender implements Sender {
-  final Config _config;
-  final Destination _destination;
+  final Config config;
+  late final Destination destination;
 
-  const PersistentSender({
-    required Config config,
-    required Destination destination,
-  })  : _config = config,
-        _destination = destination;
+  PersistentSender(this.config)
+      : destination = Destination(
+          endpoint: config.endpoint,
+          accessToken: config.accessToken,
+        );
 
   /// Sends the provided payload as the body of POST request to
   /// the configured endpoint.
@@ -37,9 +28,9 @@ class PersistentSender implements Sender {
     try {
       Rollbar.process(
           record: PayloadRecord.create(
-              configJson: jsonEncode(_config.toMap()),
+              configJson: jsonEncode(config.toMap()),
               payloadJson: payload,
-              destination: _destination));
+              destination: destination));
 
       return true;
     } catch (error, stackTrace) {
