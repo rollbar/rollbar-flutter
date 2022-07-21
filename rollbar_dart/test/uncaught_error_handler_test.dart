@@ -21,7 +21,7 @@ Future<void> main() async {
           accessToken: 'BlaBlaAccessToken',
           endpoint: server.endpoint,
           package: 'some_package_name',
-          sender: (config) => RawTextSender(config.port));
+          sender: RawTextSender.new);
 
       // ignore: deprecated_member_use_from_same_package
       handler = await UncaughtErrorHandler.run(config: config);

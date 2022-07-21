@@ -44,9 +44,8 @@ class RawTextSocket {
   /// do something like
   /// `var message = await server.messages.first.timeout(Duration(milliseconds: 500));`
   /// ...with an appropriate timeout for the scenario being tested.
-  Stream<String?> get messages {
-    return _receivePort.map((v) => v as String?);
-  }
+  Stream<String?> get messages =>
+      _receivePort.map((message) => message as String?);
 
   Future<void> close() async {
     final socket = await Socket.connect('localhost', port);
@@ -100,7 +99,7 @@ class RawTextSocket {
 class RawTextSender implements Sender {
   final int port;
 
-  const RawTextSender(this.port);
+  RawTextSender(Config config) : port = config.port;
 
   @override
   Future<bool> send(JsonMap payload) async =>
