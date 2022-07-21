@@ -10,13 +10,8 @@ import '../../rollbar.dart';
 @immutable
 class PersistentSender implements Sender {
   final Config config;
-  final Destination destination;
 
-  PersistentSender(this.config)
-      : destination = Destination(
-          endpoint: config.endpoint,
-          accessToken: config.accessToken,
-        );
+  const PersistentSender(this.config);
 
   /// Sends the provided payload as the body of POST request to
   /// the configured endpoint.
@@ -28,9 +23,10 @@ class PersistentSender implements Sender {
     try {
       Rollbar.process(
           record: PayloadRecord(
+              accessToken: config.accessToken,
+              endpoint: config.endpoint,
               configJson: jsonEncode(config.toMap()),
               payloadJson: payload,
-              destination: destination,
               timestamp: DateTime.now().toUtc()));
 
       return true;
