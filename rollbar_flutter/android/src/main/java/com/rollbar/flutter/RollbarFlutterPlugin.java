@@ -34,7 +34,7 @@ public class RollbarFlutterPlugin implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     context = flutterPluginBinding.getApplicationContext();
-    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "rollbar_flutter");
+    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "com.rollbar.flutter");
     channel.setMethodCallHandler(this);
   }
 

@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
 
+import '../ext/collections.dart';
+
 class PayloadRecord {
   int? _id;
   late final DateTime timestamp;
@@ -11,23 +13,24 @@ class PayloadRecord {
 
   late final Destination destination;
 
-  PayloadRecord.create(
-      {required String configJson,
-      required String payloadJson,
-      required Destination destination})
-      : this(
-            timestamp: DateTime.now().toUtc(),
-            configJson: configJson,
-            payloadJson: payloadJson,
-            destination: destination);
+  PayloadRecord.create({
+    required String configJson,
+    required String payloadJson,
+    required Destination destination,
+  }) : this(
+          timestamp: DateTime.now().toUtc(),
+          configJson: configJson,
+          payloadJson: payloadJson,
+          destination: destination,
+        );
 
-  PayloadRecord(
-      {required this.timestamp,
-      required this.configJson,
-      required this.payloadJson,
-      required this.destination,
-      int? id})
-      : _id = id;
+  PayloadRecord({
+    required this.timestamp,
+    required this.configJson,
+    required this.payloadJson,
+    required this.destination,
+    int? id,
+  }) : _id = id;
 
   int? get id => _id;
 
@@ -54,7 +57,7 @@ class PayloadRecord {
     );
   }
 
-  Map<String, dynamic> toMap() {
+  JsonMap toMap() {
     return {
       'id': id,
       'timestamp': timestamp.millisecondsSinceEpoch,
@@ -64,7 +67,7 @@ class PayloadRecord {
     };
   }
 
-  factory PayloadRecord.fromMap(Map<String, dynamic> map) {
+  factory PayloadRecord.fromMap(JsonMap map) {
     return PayloadRecord(
       id: map['id']?.toInt(),
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp']),
@@ -80,9 +83,12 @@ class PayloadRecord {
       PayloadRecord.fromMap(json.decode(source));
 
   @override
-  String toString() {
-    return 'PayloadRecord(id: $id, timestamp: $timestamp, configJson: $configJson, payloadJson: $payloadJson, destination: $destination)';
-  }
+  String toString() => 'PayloadRecord('
+      'id: $id, '
+      'timestamp: $timestamp, '
+      'configJson: $configJson, '
+      'payloadJson: $payloadJson, '
+      'destination: $destination)';
 
   @override
   bool operator ==(Object other) {
@@ -97,11 +103,10 @@ class PayloadRecord {
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
-        timestamp.hashCode ^
-        configJson.hashCode ^
-        payloadJson.hashCode ^
-        destination.hashCode;
-  }
+  int get hashCode =>
+      id.hashCode ^
+      timestamp.hashCode ^
+      configJson.hashCode ^
+      payloadJson.hashCode ^
+      destination.hashCode;
 }

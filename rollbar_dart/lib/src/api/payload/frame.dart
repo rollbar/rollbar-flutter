@@ -1,48 +1,65 @@
+import 'package:meta/meta.dart';
+import 'package:stack_trace/stack_trace.dart' as trace;
+
+import '../../ext/trace.dart';
+import '../../ext/collections.dart';
+
 /// Contains the information of a single frame in a stack trace.
+@sealed
+@immutable
 class Frame {
-  int? colno;
-  int? lineno;
-  String? method;
-  String? filename;
-  String? className;
+  final String filename;
+  final String? type;
+  final String? method;
+  final int? line;
+  final int? column;
 
-  Map<String, dynamic> toJson() {
-    var result = <String, dynamic>{};
-    if (colno != null) {
-      result['colno'] = colno;
-    }
-    if (lineno != null) {
-      result['lineno'] = lineno;
-    }
-    if (method != null) {
-      result['method'] = method;
-    }
-    if (filename != null) {
-      result['filename'] = filename;
-    }
-    if (className != null) {
-      result['class_name'] = className;
-    }
-    return result;
-  }
+  const Frame({
+    required this.filename,
+    this.type,
+    this.method,
+    this.line,
+    this.column,
+  });
 
-  static Frame fromMap(Map attributes) {
-    var result = Frame();
-    if (attributes.containsKey('colno')) {
-      result.colno = attributes['colno'] as int?;
-    }
-    if (attributes.containsKey('lineno')) {
-      result.lineno = attributes['lineno'] as int?;
-    }
-    if (attributes.containsKey('method')) {
-      result.method = attributes['method'];
-    }
-    if (attributes.containsKey('filename')) {
-      result.filename = attributes['filename'];
-    }
-    if (attributes.containsKey('class_name')) {
-      result.className = attributes['class_name'];
-    }
-    return result;
-  }
+  factory Frame.from(trace.Frame frame) => Frame(
+      filename: frame.path,
+      type: frame.type,
+      method: frame.method,
+      line: frame.line,
+      column: frame.column);
+
+  @override
+  factory Frame.fromMap(JsonMap map) => Frame(
+      filename: map['filename'],
+      method: map['method'],
+      type: map['class_name'],
+      line: map['lineno'],
+      column: map['colno']);
+
+  String get location => [
+        filename,
+        line == null && column != null ? '???' : line,
+        column,
+      ].where(isNotNull).join(':');
+
+  String get member => [
+        type,
+        method ?? '???',
+      ].where(isNotNull).join('.');
+
+  @override
+  String toString() => [
+        'Frame: ',
+        if (member.isNotEmpty) '$member ',
+        '($location)',
+      ].join();
+
+  JsonMap toMap() => {
+        'filename': filename,
+        'class_name': type,
+        'method': method,
+        'lineno': line,
+        'colno': column,
+      }.compact();
 }

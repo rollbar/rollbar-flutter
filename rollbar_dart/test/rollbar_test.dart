@@ -4,112 +4,99 @@ import 'package:mockito/mockito.dart';
 import 'package:rollbar_dart/rollbar.dart';
 
 Future<void> main() async {
-  late Rollbar rollbar;
-  late Sender sender;
-  // handleUncaughtErrors must be set to false otherwise we can't use a closure with a
-  // mock as the sender factory.
-  var config = (ConfigBuilder('BlaBlaAccessToken')
-        ..environment = 'production'
-        ..codeVersion = '0.23.2'
-        ..handleUncaughtErrors = false
-        ..package = 'some_package_name'
-        ..persistPayloads = true)
-      .build();
-  await RollbarInfrastructure.instance.initialize(rollbarConfig: config);
+  late MockSender sender;
 
   group('Rollbar notifier tests', () {
     setUp(() async {
       sender = MockSender();
       when(sender.send(any)).thenAnswer((_) async => true);
-      var config = (ConfigBuilder('BlaBlaAccessToken')
-            ..environment = 'production'
-            ..codeVersion = '0.23.2'
-            ..handleUncaughtErrors = false
-            ..package = 'some_package_name'
-            ..persistPayloads = true
-            ..sender = (_) => sender)
-          .build();
-      rollbar = Rollbar(config);
-      await rollbar.ensureInitialized();
+
+      //await rollbar.ensureInitialized();
     });
 
     tearDown(() {});
 
     test('When reporting single error it should send json payload', () async {
+      final config = Config(
+          accessToken: 'BlaBlaAccessToken',
+          environment: 'production',
+          codeVersion: '0.23.2',
+          package: 'some_package_name',
+          handleUncaughtErrors: true,
+          persistPayloads: true,
+          sender: (_) => sender);
+
+      await Rollbar.run(config);
+
       try {
         failingFunction();
       } catch (error, stackTrace) {
-        await rollbar.error(error, stackTrace);
-        var payload = verify(sender.send(captureAny)).captured.single;
+        await Rollbar.error(error, stackTrace);
+        final payload = verify(sender.send(captureAny)).captured.single;
 
         expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
 
         // Project root detection currently uses the `server` element of the payload,
         // so that's where we include it.
-        var root = getPath(payload, ['data', 'server', 'root']);
+        final root = payload['data']['server']['root'];
         expect(root, equals('some_package_name'));
 
-        var trace = getPath(payload, ['data', 'body', 'trace']);
-
+        final trace = payload['data']['body']['trace'];
         expect(trace['exception']['class'], equals('ArgumentError'));
         expect(trace['frames'].length, greaterThan(1));
         expect(trace['frames'][0]['method'], equals('failingFunction'));
       }
     });
 
-    test(
-        'If optional fields are not set they should not be added to the payload',
-        () async {
-      var config = (ConfigBuilder('BlaBlaAccessToken')
-            ..environment = 'production'
-            ..handleUncaughtErrors = false
-            ..sender = (_) => sender)
-          .build();
+    test('Optional fields should have defaults in the payload', () async {
+      final config = Config(
+          accessToken: 'BlaBlaAccessToken',
+          package: 'some_package_name',
+          sender: (_) => sender);
 
-      rollbar = Rollbar(config);
-      await rollbar.ensureInitialized();
+      await Rollbar.run(config);
 
       try {
         failingFunction();
       } catch (error, stackTrace) {
-        await rollbar.error(error, stackTrace);
+        await Rollbar.error(error, stackTrace);
         var payload = verify(await sender.send(captureAny)).captured.single;
 
-        Map? data = payload['data'];
-        expect(data, isNot(contains('code_version')));
-        expect(data, isNot(contains('framework')));
-        expect(data, isNot(contains('custom')));
+        Map data = payload['data'];
+        expect(data['code_version'], equals('main'));
+        expect(data['framework'], equals('dart'));
+        expect(data['environment'], equals('development'));
         expect(data, isNot(contains('platform_payload')));
-        expect(data, isNot(contains('server')));
       }
     });
 
     test('If error trasformer is provided it should transform error', () async {
-      var config = (ConfigBuilder('token')
-            ..environment = 'production'
-            ..codeVersion = '1.0.0'
-            ..handleUncaughtErrors = false
-            ..transformer = ((_) => ExpandableTransformer())
-            ..sender = ((_) => sender))
-          .build();
+      final config = Config(
+          accessToken: 'token',
+          environment: 'production',
+          codeVersion: '1.0.0',
+          package: 'some_package_name',
+          handleUncaughtErrors: false,
+          transformer: ((_) => ExpandableTransformer()),
+          sender: ((_) => sender));
 
-      rollbar = Rollbar(config);
+      await Rollbar.run(config);
 
-      await rollbar.error(
-          ExpandableException(['a', 'b', 'c']), StackTrace.empty);
+      await Rollbar.error(
+        ExpandableException(['a', 'b', 'c']),
+        StackTrace.empty,
+      );
 
-      var payload = verify(await sender.send(captureAny)).captured.single;
+      final payload = verify(await sender.send(captureAny)).captured.single;
 
-      var body = getPath(payload, ['data', 'body']);
+      final body = payload['data']['body'];
       expect(body, contains('trace_chain'));
 
-      var chain = body['trace_chain'];
+      final chain = body['trace_chain'];
       expect(chain, hasLength(4));
     });
   });
-
-  await RollbarInfrastructure.instance.dispose();
 }
 
 void failingFunction() {
@@ -119,53 +106,34 @@ void failingFunction() {
 class ExpandableTransformer implements Transformer {
   @override
   Future<Data> transform(dynamic error, StackTrace? trace, Data data) async {
-    // Simulates for example what we'd do with a PlatformException in Flutter
-    if (error is ExpandableException) {
-      List<TraceInfo?> traceChain = error.messages.map((message) {
-        return TraceInfo()
-          ..frames = []
-          ..exception = (ExceptionInfo()
-            ..clazz = 'testing'
-            ..message = message);
-      }).toList();
+    expect(error, TypeMatcher<ExpandableException>());
 
-      traceChain.addAll(data.body.getTraces()!);
-      data.body = TraceChain()..traces = traceChain;
-    }
-    return data;
+    final traceChain = (error.messages as List<String>)
+        .map((message) => TraceInfo(
+            frames: [],
+            exception: ExceptionInfo(type: 'testing', message: message)))
+        .toList()
+      ..addAll(data.body.traces);
+
+    return data.copyWith(body: TraceChain(traceChain));
   }
 }
 
 class ExpandableException implements Exception {
   List<String> messages;
+
   ExpandableException(this.messages);
 
   @override
-  String toString() {
-    return 'ExpandableException with ${messages.length} messages';
-  }
+  String toString() => 'ExpandableException with ${messages.length} messages';
 }
 
 class MockSender extends Mock implements Sender {
   @override
-  Future<bool> send(Map<String, dynamic>? payload) {
-    return super.noSuchMethod(Invocation.method(#send, [payload]),
-        returnValue: Future<bool>.value(true));
-  }
-}
-
-dynamic getPath(Map<String, dynamic>? source, List<String> path) {
-  // We're in a test, let the bounds checker handle the edge case of an empty path
-  for (var i = 0;; ++i) {
-    var key = path[i];
-
-    expect(source, contains(key));
-    var value = source![key];
-
-    if (i == path.length - 1) {
-      return value;
-    } else {
-      source = value as Map<String, dynamic>?;
-    }
+  Future<bool> send(Map<String, dynamic>? payload) async {
+    return super.noSuchMethod(
+      Invocation.method(#send, [payload]),
+      returnValue: Future<bool>.value(true),
+    );
   }
 }

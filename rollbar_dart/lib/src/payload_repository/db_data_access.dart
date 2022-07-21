@@ -3,7 +3,7 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:rollbar_dart/src/payload_repository/destination.dart';
 import 'package:rollbar_dart/src/payload_repository/payload_record.dart';
 
-import '../_internal/database.dart';
+import '../ext/database.dart';
 
 class DbDataAccess {
   static const String dbFileName = 'rollbar_payloads.db';

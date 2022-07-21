@@ -1,8 +1,8 @@
 {
   "convention": 1,
   "documentation": 1,
-  "platform": 0.5,
+  "platform": 1,
   "analysis": 1,
   "dependency": 1,
-  "null-safety": 0
+  "null-safety": 1
 }

@@ -8,6 +8,8 @@ import 'package:rollbar_dart/src/api/response.dart';
 
 const endpointPrefix = 'http://raw:';
 
+typedef JsonMap = Map<String, dynamic>;
+
 Sender createTextSender(Config c) {
   if (c.endpoint.startsWith(endpointPrefix)) {
     var port = int.parse(c.endpoint.substring(endpointPrefix.length));
@@ -17,33 +19,28 @@ Sender createTextSender(Config c) {
   }
 }
 
-/// Useful class to do some basic tests across isolates, without setting up a full blown
-/// HTTP server. It accepts and collects raw text over a TCP socket, 1 message per line.
+/// Useful class to do some basic tests across isolates, without setting up a
+/// full blown HTTP server. It accepts and collects raw text over a TCP socket,
+/// 1 message per line.
 class RawTextSocket {
   late Isolate _isolate;
-  int? _port;
   late ReceivePort _receivePort;
+  int port = 0;
 
   RawTextSocket._();
 
   String get endpoint => '$endpointPrefix$port';
 
-  Future<int?> _start() async {
+  Future<void> _start() async {
     _receivePort = ReceivePort();
 
-    var tcpInfoPort = ReceivePort();
+    final tcpInfoPort = ReceivePort();
 
     _isolate = await Isolate.spawn(
         _server, [tcpInfoPort.sendPort, _receivePort.sendPort]);
 
-    var port = await tcpInfoPort.first;
+    port = await tcpInfoPort.first;
     tcpInfoPort.close();
-
-    return port;
-  }
-
-  int? get port {
-    return _port;
   }
 
   /// Returns the messages received. This will block, so normally you'll want to
@@ -55,7 +52,7 @@ class RawTextSocket {
   }
 
   Future<void> close() async {
-    final socket = await Socket.connect('localhost', port!);
+    final socket = await Socket.connect('localhost', port);
     try {
       socket.add('close\n'.codeUnits);
     } finally {
@@ -68,20 +65,20 @@ class RawTextSocket {
   }
 
   static Future<RawTextSocket> build() async {
-    var socket = RawTextSocket._();
-    socket._port = await socket._start();
+    final socket = RawTextSocket._();
+    await socket._start();
     return socket;
   }
 
   static Future<void> _server(List<SendPort> ports) async {
-    var serverSocket = await ServerSocket.bind('127.0.0.1', 0);
+    final serverSocket = await ServerSocket.bind('127.0.0.1', 0);
 
-    var tcpInfo = ports[0];
-    var msgPort = ports[1];
+    final tcpInfo = ports[0];
+    final msgPort = ports[1];
 
     tcpInfo.send(serverSocket.port);
 
-    await for (var socket in serverSocket) {
+    await for (final socket in serverSocket) {
       log('New connection from ${socket.remotePort}');
       socket
           .map((event) => event.toList())
@@ -113,14 +110,8 @@ class RawTextSender implements Sender {
   RawTextSender(this.port);
 
   @override
-  Future<bool> send(Map<String, dynamic>? payload) async {
-    if (payload == null) {
-      return false;
-    }
-
-    var message = json.encode(payload);
-    return sendString(message);
-  }
+  Future<bool> send(JsonMap payload) async =>
+      await sendString(jsonEncode(payload));
 
   @override
   Future<bool> sendString(String payload) async {
@@ -132,8 +123,8 @@ class RawTextSender implements Sender {
       socket.destroy();
     }
 
-    return !Response(err: 0, result: Result(uuid: '1234')).isError();
+    return !Response(error: 0, result: Result(uuid: '1234')).isError;
   }
 }
 
-void log(String ignored) {}
+void log(String _) {}

@@ -1,112 +1,98 @@
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+import 'package:http/http.dart' as http;
+
+import '../ext/object.dart';
+import '../ext/collections.dart';
+
 /// Represents the response from the Rollbar API.
+///
+/// Rollbar will respond with either an error [message] xor a [Result].
+///
+/// [todo] if we ever drop support for Dart <2.17.0, turn this into an
+/// [Either monad](https://hackage.haskell.org/package/base-4.16.2.0/docs/Data-Either.html)
+/// [Result](https://doc.rust-lang.org/std/result/)
+@sealed
+@immutable
 class Response {
-  final int? err;
+  final int error;
   final String? message;
   final Result? result;
 
-  Response({
-    this.err,
+  const Response({
+    required this.error,
     this.message,
     this.result,
   });
 
-  bool isError() {
-    return err != null && err != 0;
-  }
+  bool get isError => error != 0;
 
   Response copyWith({
-    int? err,
+    int? error,
     String? message,
     Result? result,
-  }) {
-    return Response(
-      err: err ?? this.err,
-      message: message ?? this.message,
-      result: result ?? this.result,
-    );
-  }
+  }) =>
+      Response(
+          error: error ?? this.error,
+          message: message ?? this.message,
+          result: result ?? this.result);
 
-  Map<String, dynamic> toMap() {
-    return {
-      'err': err,
-      'message': message,
-      'result': result?.toMap(),
-    };
-  }
+  JsonMap toMap() => {
+        'err': error,
+        'message': message,
+        'result': result?.toMap(),
+      };
 
-  factory Response.fromMap(Map<String, dynamic> map) {
-    return Response(
-      err: map['err']?.toInt(),
-      message: map['message'],
-      result: map['result'] != null ? Result.fromMap(map['result']) : null,
-    );
-  }
+  factory Response.fromMap(JsonMap map) => Response(
+        error: map['err']?.toInt() ?? 0,
+        message: map['message'],
+        result: (map['result'] as JsonMap?).map(Result.fromMap),
+      );
 
-  String toJson() => json.encode(toMap());
+  factory Response.fromJson(String json) => Response.fromMap(jsonDecode(json));
 
-  factory Response.fromJson(String source) =>
-      Response.fromMap(json.decode(source));
+  factory Response.from(http.Response response) =>
+      Response.fromMap(jsonDecode(response.body));
 
   @override
   String toString() =>
-      'Response(err: $err, message: $message, result: $result)';
+      'Response(err: $error, message: $message, result: $result)';
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Response &&
-        other.err == err &&
-        other.message == message &&
-        other.result == result;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Response &&
+          other.error == error &&
+          other.message == message &&
+          other.result == result);
 
   @override
-  int get hashCode => err.hashCode ^ message.hashCode ^ result.hashCode;
+  int get hashCode => error.hashCode ^ message.hashCode ^ result.hashCode;
 }
 
+@sealed
+@immutable
 class Result {
-  final String? uuid;
+  final String uuid;
 
-  Result({
-    this.uuid,
-  });
+  const Result({required this.uuid});
 
-  Result copyWith({
-    String? uuid,
-  }) {
-    return Result(
-      uuid: uuid ?? this.uuid,
-    );
-  }
+  Result copyWith({String? uuid}) => Result(uuid: uuid ?? this.uuid);
 
-  Map<String, dynamic> toMap() {
-    return {
-      'uuid': uuid,
-    };
-  }
-
-  factory Result.fromMap(Map<String, dynamic> map) {
-    return Result(
-      uuid: map['uuid'],
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
+  factory Result.fromMap(JsonMap map) => Result(uuid: map['uuid']);
   factory Result.fromJson(String source) => Result.fromMap(json.decode(source));
+
+  JsonMap toMap() => {'uuid': uuid};
 
   @override
   String toString() => 'Result(uuid: $uuid)';
 
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+  String toJson() => json.encode(toMap());
 
-    return other is Result && other.uuid == uuid;
-  }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is Result && other.uuid == uuid);
 
   @override
   int get hashCode => uuid.hashCode;

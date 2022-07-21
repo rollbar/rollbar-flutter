@@ -1,93 +1,54 @@
 import 'dart:async';
-import 'dart:isolate';
 
+import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
 import 'package:rollbar_dart/rollbar.dart';
 
 import 'platform_transformer.dart';
 
-/// Rollbar Flutter notifier.
-class RollbarFlutter extends Rollbar {
-  static const MethodChannel _channel = MethodChannel('rollbar_flutter');
-  final UniqueKey instanceId;
+extension _Methods on MethodChannel {
+  Future<void> initialize({required Config config}) async =>
+      await invokeMethod('initialize', config.toMap());
+}
 
-  RollbarFlutter._(Config config)
-      : instanceId = UniqueKey(),
-        super(_initConfig(config));
+typedef RollbarClosure = FutureOr<void> Function();
+
+@sealed
+class RollbarFlutter {
+  static const _platform = MethodChannel('com.rollbar.flutter');
+
+  RollbarFlutter._();
 
   static Future<void> run(
     Config config,
-    FutureOr<void> Function(RollbarFlutter) action,
+    RollbarClosure appRunner,
   ) async {
-    final shouldHandleUncaughtErrors = config.handleUncaughtErrors ?? false;
+    await Rollbar.run(config.copyWith(
+      framework: 'flutter',
+      transformer: platformTransformer,
+    ));
 
-    if (!shouldHandleUncaughtErrors) {
-      var rollbar = RollbarFlutter._(config);
-      await rollbar._initializePlatformInstance();
-      await action(rollbar);
+    if (!config.handleUncaughtErrors) {
+      WidgetsFlutterBinding.ensureInitialized();
+      await _platform.initialize(config: config);
+      await appRunner();
       return;
     }
-
-    var rollbar = RollbarFlutter._(config);
 
     await runZonedGuarded(() async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      var previousOnError = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) async {
-        final stackTrace = details.stack ?? StackTrace.empty;
-        await rollbar._unhandledError(details.exception, stackTrace);
-        previousOnError?.call(details);
+      FlutterError.onError = (error) async {
+        FlutterError.presentError(error);
+        await Rollbar.error(error.exception, error.stack ?? StackTrace.empty);
       };
 
-      var errorHandler = await (rollbar.errorHandler as Future<SendPort?>);
-      if (errorHandler == null) return;
-
-      Isolate.current.addErrorListener(errorHandler);
-
-      await rollbar._initializePlatformInstance();
-      await action(rollbar);
-    }, (Object exception, StackTrace trace) {
-      rollbar._unhandledError(exception, trace);
+      await _platform.initialize(config: config);
+      await appRunner();
+    }, (exception, stackTrace) {
+      Rollbar.error(exception, stackTrace);
     });
-  }
-
-  Future<void> _initializePlatformInstance() async {
-    WidgetsFlutterBinding.ensureInitialized();
-
-    await _channel.invokeMethod('initialize', <String, dynamic>{
-      'instanceId': instanceId.toString(),
-      'isGlobalInstance': true,
-      'endpoint': config.endpoint,
-      'accessToken': config.accessToken,
-      'environment': config.environment,
-      'codeVersion': config.codeVersion,
-      'handleUncaughtErrors': config.handleUncaughtErrors,
-      'includePlatformLogs': config.includePlatformLogs
-    });
-  }
-
-  Future<void> _unhandledError(dynamic exception, StackTrace trace) async {
-    try {
-      await super.error(exception, trace);
-    } on Exception catch (e) {
-      Logging.err(
-          'Internal error encountered while sending data to Rollbar', e);
-    }
-  }
-
-  static Config _initConfig(Config config) {
-    var builder = ConfigBuilder.from(config);
-    builder.framework ??= 'flutter';
-
-    return (builder..transformer = platformTransformer).build();
   }
 }
-
-/// Free function to create the transformer.
-///
-/// Free and static functions are the only way we can pass factories to
-/// different isolates, which we need to be able to do to register uncaught
-/// error handlers.
-Transformer platformTransformer(Config config) => PlatformTransformer();

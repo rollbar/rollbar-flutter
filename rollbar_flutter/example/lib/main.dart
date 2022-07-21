@@ -3,40 +3,36 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/rollbar.dart';
 
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
-  final config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
-        ..environment = 'development'
-        ..codeVersion = '0.2.0'
-        ..package = 'rollbar_flutter_example'
-        ..handleUncaughtErrors = true
-        ..includePlatformLogs = false)
-      .build();
+  const config = Config(
+    accessToken: 'YOUR-ROLLBAR-ACCESSTOKEN',
+    package: 'rollbar_flutter_example',
+  );
 
-  await RollbarFlutter.run(config, (_rollbar) {
-    runApp(MyApp());
-  });
+  await RollbarFlutter.run(config, () => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Rollbar Flutter Example',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Rollbar Flutter example'),
+      home: const MyHomePage(title: 'Rollbar Flutter Example'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key = null, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -47,101 +43,97 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.rollbar.flutter.example/activity');
 
-  int _counter = 0;
-  final _lastError = 'No errors yet';
-  String _batteryLevel = 'Unknown battery level.';
-  String _faultyMsg = 'No successful invocations yet.';
+  var _lastError = 'No errors yet';
+  var _batteryLevel = 'Unknown battery level.';
+  var _faultyMsg = 'No successful invocations yet.';
+  var _counter = 0;
 
   _MyHomePageState();
 
-  Future<void> _getBatteryLevel() async {
-    var batteryLevelMsg = await _getBatteryLevelMsg();
-    setState(() {
-      _batteryLevel = batteryLevelMsg;
-    });
-  }
-
-  Future<String> _getBatteryLevelMsg() async {
+  void batteryLevel() async {
     String batteryLevel;
-    final result = await platform.invokeMethod('getBatteryLevel');
-    batteryLevel = 'Battery level at $result % .';
-    return batteryLevel;
-  }
+    try {
+      final int level = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery at $level%.';
+    } on PlatformException catch (e, stackTrace) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
+      await Rollbar.warn(e, stackTrace);
+    }
 
-  Future<void> _faultyMethod() async {
-    var msg = await _getFaultyMethodMsg();
     setState(() {
-      _faultyMsg = msg;
+      _batteryLevel = batteryLevel;
     });
   }
 
-  Future<String> _getFaultyMethodMsg() async {
-    try {
-      return await platform.invokeMethod('faultyMethod');
-    } catch (error, _) {
-      rethrow;
-    }
+  void faultyMethod() {
+    platform
+        .invokeMethod('faultyMethod')
+        .then((message) => setState(() => _faultyMsg = message))
+        .catchError(
+          (e) => setState(() => _lastError = e.message),
+          test: (_) => false,
+        );
   }
 
-  Future<void> _incrementCounter() async {
-    await Future.delayed(const Duration(milliseconds: 100));
+  void incrementCounter() {
     setState(() {
-      _counter++;
-      if (_counter % 2 == 0) {
+      if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
+      } else {
+        Rollbar.message('Counter incremented to $_counter');
       }
     });
   }
 
-  Future<void> _crash() async {
-    return await platform.invokeMethod('crash');
+  void divideByZero() {
+    1 ~/ 0;
+  }
+
+  void crash() {
+    platform.invokeMethod('crash');
   }
 
   @override
   Widget build(BuildContext context) {
-    var bodyChildren = <Widget>[
-      // If we ever remove Flutter 1 support, this should be updated to [ElevatedButton]
-      // ignore: deprecated_member_use
-      RaisedButton(
-        onPressed: _getBatteryLevel,
-        child: Text('Get Battery Level'),
+    final bodyChildren = <Widget>[
+      ElevatedButton(
+        onPressed: batteryLevel,
+        child: const Text('Get Battery Level'),
       ),
       Text(_batteryLevel),
-      // ignore: deprecated_member_use
-      RaisedButton(
-        onPressed: _faultyMethod,
-        child: Text('Call Faulty Method'),
+      ElevatedButton(
+        onPressed: faultyMethod,
+        child: const Text('Call Faulty Method'),
       ),
-      Text(_faultyMsg)
-    ];
-
-    if (Platform.isIOS) {
-      // ignore: deprecated_member_use
-      bodyChildren.add(RaisedButton(
-        onPressed: _crash,
-        child: Text('Crash application'),
-      ));
-    }
-
-    bodyChildren.addAll(<Widget>[
-      Divider(),
-      Text(
-        'Times you have pushed the plus button:',
+      Text(_faultyMsg),
+      ElevatedButton(
+        onPressed: divideByZero,
+        child: const Text('Divide by zero'),
       ),
+      if (Platform.isIOS)
+        ElevatedButton(
+          onPressed: crash,
+          child: const Text('Crash application'),
+        ),
+      const Divider(),
+      const Text('Times you have pushed the plus button:'),
       Text(
         '$_counter',
         style: Theme.of(context).textTheme.headline4,
       ),
-      Divider(),
+      const Divider(height: 10),
       Text(
         'Most recent Flutter error:',
         style: Theme.of(context).textTheme.headline6,
       ),
-      Text(
-        _lastError,
-        style: Theme.of(context).textTheme.caption,
+      Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: Text(
+          _lastError,
+          style: Theme.of(context).textTheme.headline4,
+        ),
       )
-    ]);
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -154,9 +146,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: incrementCounter,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

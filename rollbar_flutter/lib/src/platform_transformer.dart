@@ -1,8 +1,18 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:rollbar_dart/rollbar.dart'
-    show Body, Data, RollbarPlatformInfo, TraceChain, TraceInfo, Transformer;
+    show Body, Data, TraceChain, Traces, Transformer;
+
+typedef JsonMap = Map<String, dynamic>;
+
+/// Free function to create the transformer.
+///
+/// Free and static functions are the only way we can pass factories to
+/// different isolates, which we need to be able to do to register uncaught
+/// error handlers.
+Transformer platformTransformer(_) => PlatformTransformer();
 
 /// This trasformer inspects some platform specific exception types, which
 /// carry additional occurrence details in their exception messages.
@@ -16,66 +26,66 @@ class PlatformTransformer implements Transformer {
 
   @override
   Future<Data> transform(dynamic error, StackTrace? trace, Data data) async {
-    if (error is PlatformException) {
-      if (RollbarPlatformInfo.isAndroid) {
-        _enrichAndroidTrace(error, data);
-      }
+    if (defaultTargetPlatform == TargetPlatform.android &&
+        error is PlatformException) {
+      data = _enrichAndroidTrace(error.message, data);
     }
 
-    if (wrapped != null) {
-      return await wrapped!.transform(error, trace, data);
+    return await wrapped?.transform(error, trace, data) ?? data;
+  }
+}
+
+extension _AndroidPlatform on PlatformTransformer {
+  static const String tracePayloadPrefix =
+      'com.rollbar.flutter.RollbarTracePayload:';
+
+  Data _enrichAndroidTrace(String? rawPayload, Data data) {
+    // We cannot use error.stackTrace here, it will contain
+    // 'com.rollbar.flutter.RollbarTracePayload:' only in debug mode,
+    // but not in release.
+    if (rawPayload?.startsWith(tracePayloadPrefix) == true) {
+      final payload = rawPayload!.substring(tracePayloadPrefix.length);
+      return _attachPlatformPayload(jsonDecode(payload), data);
     }
 
     return data;
   }
 
-  static const String androidTracePayloadPrefix =
-      'com.rollbar.flutter.RollbarTracePayload:';
-
-  void _enrichAndroidTrace(PlatformException error, Data data) {
-    // We cannot use error.stackTrace here, it will contain 'com.rollbar.flutter.RollbarTracePayload:'
-    // only in debug mode, but not in release
-    if (error.message!.startsWith(androidTracePayloadPrefix)) {
-      var message = error.message!.substring(androidTracePayloadPrefix.length);
-      _attachPlatformPayload(message, data);
-    }
-  }
-
-  void _attachPlatformPayload(String message, Data data) {
-    var embeddedPayload = jsonDecode(message);
-    var embeddedBody = embeddedPayload['data']['body'] as Map?;
+  Data _attachPlatformPayload(JsonMap payload, Data data) {
+    final embeddedBody = payload['data']['body'] as JsonMap;
 
     if (appendToChain) {
-      data.body = _prependPlatformTraceToChain(data.body, embeddedBody!);
+      final body = _appendPlatformTraceToChain(data.body, embeddedBody);
+      return data.copyWith(body: body);
     } else {
-      data.platformPayload = embeddedPayload;
       _restoreDartChainMessage(
-          data.body.getTraces(), Body.fromMap(embeddedBody!)!.getTraces()!);
+        data.body.traces,
+        Body.fromMap(embeddedBody).traces,
+      );
+      return data.copyWith(platformPayload: payload);
     }
   }
 
-  Body _prependPlatformTraceToChain(Body dartBody, Map embeddedBody) {
-    var embeddedChain = Body.fromMap(embeddedBody)!.getTraces()!;
-
-    var dartChain = dartBody.getTraces()!;
+  Body _appendPlatformTraceToChain(Body dartBody, JsonMap embeddedBody) {
+    final embeddedChain = Body.fromMap(embeddedBody).traces;
+    final dartChain = dartBody.traces;
 
     _restoreDartChainMessage(dartChain, embeddedChain);
 
     embeddedChain.addAll(dartChain);
-    return TraceChain()..traces = embeddedChain;
+    return TraceChain(embeddedChain);
   }
 
   // Fix message, we hijacked it on the platform side to carry the payload
-  void _restoreDartChainMessage(
-      List<TraceInfo?>? dartChain, List<TraceInfo?> embeddedChain) {
-    if (embeddedChain.isNotEmpty) {
-      for (var element in dartChain!) {
-        if (element!.exception != null &&
-            element.exception!.message!.startsWith('PlatformException') &&
-            element.exception!.message!.contains(androidTracePayloadPrefix)) {
-          element.exception!.message =
-              'PlatformException(error, "${embeddedChain[0]!.exception!.message}")';
-        }
+  void _restoreDartChainMessage(Traces dartChain, Traces embeddedChain) {
+    if (embeddedChain.isEmpty) return;
+    final originalMessage = embeddedChain.first.exception.message;
+    final message = 'PlatformException(error, "$originalMessage")';
+
+    for (final element in dartChain) {
+      if (element.exception.message.startsWith('PlatformException') &&
+          element.exception.message.contains(tracePayloadPrefix)) {
+        element.exception.message = message;
       }
     }
   }

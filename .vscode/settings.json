@@ -1,5 +1,5 @@
 {
-  "dart.flutterSdkPath": ".fvm/flutter_sdk",
+  "dart.flutterSdkPath": "/Users/matux/fvm/versions/3.0.5",
   // Remove .fvm files from search
   "search.exclude": {
     "**/.fvm": true
@@ -8,5 +8,5 @@
   "files.watcherExclude": {
     "**/.fvm": true
   },
-  "java.configuration.updateBuildConfiguration": "automatic"
+  "java.configuration.updateBuildConfiguration": "automatic",
 }

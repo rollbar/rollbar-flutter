@@ -10,9 +10,10 @@ environment:
   flutter: '>=2.0.0'
 
 dependencies:
-  connectivity_plus: ^2.1.0
   flutter:
     sdk: flutter
+  connectivity_plus: ^2.1.0
+  sqlite3_flutter_libs: ^0.5.8
   logging: ^1.0.2
   meta: ^1.7.0
   rollbar_common: ^0.3.0-beta

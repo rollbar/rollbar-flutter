@@ -1,17 +1,24 @@
 import 'dart:developer' as developer;
+import 'package:logging/logging.dart' show Level;
+import 'package:meta/meta.dart';
 
-/// Internal SDK logging (for the SDK use only!!!):
-class Logging {
-  static void info(String message, dynamic error) => _log(800, message, error);
-  static void warn(String message, dynamic error) => _log(900, message, error);
-  static void err(String message, dynamic error) => _log(1000, message, error);
+@internal
+void log(String message, [dynamic error, StackTrace? stackTrace]) =>
+    _log(Level.INFO, message, error, stackTrace);
 
-  static void _log(int level, String message, dynamic error) {
+@internal
+void warn(String message, [dynamic error, StackTrace? stackTrace]) =>
+    _log(Level.WARNING, message, error, stackTrace);
+
+@internal
+void err(String message, dynamic error, [StackTrace? stackTrace]) =>
+    _log(Level.SEVERE, message, error, stackTrace);
+
+void _log(Level level, String message, dynamic error, StackTrace? stackTrace) =>
     developer.log(
       message,
-      level: level,
+      level: level.value,
       name: 'com.rollbar.rollbar-dart',
-      error: error?.toString(),
+      error: error,
+      stackTrace: stackTrace,
     );
-  }
-}

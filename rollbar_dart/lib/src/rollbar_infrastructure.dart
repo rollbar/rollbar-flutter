@@ -1,114 +1,111 @@
 import 'dart:core';
 import 'dart:isolate';
 
+import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart' as common;
 import 'package:rollbar_dart/rollbar_dart.dart';
 
-import '_internal/module.dart';
-import 'http_sender.dart';
+import 'sender/http_sender.dart';
 
 class RollbarInfrastructure {
-  final ReceivePort _receivePort = ReceivePort();
-  late final SendPort _sendPort;
+  final ReceivePort _receivePort;
+  final SendPort _sendPort;
+  final Isolate _isolate;
 
-  RollbarInfrastructure._() {
-    Isolate.spawn(_processWorkItemsInBackground, _receivePort.sendPort,
-        debugName: 'RollbarInfrastructureIsolate');
-  }
+  RollbarInfrastructure._(this._isolate, this._receivePort, this._sendPort);
 
-  Future<SendPort> initialize({required Config rollbarConfig}) async {
-    _sendPort = await _receivePort.first;
-    ModuleLogger.moduleLogger.info('Send port: $_sendPort');
-    _sendPort.send(rollbarConfig);
-    return _sendPort;
+  static Future<RollbarInfrastructure> start({required Config config}) async {
+    final receivePort = ReceivePort();
+    final isolate = await Isolate.spawn(work, receivePort.sendPort);
+    final sendPort = await receivePort.first;
+    // [todo] figure a cleanear way of removing the sender/transformer
+    // before, isolates imposes limitations where the transformer/senders
+    // functions must be free functions, but the latest architecture changes
+    // allow us to init everything that requires these functions before the
+    // isolates, so there's no more need for the Config at this point to carry
+    // these functions, thus eliminating the restriction/limitations.
+    sendPort.send(Config.fromMap(config.toMap()));
+    return RollbarInfrastructure._(isolate, receivePort, sendPort);
   }
 
   Future<void> dispose() async {
     // Send a signal to the spawned isolate indicating that it should exit:
     _sendPort.send(null);
     _receivePort.close();
+    _isolate.kill(priority: Isolate.beforeNextEvent);
   }
 
-  static final RollbarInfrastructure instance = RollbarInfrastructure._();
+  //static final RollbarInfrastructure instance = RollbarInfrastructure._();
 
   void process({required PayloadRecord record}) {
     _sendPort.send(record);
   }
 
-  static Future<void> _processWorkItemsInBackground(SendPort sendPort) async {
-    ModuleLogger.moduleLogger.info('Infrastructure isolate started.');
-
-    // Send a SendPort to the main isolate (RollbarInfrastructure)
-    // so that it can send JSON strings to this isolate:
-    final receivePort = ReceivePort();
-    sendPort.send(receivePort.sendPort);
+  @internal
+  static Future<void> work(SendPort sendPort) async {
+    final infrastructurePort = ReceivePort();
+    sendPort.send(infrastructurePort.sendPort);
 
     // Wait for messages from the main isolate.
-    await for (final message in receivePort) {
+    await for (final message in infrastructurePort) {
       bool continueProcessing = await _process(message);
       if (!continueProcessing) {
         break;
       }
     }
-
-    ModuleLogger.moduleLogger.info('Infrastructure isolate finished.');
-    Isolate.exit();
   }
 
   static Future<bool> _process(dynamic message) async {
-    // [HACK] This delay helps to avoid occasional sqlite's "db locked"
-    // errors/exceptions. Keep it until we figure out why sqlite has these
-    // errors randomly:
-    await Future.delayed(Duration(milliseconds: 25));
-
-    if (message is Config) {
-      _processConfig(message);
-      await _processAllPendingRecords();
-      return true;
-    } else if (message is PayloadRecord) {
-      await _processPayloadRecord(message);
-      return true;
-    } else if (message == null) {
-      // Exit if the main isolate sends a null message, indicating
-      // it is the time to exit.
+    if (message == null) {
       await _processAllPendingRecords();
       return false;
-    } else {
-      return true;
     }
+
+    switch (message.runtimeType) {
+      case Config:
+        _processConfig(message);
+        await _processAllPendingRecords();
+        break;
+      case PayloadRecord:
+        await _processPayloadRecord(message);
+    }
+
+    return true;
   }
 
   static void _processConfig(Config config) {
-    if (common.ServiceLocator.instance.registrationsCount == 0) {
-      common.ServiceLocator.instance
-          .register<PayloadRepository, PayloadRepository>(
-              PayloadRepository.create(config.persistPayloads ?? false));
-      common.ServiceLocator.instance.register<Sender, HttpSender>(HttpSender(
-          endpoint: config.endpoint, accessToken: config.accessToken));
-      common.ServiceLocator.instance
-          .register<common.ConnectivityMonitor, ConnectivityMonitor>(
-              ConnectivityMonitor());
-    }
+    if (common.ServiceLocator.instance.registrationsCount > 0) return;
+
+    common.ServiceLocator.instance
+        .register<PayloadRepository, PayloadRepository>(
+      PayloadRepository.create(config.persistPayloads),
+    );
+    common.ServiceLocator.instance.register<Sender, HttpSender>(
+      HttpSender(endpoint: config.endpoint, accessToken: config.accessToken),
+    );
+    common.ServiceLocator.instance
+        .register<ConnectivityMonitor, ConnectivityMonitor>(
+      ConnectivityMonitor(),
+    );
   }
 
   static Future<void> _processPayloadRecord(PayloadRecord payloadRecord) async {
     final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
     if (repo != null) {
       repo.addPayloadRecord(payloadRecord);
-      await _processDestinationPendindRecords(payloadRecord.destination, repo);
+      await _processDestinationPendingRecords(payloadRecord.destination, repo);
     } else {
-      ModuleLogger.moduleLogger
-          .severe('PayloadRepository service was never registered!');
       await HttpSender(
-              endpoint: payloadRecord.destination.endpoint,
-              accessToken: payloadRecord.destination.accessToken)
-          .sendString(payloadRecord.payloadJson);
-      return; // we tried our best.
+        endpoint: payloadRecord.destination.endpoint,
+        accessToken: payloadRecord.destination.accessToken,
+      ).sendString(payloadRecord.payloadJson);
     }
   }
 
-  static Future<void> _processDestinationPendindRecords(
-      Destination destination, PayloadRepository repo) async {
+  static Future<void> _processDestinationPendingRecords(
+    Destination destination,
+    PayloadRepository repo,
+  ) async {
     final records =
         await repo.getPayloadRecordsForDestinationAsync(destination);
     if (records.isEmpty) {
@@ -116,7 +113,10 @@ class RollbarInfrastructure {
     }
 
     final sender = HttpSender(
-        endpoint: destination.endpoint, accessToken: destination.accessToken);
+      endpoint: destination.endpoint,
+      accessToken: destination.accessToken,
+    );
+
     for (var record in records) {
       if (!await _processPendingRecord(record, sender, repo)) {
         break;
@@ -125,11 +125,13 @@ class RollbarInfrastructure {
   }
 
   static Future<bool> _processPendingRecord(
-      PayloadRecord record, Sender sender, PayloadRepository repo) async {
+    PayloadRecord record,
+    Sender sender,
+    PayloadRepository repo,
+  ) async {
     final connectivityMonitor =
-        common.ServiceLocator.instance.tryResolve<common.ConnectivityMonitor>();
-    if (connectivityMonitor != null &&
-        !connectivityMonitor.connectivityState.connectivityOn) {
+        common.ServiceLocator.instance.tryResolve<ConnectivityMonitor>();
+    if (connectivityMonitor?.connectivityState.connectivityOn != true) {
       return false;
     }
 
@@ -152,16 +154,15 @@ class RollbarInfrastructure {
   }
 
   static Future<void> _processAllPendingRecords() async {
-    final repo = common.ServiceLocator.instance.tryResolve<PayloadRepository>();
-    if (repo == null) {
-      ModuleLogger.moduleLogger
-          .severe('PayloadRepository service was never registered!');
-    } else {
-      final destinations = repo.getDestinations();
-      for (final destination in destinations) {
-        await _processDestinationPendindRecords(destination, repo);
+    final repository =
+        common.ServiceLocator.instance.tryResolve<PayloadRepository>();
+
+    if (repository != null && repository.destinations.isNotEmpty == true) {
+      for (final destination in repository.destinations) {
+        await _processDestinationPendingRecords(destination, repository);
       }
-      await repo.removeUnusedDestinationsAsync();
+
+      await repository.removeUnusedDestinationsAsync();
     }
   }
 }

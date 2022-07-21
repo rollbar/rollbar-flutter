@@ -1,30 +1,38 @@
+import 'dart:io';
+import 'package:meta/meta.dart';
+import '../../ext/collections.dart';
+
+@sealed
+@immutable
 class Client {
-  String? locale;
+  final String locale;
+  final String hostname;
+  final String os;
+  final String osVersion;
+  final String dartVersion;
 
-  String? hostname;
+  const Client({
+    required this.locale,
+    required this.hostname,
+    required this.os,
+    required this.osVersion,
+    required this.dartVersion,
+  });
 
-  String? os;
-
-  String? osVersion;
-
-  String? rootPackage;
-
-  Map<String, String>? dart;
+  factory Client.fromPlatform() => Client(
+        locale: Platform.localeName,
+        hostname: Platform.localHostname,
+        os: Platform.operatingSystem,
+        osVersion: Platform.operatingSystemVersion,
+        dartVersion: Platform.version,
+      );
 
   /// Converts the object into a Json encodable map.
-  ///
-  /// The `root` field is not supported by the backend as part of the `client` element,
-  /// and it's being sent under the `server` element, though this might change in the future.
-  /// See the file `core_notifier.dart` for details.
-  Map<String, dynamic> toJson() {
-    var result = <String, dynamic>{
-      'locale': locale,
-      'hostname': hostname,
-      'os': os,
-      'os_version': osVersion,
-      'dart': dart
-    };
-
-    return result;
-  }
+  JsonMap toMap() => {
+        'locale': locale,
+        'hostname': hostname,
+        'os': os,
+        'os_version': osVersion,
+        'dart': {'version': dartVersion}
+      };
 }

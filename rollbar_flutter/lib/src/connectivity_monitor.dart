@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-import 'package:rollbar_dart/rollbar_dart.dart' as rdart;
-
-import 'package:rollbar_flutter/src/_internal/module.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
 
 /// Service aiding in optimizing network operations.
-/// [ConnectivityMonitor] is designed to work as a singleton.
+/// [FlutterConnectivityMonitor] is designed to work as a singleton.
 ///
 /// Usage:
 ///
@@ -61,42 +59,17 @@ import 'package:rollbar_flutter/src/_internal/module.dart';
 /// ```
 ///
 ////// Service aiding in optimizing network operations.
-/// [ConnectivityMonitor] is designed to work as a singleton.
-class ConnectivityMonitor extends rdart.ConnectivityMonitor {
-  late final Connectivity _connectivity;
+/// [FlutterConnectivityMonitor] is designed to work as a singleton.
+class FlutterConnectivityMonitor extends ConnectivityMonitor {
+  final Connectivity _connectivity = Connectivity();
   late final StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
-  ConnectivityMonitor() {
-    _connectivity = Connectivity();
+  FlutterConnectivityMonitor() {
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-        (result) => _processConnectivityEvent(result),
-        onDone: () => _processConnectivityStreamCompletion(),
-        onError: (error, stackTrace) =>
-            _processConnectivityDetectionError(error, stackTrace));
-  }
-
-  void _processConnectivityEvent(ConnectivityResult connectivityResult) {
-    switch (connectivityResult) {
-      case ConnectivityResult.none:
-        connectivityOn = false;
-        break;
-      case ConnectivityResult.ethernet:
-      case ConnectivityResult.wifi:
-      case ConnectivityResult.mobile:
-      default:
-        connectivityOn = true;
-        break;
-    }
-  }
-
-  void _processConnectivityDetectionError(Object error, StackTrace stackTrace) {
-    ModuleLogger.moduleLogger
-        .warning('Connectivity Detection Error:', error, stackTrace);
-  }
-
-  void _processConnectivityStreamCompletion() {
-    ModuleLogger.moduleLogger
-        .info('Connectivity Detection Event Stream completed!');
+      (status) {
+        connectivityOn = status != ConnectivityResult.none;
+      },
+    );
   }
 
   @override
@@ -107,12 +80,12 @@ class ConnectivityMonitor extends rdart.ConnectivityMonitor {
 
   @override
   Future<void> checkConnectivity() async {
-    ConnectivityResult result = await _connectivity.checkConnectivity();
-    if (result == ConnectivityResult.none) {
-      connectivityOn = false;
-      return;
+    switch (await _connectivity.checkConnectivity()) {
+      case ConnectivityResult.none:
+        connectivityOn = false;
+        break;
+      default:
+        connectivityOn = await super.hasInternetConnectionToRollbar();
     }
-
-    connectivityOn = await super.hasInternetConnectionToRollbar();
   }
 }

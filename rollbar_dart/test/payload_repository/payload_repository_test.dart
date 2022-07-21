@@ -31,7 +31,7 @@ void main() {
 
     test('Basic Destination entities manipulation...', () async {
       final repo = await PayloadRepository.createInMemoryAsync();
-      expect(repo.getDestinations().length, 0);
+      expect(repo.destinations.length, 0);
 
       // insert new destination:
       var destination =

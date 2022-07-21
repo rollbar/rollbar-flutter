@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/uncaught_error.dart';
+import 'package:rollbar_dart/src/uncaught_error_handler.dart';
 import 'package:test/test.dart';
 
 import 'client_server_utils.dart';
@@ -11,60 +11,65 @@ import 'client_server_utils.dart';
 Future<void> main() async {
   group('UncaughtErrorHandler tests', () {
     late RawTextSocket server;
+    // ignore: deprecated_member_use_from_same_package
     late UncaughtErrorHandler handler;
 
     setUp(() async {
       server = await RawTextSocket.build();
-      handler = await _createErrorHandler(server.endpoint);
+
+      final config = Config(
+          accessToken: 'BlaBlaAccessToken',
+          endpoint: server.endpoint,
+          environment: 'production',
+          package: 'some_package_name',
+          codeVersion: '1.0.0',
+          handleUncaughtErrors: true,
+          sender: createTextSender);
+
+      // ignore: deprecated_member_use_from_same_package
+      handler = await UncaughtErrorHandler.run(config: config);
     });
 
     tearDown(() async {
       await server.close();
+      handler.dispose();
     });
 
-    test(
-        'When error is received in current isolate should report it using sender',
-        () async {
-      var errorPort = await handler.errorHandlerPort;
+    test('Reporting error caught in current isolate using sender', () async {
       try {
         await throwyMethodA();
-      } catch (error, trace) {
-        errorPort!.send([error.toString(), trace.toString()]);
+      } catch (error, stackTrace) {
+        handler.sendPort.send([error.toString(), stackTrace.toString()]);
       }
 
-      var payloadJson =
-          await server.messages.first.timeout(Duration(milliseconds: 500));
-      expect(payloadJson != null, equals(true));
-      var payload = json.decode(payloadJson!);
+      final payloadJson = await server.messages.first;
+      expect(payloadJson, isNotNull);
+      final payload = jsonDecode(payloadJson!);
 
-      var data = payload['data'];
+      final data = payload['data'];
       expect(data['language'], equals('dart'));
 
-      var frames = data['body']['trace']['frames'];
+      final frames = data['body']['trace']['frames'];
       // We'll get different traces depending on whether we're running in AOT
       // or VM modes, and there isn't much we can do about it. So the only
       // thing we can reliably check here is the first element
-      expect(frames[0]['method'], equals('nestedThrowy'));
+      expect(frames.first['method'], equals('nestedThrowy'));
     });
 
-    test(
-        'When error is not caught in separate isolate should report it using sender',
-        () async {
-      var errorPort = await handler.errorHandlerPort;
-      var isolate = await Isolate.spawn(secondIsolateMethod, errorPort);
+    test('Report uncaught error in separate isolate using sender', () async {
+      final isolate = await Isolate.spawn(otherIsolateMethod, handler.sendPort);
       try {
-        var payloadJson =
-            await server.messages.first.timeout(Duration(milliseconds: 500));
-        expect(payloadJson != null, equals(true));
-        var payload = json.decode(payloadJson!);
+        final payloadJson = await server.messages.first;
+        expect(payloadJson, isNotNull);
+        final payload = jsonDecode(payloadJson!);
 
-        var data = payload['data'];
+        final data = payload['data'];
         expect(data['language'], equals('dart'));
 
-        var frames = data['body']['trace']['frames'];
+        final frames = data['body']['trace']['frames'];
         expect(frames[0]['method'], equals('inDifferentIsolate'));
 
-        var message = data['body']['trace']['exception']['message'];
+        final message = data['body']['trace']['exception']['message'];
         expect(message, equals('Too late'));
       } finally {
         isolate.kill();
@@ -87,20 +92,8 @@ Future<void> inDifferentIsolate() async {
   throw TimeoutException('Too late');
 }
 
-Future<UncaughtErrorHandler> _createErrorHandler(String endpoint) async {
-  var config = (ConfigBuilder('BlaBlaAccessToken')
-        ..endpoint = endpoint
-        ..environment = 'production'
-        ..codeVersion = '1.0.0'
-        ..handleUncaughtErrors = true
-        ..sender = createTextSender)
-      .build();
-
-  return await UncaughtErrorHandler.build(config);
-}
-
-Future<void> secondIsolateMethod(SendPort? errorPort) async {
-  Isolate.current.addErrorListener(errorPort!);
+Future<void> otherIsolateMethod(SendPort errorPort) async {
+  Isolate.current.addErrorListener(errorPort);
   // No try catch here, our handler should take care of it
   await inDifferentIsolate();
 }

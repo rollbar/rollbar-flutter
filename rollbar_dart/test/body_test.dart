@@ -8,96 +8,89 @@ import 'package:test/test.dart';
 void main() {
   group('Serialization tests', () {
     test('TraceInfo json roundtrip serialization test', () {
-      var frames = [
-        Frame()
-          ..className = 'ignore.this.Class'
-          ..colno = 3
-          ..filename = 'test.dart'
-          ..lineno = 100
-          ..method = 'someMethod',
-        Frame()
-          ..className = 'ignore.this.AsWell'
-          ..filename = 'test2.dart'
-          ..method = '_AnotherMethod'
+      const frames = [
+        Frame(
+            filename: 'test.dart',
+            type: 'ignore.this.Class',
+            method: 'someMethod',
+            line: 100,
+            column: 3),
+        Frame(
+            filename: 'test2.dart',
+            type: 'ignore.this.AsWell',
+            method: '_AnotherMethod')
       ];
 
-      var traceInfo = TraceInfo()
-        ..rawTrace = 'stack frame 1 2 3'
-        ..frames = frames
-        ..exception = (ExceptionInfo()
-          ..clazz = 'TestException'
-          ..message = 'Attempted to test some code');
+      final traceInfo = TraceInfo(
+        rawTrace: 'stack frame 1 2 3',
+        frames: frames,
+        exception: ExceptionInfo(
+          type: 'TestException',
+          message: 'Attempted to test some code',
+        ),
+      );
 
-      var asJson = jsonEncode(traceInfo.toJson());
+      final asJson = jsonEncode(traceInfo.toMap());
 
-      for (var builder in [
-        (v) => TraceInfo.fromMap(v),
-        (v) => Body.fromMap(v)
-      ]) {
-        var recovered = builder(jsonDecode(asJson)) as TraceInfo;
-
-        expect(recovered.exception!.clazz, equals('TestException'));
-        expect(recovered.exception!.message,
-            equals('Attempted to test some code'));
-        expect(recovered.frames.length, equals(2));
-        expect(recovered.rawTrace, equals('stack frame 1 2 3'));
+      for (final fromMap in [TraceInfo.fromMap, Body.fromMap]) {
+        final ti = fromMap(jsonDecode(asJson)) as TraceInfo;
+        expect(ti.exception.type, equals('TestException'));
+        expect(ti.exception.message, equals('Attempted to test some code'));
+        expect(ti.frames.length, equals(2));
+        expect(ti.rawTrace, equals('stack frame 1 2 3'));
       }
     });
 
     test('TraceChain json roundtrip serialization test', () {
-      var frames = [
-        Frame()
-          ..className = 'ignore.this.Class'
-          ..colno = 3
-          ..filename = 'test.dart'
-          ..lineno = 100
-          ..method = 'inAChain',
-        Frame()
-          ..className = 'ignore.this.AsWell'
-          ..filename = 'test2.dart'
-          ..method = '_AnotherMethod'
+      const frames = [
+        Frame(
+            filename: 'test.dart',
+            type: 'ignore.this.Class',
+            method: 'inAChain',
+            line: 100,
+            column: 3),
+        Frame(
+            filename: 'test2.dart',
+            type: 'ignore.this.AsWell',
+            method: '_AnotherMethod')
       ];
 
-      var traceInfo1 = TraceInfo()
-        ..frames = frames
-        ..exception = (ExceptionInfo()
-          ..clazz = 'TestException'
-          ..message = 'Attempted to test some code');
+      final traces = [
+        TraceInfo(
+            frames: frames,
+            exception: ExceptionInfo(
+              type: 'TestException',
+              message: 'Attempted to test some code',
+            )),
+        TraceInfo(
+            frames: [frames[1]],
+            exception: ExceptionInfo(
+              type: 'TestException',
+              message: 'Attempted to test some code',
+            ))
+      ];
 
-      var traceInfo2 = TraceInfo()
-        ..frames = [frames[1]]
-        ..exception = (ExceptionInfo()
-          ..clazz = 'TestException'
-          ..message = 'Attempted to test some code');
+      final asJson = jsonEncode(TraceChain(traces).toMap());
 
-      var chain = TraceChain()..traces = [traceInfo1, traceInfo2];
-      var asJson = jsonEncode(chain.toJson());
+      for (final fromMap in [TraceChain.fromMap, Body.fromMap]) {
+        final tc = fromMap(jsonDecode(asJson)) as TraceChain;
 
-      for (var builder in [
-        (v) => TraceChain.fromMap(v),
-        (v) => Body.fromMap(v)
-      ]) {
-        var recovered = builder(jsonDecode(asJson)) as TraceChain;
+        expect(tc.traces.length, equals(2));
+        expect(tc.traces[0].frames.length, equals(2));
+        expect(tc.traces[0].frames.first.method, equals('inAChain'));
 
-        expect(recovered.traces!.length, equals(2));
-        expect(recovered.traces![0]!.frames.length, equals(2));
-        expect(recovered.traces![0]!.frames[0].method, equals('inAChain'));
-
-        expect(recovered.traces![1]!.frames.length, equals(1));
-        expect(
-            recovered.traces![1]!.frames[0].method, equals('_AnotherMethod'));
+        expect(tc.traces[1].frames.length, equals(1));
+        expect(tc.traces[1].frames.first.method, equals('_AnotherMethod'));
       }
     });
 
     test('Message json roundtrip serialization test', () {
-      var message = Message()..body = 'This is a test body';
+      const message = Message('This is a test message');
+      final asJson = jsonEncode(message.toMap());
 
-      var asJson = jsonEncode(message.toJson());
-
-      for (var builder in [(v) => Message.fromMap(v), (v) => Body.fromMap(v)]) {
-        var recovered = builder(jsonDecode(asJson)) as Message;
-
-        expect(recovered.body, equals('This is a test body'));
+      for (final fromMap in [Message.fromMap, Body.fromMap]) {
+        final recovered = fromMap(jsonDecode(asJson)) as Message;
+        expect(recovered.text, equals('This is a test message'));
       }
     });
   });

@@ -1,20 +1,23 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/src/platform_transformer.dart';
 
-import 'platform_exception_utils.dart';
+import 'utils/payload_utils.dart';
+import 'utils/platform_exception_utils.dart';
 
 void main() {
   group('PlatformTransformer tests', () {
+    const filename = 'test/platform_transformer_test.dart';
     String? expectedMessage;
 
     setUp(() {
-      RollbarPlatformInfo.isAndroid = true;
       expectedMessage = 'PlatformException(error, "Invalid counter state: 1")';
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
     });
 
     tearDown(() {
-      RollbarPlatformInfo.reset();
+      debugDefaultTargetPlatformOverride = null;
     });
 
     group('Platform transformer (appendToChain: true)', () {
@@ -24,74 +27,71 @@ void main() {
         transformer = PlatformTransformer(appendToChain: true);
       });
 
-      test(
-          'If error is PlatformException object with chain it should enrich trace chain',
-          () async {
-        var exception = createAndroidPlatformException(
-            topFrameMethod: 'letsSeeYouParseThis', includeLineNumber: false);
+      test('Enrich trace chain on PlatformException', () async {
+        final exception = androidPlatformException(
+          topFrameMethod: 'letsSeeYouParseThis',
+          includeLineNumber: false,
+        );
 
-        var frames = [Frame()..method = 'testThis', Frame()..method = 'what'];
-        var body = createPlatformTraceInfo(exception, frames);
+        const frames = [
+          Frame(filename: filename, method: 'testThis'),
+          Frame(filename: filename, method: 'what'),
+        ];
 
-        var original = Data()..body = body;
+        final body = platformTraceInfo(exception, frames);
+        final original = data(body: body);
+        final transformed = await transformer.transform(
+          exception,
+          StackTrace.empty,
+          original,
+        );
 
-        var updated =
-            await transformer.transform(exception, StackTrace.empty, original);
-
-        var traces = updated.body.getTraces()!;
+        final traces = transformed.body.traces;
         expect(traces, hasLength(2));
 
-        var rootCause = traces[0]!;
-        expect(rootCause.frames.length, greaterThan(1));
-        expect(rootCause.frames[0].method, equals('letsSeeYouParseThis'));
-
-        var dartTrace = traces[1]!;
+        final dartTrace = traces[1];
         expect(dartTrace.frames, hasLength(2));
         expect(dartTrace.frames[0].method, equals('testThis'));
         expect(dartTrace.frames[1].method, equals('what'));
 
-        // The message was temporarily hijacked to transfer the platform payload, let's make sure
-        // it's been restored
-        expect(dartTrace.exception!.message, equals(expectedMessage));
+        // The message was temporarily hijacked to transfer the platform
+        // payload, let's make sure it's been restored
+        expect(dartTrace.exception.message, equals(expectedMessage));
       });
 
-      test(
-          'If error is PlatformException object with trace it should create chain',
-          () async {
-        var exception = createAndroidPlatformException(
-            topFrameMethod: 'thisWillBeRethrown',
-            includeLineNumber: true,
-            createChain: true);
+      test('Create chain on PlatformException with trace', () async {
+        final exception = androidPlatformException(
+          topFrameMethod: 'thisWillBeRethrown',
+          includeLineNumber: true,
+          createChain: true,
+        );
 
-        var frames = [
-          Frame()
-            ..lineno = 3
-            ..method = 'onTheDartSide'
+        const frames = [
+          Frame(filename: filename, method: 'onTheDartSide', line: 3)
         ];
 
-        var body = createPlatformTraceInfo(exception, frames);
-        var original = Data()..body = body;
-
-        var updated =
+        final body = platformTraceInfo(exception, frames);
+        final original = data(body: body);
+        final transformed =
             await transformer.transform(exception, StackTrace.empty, original);
 
-        var traces = updated.body.getTraces()!;
+        final traces = transformed.body.traces;
         expect(traces, hasLength(3));
 
-        var rootCause = traces[0]!;
+        final rootCause = traces.first;
         expect(rootCause.frames.length, greaterThan(1));
-        expect(rootCause.frames[0].method, equals('thisWillBeRethrown'));
+        expect(rootCause.frames.first.method, equals('thisWillBeRethrown'));
 
-        var rethrownTrace = traces[1]!;
+        final rethrownTrace = traces[1];
         expect(rethrownTrace.frames, hasLength(2));
         expect(rethrownTrace.frames[0].method, equals('processError'));
         expect(rethrownTrace.frames[1].method, equals('catchAndThrow'));
 
-        var dartTrace = traces[2]!;
+        final dartTrace = traces[2];
         expect(dartTrace.frames, hasLength(1));
-        expect(dartTrace.frames[0].method, equals('onTheDartSide'));
+        expect(dartTrace.frames.first.method, equals('onTheDartSide'));
 
-        expect(dartTrace.exception!.message, equals(expectedMessage));
+        expect(dartTrace.exception.message, equals(expectedMessage));
       });
     });
 
@@ -102,84 +102,73 @@ void main() {
         transformer = PlatformTransformer(appendToChain: false);
       });
 
-      test(
-          'If error is PlatformException object with chain it should attach platform payload',
-          () async {
-        var exception = createAndroidPlatformException(
-            topFrameMethod: 'toBeAttached', includeLineNumber: true);
+      test('Attach platform payload on PlatformException with chain', () async {
+        final exception = androidPlatformException(
+          topFrameMethod: 'toBeAttached',
+          includeLineNumber: true,
+        );
 
-        var frames = [Frame()..method = 'thisFails'];
+        const frames = [Frame(filename: filename, method: 'thisFails')];
 
-        var body = createPlatformTraceInfo(exception, frames);
-        var original = Data()..body = body;
-
-        var updated =
+        final body = platformTraceInfo(exception, frames);
+        final original = data(body: body);
+        final transformed =
             await transformer.transform(exception, StackTrace.empty, original);
 
-        var traces = updated.body.getTraces()!;
+        final traces = transformed.body.traces;
         expect(traces, hasLength(1));
 
-        var dartTrace = traces[0]!;
+        final dartTrace = traces.first;
         expect(dartTrace.frames, hasLength(1));
-        expect(dartTrace.frames[0].method, equals('thisFails'));
+        expect(dartTrace.frames.first.method, equals('thisFails'));
 
-        expect(dartTrace.exception!.message, equals(expectedMessage));
+        expect(dartTrace.exception.message, equals(expectedMessage));
 
-        expect(updated.platformPayload, isNotNull);
-        expect(updated.platformPayload!['data']['notifier']['name'],
+        expect(transformed.platformPayload, isNotNull);
+        expect(transformed.platformPayload?['data']['notifier']['name'],
             equals('rollbar-java'));
-        var trace = updated.platformPayload!['data']['body']['trace'];
+
+        final trace = transformed.platformPayload?['data']['body']['trace'];
         expect(trace['frames'].length, equals(2));
         expect(trace['frames'][0]['method'], equals('toBeAttached'));
       });
 
-      test(
-          'If error is PlatformException object with trace it should attach platform payload',
-          () async {
-        var exception = createAndroidPlatformException(
-            topFrameMethod: 'topChainFailure',
-            includeLineNumber: true,
-            createChain: true);
+      test('Attach platform payload on PlatformException with trace', () async {
+        final exception = androidPlatformException(
+          topFrameMethod: 'topChainFailure',
+          includeLineNumber: true,
+          createChain: true,
+        );
 
-        var frames = [
-          Frame()
-            ..lineno = 3
-            ..method = 'attachedFailureChain'
+        const frames = [
+          Frame(filename: filename, method: 'attachedFailureChain', line: 3)
         ];
 
-        var body = createPlatformTraceInfo(exception, frames);
-        var original = Data()..body = body;
-
-        var updated =
+        final body = platformTraceInfo(exception, frames);
+        final original = data(body: body);
+        final transformed =
             await transformer.transform(exception, StackTrace.empty, original);
 
-        var traces = updated.body.getTraces()!;
+        final traces = transformed.body.traces;
         expect(traces, hasLength(1));
 
-        var dartTrace = traces[0]!;
+        final dartTrace = traces.first;
         expect(dartTrace.frames, hasLength(1));
-        expect(dartTrace.frames[0].method, equals('attachedFailureChain'));
+        expect(dartTrace.frames.first.method, equals('attachedFailureChain'));
 
-        expect(dartTrace.exception!.message, equals(expectedMessage));
+        expect(dartTrace.exception.message, equals(expectedMessage));
 
-        expect(updated.platformPayload, isNotNull);
-        expect(updated.platformPayload!['data']['notifier']['name'],
+        expect(transformed.platformPayload, isNotNull);
+        expect(transformed.platformPayload?['data']['notifier']['name'],
             equals('rollbar-java'));
 
-        var chain = updated.platformPayload!['data']['body']['trace_chain'];
+        final chain =
+            transformed.platformPayload?['data']['body']['trace_chain'];
         expect(chain.length, equals(2));
 
-        var topTrace = chain[0];
+        final topTrace = chain.first;
         expect(topTrace['frames'][0]['method'], equals('topChainFailure'));
       });
     });
   });
-}
-
-TraceInfo createPlatformTraceInfo(Exception exception, List<Frame> frames) {
-  return TraceInfo()
-    ..exception = (ExceptionInfo()
-      ..clazz = 'PlatformException'
-      ..message = exception.toString())
-    ..frames = frames;
 }

@@ -1,4 +1,4 @@
-import '_internal/module.dart';
+import 'dart:core';
 
 /// [ServiceLocatorByType]
 ///
@@ -59,9 +59,8 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
   final Map<Type, Object> _servicesByType = {};
   final Map<Enum, Service> _servicesByID = {};
 
-  ServiceLocator._() {
-    ModuleLogger.moduleLogger.finer('Created $ServiceLocator instance.');
-  }
+  ServiceLocator._();
+
   bool _assertSafeTransitionTo(ServiceLocatorState state) {
     switch (state.index - _state.index) {
       case 1:
@@ -126,7 +125,8 @@ class ServiceLocator implements ServiceLocatorByType, ServiceLocatorByID {
 
   @override
   bool registerIfNone<TService extends Object, T extends TService>(
-      T singleton) {
+    T singleton,
+  ) {
     if (!_servicesByType.containsKey(TService)) {
       _servicesByType[TService] = singleton;
       _assertSafeTransitionTo(ServiceLocatorState.registrationPhase);

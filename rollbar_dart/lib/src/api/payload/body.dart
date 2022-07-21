@@ -1,16 +1,20 @@
+import 'package:meta/meta.dart';
+
+import '../../ext/collections.dart';
+import '../../ext/trace.dart';
 import 'exception_info.dart';
 import 'frame.dart';
 
+typedef Traces = List<TraceInfo>;
+
 /// Container class with the error or message to be sent to Rollbar.
 abstract class Body {
-  Map<String, dynamic> toJson();
-  List<TraceInfo?>? getTraces();
+  JsonMap toMap();
+  Traces get traces;
 
-  static Body empty() {
-    return Message()..body = '';
-  }
+  static Body get empty => Message();
 
-  static Body? fromMap(Map attributes) {
+  static Body fromMap(JsonMap attributes) {
     if (attributes.containsKey('trace')) {
       return TraceInfo.fromMap(attributes);
     } else if (attributes.containsKey('message')) {
@@ -19,122 +23,121 @@ abstract class Body {
       return TraceChain.fromMap(attributes);
     }
   }
+
+  factory Body.from(String? message, {dynamic error, StackTrace? stackTrace}) {
+    if (error == null && message == null) {
+      throw ArgumentError(
+          'Either an error or a message must be provided.', 'error');
+    }
+
+    if (error != null) {
+      return TraceInfo(
+          frames: stackTrace?.frames ?? [],
+          exception: ExceptionInfo.from(error, message),
+          rawTrace: stackTrace?.rawTrace);
+    }
+
+    return Message(message!);
+  }
 }
 
 /// An individual error with its corresponding stack trace if available.
+@immutable
 class TraceInfo implements Body {
-  late List<Frame> frames;
-  ExceptionInfo? exception;
-  String? rawTrace;
-
-  TraceInfo() {
-    frames = [];
-  }
+  final ExceptionInfo exception;
+  final List<Frame> frames;
+  final String? rawTrace;
 
   @override
-  List<TraceInfo> getTraces() {
-    return [this];
-  }
+  Traces get traces => [this];
+
+  const TraceInfo({
+    required this.exception,
+    required this.frames,
+    this.rawTrace,
+  });
+
+  factory TraceInfo.fromMap(JsonMap attributes) => TraceInfo(
+      frames: attributes.trace.frames,
+      exception: attributes.trace.exceptionInfo,
+      rawTrace: attributes.trace.rawTrace);
+
+  TraceInfo copyWith({
+    ExceptionInfo? exception,
+    List<Frame>? frames,
+    String? rawTrace,
+  }) =>
+      TraceInfo(
+          exception: exception ?? this.exception,
+          frames: frames ?? this.frames,
+          rawTrace: rawTrace ?? this.rawTrace);
 
   @override
-  Map<String, dynamic> toJson() {
-    var traceInfo = <String, dynamic>{
-      'trace': <String, dynamic>{
-        'frames': frames.map((f) => f.toJson()).toList(),
-      }
-    };
-
-    if (exception != null) {
-      traceInfo['trace']['exception'] = exception!.toJson();
-    }
-
-    if (rawTrace != null) {
-      traceInfo['trace']['raw'] = rawTrace;
-    }
-
-    return traceInfo;
-  }
-
-  static TraceInfo? fromMap(Map attributes) {
-    if (!attributes.containsKey('trace')) {
-      return null;
-    }
-
-    attributes = attributes['trace'];
-
-    var result = TraceInfo();
-    if (attributes.containsKey('frames')) {
-      var frames = attributes['frames'];
-      if (frames is List) {
-        result.frames = frames.map((value) => Frame.fromMap(value)).toList();
-      } else {
-        throw ArgumentError('Frames is not a list: ${frames.runtimeType}');
-      }
-    }
-
-    if (attributes.containsKey('exception')) {
-      result.exception = ExceptionInfo.fromMap(attributes['exception']);
-    }
-
-    if (attributes.containsKey('raw')) {
-      result.rawTrace = attributes['raw'];
-    }
-
-    return result;
-  }
+  JsonMap toMap() => {
+        'trace': {
+          'frames': frames.map((f) => f.toMap()).toList(),
+          'exception': exception.toMap(),
+          'raw': rawTrace,
+        }.compact()
+      };
 }
 
 /// A chain of multiple errors, where the first one on the list represents the
 /// root cause of the error.
+@sealed
+@immutable
 class TraceChain implements Body {
-  List<TraceInfo?>? traces;
+  @override
+  final Traces traces;
+
+  const TraceChain(this.traces);
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      'trace_chain': traces!.map((v) {
-        return v!.toJson()['trace'];
-      }).toList()
-    };
-  }
+  JsonMap toMap() => {
+        'trace_chain': traces.map((trace) => trace.toMap()['trace']).toList(),
+      };
 
-  static TraceChain fromMap(Map attributes) {
-    var chain = attributes['trace_chain'] as List;
-    return TraceChain()
-      ..traces = chain.map((v) {
-        return TraceInfo.fromMap({'trace': v});
-      }).toList();
-  }
-
-  @override
-  List<TraceInfo?>? getTraces() {
-    return traces;
-  }
+  factory TraceChain.fromMap(JsonMap attributes) => TraceChain(
+        attributes.traceChain
+            .map((trace) => TraceInfo.fromMap({'trace': trace}))
+            .toList(),
+      );
 }
 
 /// A text message to be sent to Rollbar.
+@sealed
+@immutable
 class Message implements Body {
-  String? body;
+  final String text;
+
+  const Message([this.text = '']);
+
+  factory Message.fromMap(JsonMap attributes) => Message(attributes.message);
 
   @override
-  List<TraceInfo> getTraces() {
-    return [];
-  }
-
-  static Message? fromMap(Map attributes) {
-    if (!attributes.containsKey('message')) {
-      return null;
-    }
-
-    attributes = attributes['message'];
-
-    return Message()..body = attributes['body'];
-  }
+  Traces get traces => [];
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      'message': {'body': body}
-    };
+  JsonMap toMap() => {
+        'message': {
+          'body': text,
+        }
+      };
+}
+
+extension _Attributes on JsonMap {
+  ExceptionInfo get exceptionInfo {
+    assert(containsKey('exception'));
+    return ExceptionInfo.fromMap(this['exception'] as JsonMap);
   }
+
+  String get message => this['message']['body'] ?? '';
+  String? get rawTrace => this['raw'] as String?;
+  JsonMap get trace => this['trace'] ?? {};
+
+  List<JsonMap> get traceChain =>
+      (this['trace_chain'] as List? ?? []).whereType<JsonMap>().toList();
+
+  List<Frame> get frames =>
+      (this['frames'] as List? ?? []).map((f) => Frame.fromMap(f)).toList();
 }

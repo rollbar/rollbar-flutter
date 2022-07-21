@@ -347,11 +347,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 6B5NER795L;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+					/usr/lib/swift,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.rollbar.rollbarFlutterExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -470,11 +472,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 6B5NER795L;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+					/usr/lib/swift,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.rollbar.rollbarFlutterExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -488,11 +492,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 6B5NER795L;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+					/usr/lib/swift,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.rollbar.rollbarFlutterExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
