@@ -24,29 +24,29 @@ extension _PayloadRecord on PayloadRecord {
 @sealed
 @immutable
 class PayloadRepository {
-  final Database databse;
+  final Database database;
 
   PayloadRepository({required bool persistent})
-      : databse = persistent
+      : database = persistent
             ? sqlite3.open('rollbar_payloads.db')
             : sqlite3.openInMemory() {
-    databse.execute(SQL.createPayloadRecordsTable);
+    database.execute(SQL.createPayloadRecordsTable);
   }
 }
 
 extension PayloadRecords on PayloadRepository {
-  PayloadRecord? payloadRecord({required UUID id}) => databse
+  PayloadRecord? payloadRecord({required UUID id}) => database
       .select(SQL.selectPayloadRecord, [id.toBytes()])
       .singleRow
       .map(_PayloadRecord.from);
 
-  Set<PayloadRecord> get payloadRecords => databse
+  Set<PayloadRecord> get payloadRecords => database
       .select(SQL.selectAllPayloadRecords)
       .map(_PayloadRecord.from)
       .toSet();
 
   void addPayloadRecord(PayloadRecord payloadRecord) =>
-      databse.execute(SQL.insertPayloadRecord, [
+      database.execute(SQL.insertPayloadRecord, [
         payloadRecord.id.toBytes(),
         payloadRecord.accessToken,
         payloadRecord.endpoint,
@@ -55,12 +55,12 @@ extension PayloadRecords on PayloadRepository {
         payloadRecord.timestamp.millisecondsSinceEpoch / 1000
       ]);
 
-  void removePayloadRecord({required UUID id}) => databse.execute(
+  void removePayloadRecord({required UUID id}) => database.execute(
         SQL.deletePayloadRecord,
         [id.toBytes()],
       );
 
   void removePayloadRecordsOlderThan(DateTime utcExpirationTime) =>
-      databse.execute(SQL.deletePayloadRecordsOlderThan,
+      database.execute(SQL.deletePayloadRecordsOlderThan,
           [(utcExpirationTime.millisecondsSinceEpoch / 1000)]);
 }
