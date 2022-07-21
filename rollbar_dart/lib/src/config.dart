@@ -32,7 +32,7 @@ class Config {
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
     this.transformer,
-    this.sender = PersistentSender.create,
+    this.sender = PersistentSender.new,
   });
 
   Config copyWith({

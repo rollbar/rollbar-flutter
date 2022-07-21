@@ -12,14 +12,11 @@ class PersistentSender implements Sender {
   final Config config;
   late final Destination destination;
 
-  PersistentSender({required this.config})
+  PersistentSender(this.config)
       : destination = Destination(
           endpoint: config.endpoint,
           accessToken: config.accessToken,
         );
-
-  factory PersistentSender.create(Config config) =>
-      PersistentSender(config: config);
 
   /// Sends the provided payload as the body of POST request to
   /// the configured endpoint.
