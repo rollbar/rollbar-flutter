@@ -51,31 +51,26 @@ extension InfrastructureIsolate on Infrastructure {
     connectivity = ConnectivityMonitor();
     repository = PayloadRepository(persistent: shouldPersistPayloads);
 
-    await processAllPendingRecords();
+    await processPendingRecords();
 
     await for (final PayloadRecord? record in receivePort) {
       if (record == null) {
-        await processAllPendingRecords();
+        await processPendingRecords();
         break;
       }
 
       repository.addPayloadRecord(record);
-      await processDestinationPendingRecords(record.destination);
+      await processPendingRecords();
     }
   }
 
-  static Future<void> processDestinationPendingRecords(
-    Destination destination,
-  ) async {
-    final records = repository.payloadRecordsForDestination(destination);
-    if (records.isEmpty) return;
+  static Future<void> processPendingRecords() async {
+    for (final record in repository.payloadRecords) {
+      final sender = HttpSender(
+        endpoint: record.endpoint,
+        accessToken: record.accessToken,
+      );
 
-    final sender = HttpSender(
-      endpoint: destination.endpoint,
-      accessToken: destination.accessToken,
-    );
-
-    for (final record in records) {
       if (!await processPendingRecord(record, sender)) {
         break;
       }
@@ -90,29 +85,22 @@ extension InfrastructureIsolate on Infrastructure {
       return false;
     }
 
-    final success = await sender.sendString(record.payloadJson);
-    if (success) {
-      repository.removePayloadRecord(record);
-      return true;
-    } else {
+    return await sender.sendString(record.payloadJson).then((success) {
+      if (success) {
+        repository.removePayloadRecord(id: record.id);
+        return true;
+      }
+
       if (connectivity.connectivityState.connectivityOn) {
         connectivity.overrideAsOffFor(duration: 30.seconds);
       }
 
       final cutoffTime = DateTime.now().toUtc().subtract(1.days);
       if (record.timestamp.compareTo(cutoffTime) < 0) {
-        repository.removePayloadRecord(record);
+        repository.removePayloadRecord(id: record.id);
       }
 
       return false;
-    }
-  }
-
-  static Future<void> processAllPendingRecords() async {
-    repository.destinations.forEach(processDestinationPendingRecords);
-
-    if (repository.destinations.isNotEmpty) {
-      repository.removeUnusedDestinations();
-    }
+    });
   }
 }

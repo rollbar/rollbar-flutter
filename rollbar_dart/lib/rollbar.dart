@@ -19,5 +19,4 @@ export 'src/api/response.dart' show Response;
 export 'src/connectivity_monitor.dart';
 
 export 'src/payload_repository/payload_record.dart';
-export 'src/payload_repository/payload_repository.dart'
-    hide SQL, TablePayloadRecords;
+export 'src/payload_repository/payload_repository.dart';

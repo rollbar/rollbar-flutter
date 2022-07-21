@@ -20,7 +20,7 @@ extension Accessors on Row {
   String get accessToken => this[_Column.accessToken];
   String get config => this[_Column.config];
   String get payload => this[_Column.payload];
-  int get timestamp => this[_Column.createdAt];
+  double get timestamp => this[_Column.createdAt];
 }
 
 @sealed
@@ -67,7 +67,7 @@ class SQL {
       "${_Column.config}",
       "${_Column.payload}",
       "${_Column.createdAt}")
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?)
     ''';
 
   static const String deletePayloadRecord = '''

@@ -45,16 +45,6 @@ extension PayloadRecords on PayloadRepository {
       .map(_PayloadRecord.from)
       .toSet();
 
-  // Set<PayloadRecord> payloadRecordsForDestination(Destination destination) =>
-  //     databse
-  //         .select(SQL.selectPayloadRecordsWithDestinationID,
-  //             [destination.id.toBytes()])
-  //         .map((row) => _PayloadRecord.from(row, destination))
-  //         .toSet();
-
-  // Set<PayloadRecord> getPayloadRecordsWithDestinationID(UUID id) =>
-  //     destination(id: id).map(payloadRecordsForDestination) ?? {};
-
   void addPayloadRecord(PayloadRecord payloadRecord) =>
       databse.execute(SQL.insertPayloadRecord, [
         payloadRecord.id.toBytes(),
@@ -64,9 +54,6 @@ extension PayloadRecords on PayloadRepository {
         payloadRecord.payloadJson,
         payloadRecord.timestamp.millisecondsSinceEpoch / 1000
       ]);
-
-  // void removePayloadRecord(PayloadRecord record) =>
-  //     removePayloadRecordWithID(record.id);
 
   void removePayloadRecord({required UUID id}) => databse.execute(
         SQL.deletePayloadRecord,
