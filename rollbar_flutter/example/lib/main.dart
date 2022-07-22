@@ -124,13 +124,13 @@ class _MyHomePageState extends State<MyHomePage> {
       const Divider(height: 10),
       Text(
         'Most recent Flutter error:',
-        style: Theme.of(context).textTheme.headline6,
+        style: Theme.of(context).textTheme.headline5,
       ),
       Padding(
         padding: const EdgeInsets.only(top: 16),
         child: Text(
           _lastError,
-          style: Theme.of(context).textTheme.headline4,
+          style: Theme.of(context).textTheme.headline6,
         ),
       )
     ];
