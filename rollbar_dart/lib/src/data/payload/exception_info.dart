@@ -1,5 +1,5 @@
 import 'package:meta/meta.dart';
-import '../../ext/collection.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
 /// Contains all the error details except the stack trace.
 @sealed

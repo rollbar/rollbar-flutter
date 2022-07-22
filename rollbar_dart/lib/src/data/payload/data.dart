@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
-import '../../ext/collection.dart';
 import 'body.dart' show Body;
 import 'client.dart' show Client;
 import 'level.dart';

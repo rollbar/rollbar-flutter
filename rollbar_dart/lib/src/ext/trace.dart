@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'package:stack_trace/stack_trace.dart' as stacktrace;
+
 import 'package:meta/meta.dart';
-import 'object.dart';
-import 'collection.dart';
+import 'package:stack_trace/stack_trace.dart' as stacktrace;
+import 'package:rollbar_common/rollbar_common.dart';
+
 import '../data/payload/frame.dart' as rollbar;
 
 extension _Sig on RegExp {

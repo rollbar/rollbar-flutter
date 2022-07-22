@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:meta/meta.dart';
-import '../../ext/collection.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
 @sealed
 @immutable

@@ -1,4 +1,4 @@
-import '../ext/collection.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
 /// Sender interface to send payload data to Rollbar.
 abstract class Sender {

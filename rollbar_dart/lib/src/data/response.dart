@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
-
-import '../ext/object.dart';
-import '../ext/collection.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
 /// Represents the response from the Rollbar API.
 ///

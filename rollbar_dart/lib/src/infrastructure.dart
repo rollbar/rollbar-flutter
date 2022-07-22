@@ -2,12 +2,9 @@ import 'dart:core';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
-import 'package:rollbar_dart/rollbar_dart.dart';
+import 'package:rollbar_common/rollbar_common.dart' hide ConnectivityMonitor;
+import 'package:rollbar_dart/rollbar.dart';
 
-import 'ext/object.dart';
-import 'ext/tuple.dart';
-import 'ext/math.dart';
-import 'ext/date_time.dart';
 import 'sender/http_sender.dart';
 
 @sealed

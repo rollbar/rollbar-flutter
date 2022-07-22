@@ -1,8 +1,7 @@
 import 'package:meta/meta.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
 import '../../rollbar.dart';
-import '../ext/collection.dart';
-import '../ext/environment.dart';
 import '../sender/persistent_sender.dart';
 
 /// Configuration for the [Rollbar] notifier.

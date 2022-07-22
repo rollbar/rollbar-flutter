@@ -2,9 +2,9 @@ import 'dart:io' show Platform;
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
 import '../../rollbar.dart';
-import 'ext/object.dart';
 
 /// A class that performs the core functions for the notifier:
 /// - Prepare a payload from the provided error or message.

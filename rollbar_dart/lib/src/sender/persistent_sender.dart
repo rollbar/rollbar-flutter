@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:meta/meta.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
-import '../ext/collection.dart';
 import '../../rollbar.dart';
 
 /// Persistent [Sender]. Default [Sender] implementation.
