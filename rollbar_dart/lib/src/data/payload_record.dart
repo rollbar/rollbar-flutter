@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../ext/identifiable.dart';
-import '../ext/collections.dart';
+import '../ext/collection.dart';
 
 @sealed
 @immutable

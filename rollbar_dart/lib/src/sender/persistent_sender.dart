@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:meta/meta.dart';
 
-import '../ext/collections.dart';
+import '../ext/collection.dart';
 import '../../rollbar.dart';
 
 /// Persistent [Sender]. Default [Sender] implementation.

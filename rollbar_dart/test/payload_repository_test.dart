@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:test/test.dart';
 
+import 'package:rollbar_dart/src/ext/math.dart';
+import 'package:rollbar_dart/src/ext/collection.dart' as f;
 import 'package:rollbar_dart/src/data/payload_record.dart';
 import 'package:rollbar_dart/src/payload_record_database.dart';
 
@@ -23,7 +26,7 @@ void main() {
       final file = File(databaseFilename);
       expect(file.existsSync(), false);
 
-      PayloadRecordDatabase(isPersistent: false);
+      PayloadRecordDatabase();
       expect(file.existsSync(), false);
 
       PayloadRecordDatabase(isPersistent: true);
@@ -31,7 +34,7 @@ void main() {
     });
 
     test('Basic PayloadRecord entities manipulation', () async {
-      final payloadRecords = PayloadRecordDatabase(isPersistent: false);
+      final payloadRecords = PayloadRecordDatabase();
       expect(payloadRecords.length, 0);
 
       int recordsCount = 0;
@@ -86,7 +89,7 @@ void main() {
     });
 
     test('PayloadRepository database adds records correctly', () async {
-      final payloadRecords = PayloadRecordDatabase(isPersistent: false);
+      final payloadRecords = PayloadRecordDatabase();
       final record = PayloadRecord(
           accessToken: 'TOKEN1',
           endpoint: 'wwww.site.com',
@@ -129,7 +132,7 @@ void main() {
     });
 
     test('PayloadRepository database doesn\'t accept duplicates', () async {
-      final payloadRecords = PayloadRecordDatabase(isPersistent: false);
+      final payloadRecords = PayloadRecordDatabase();
       final record = PayloadRecord(
           accessToken: 'TOKEN1',
           endpoint: 'wwww.site.com',
@@ -150,7 +153,7 @@ void main() {
     });
 
     test('PayloadRepository database removes records correctly', () async {
-      final payloadRecords = PayloadRecordDatabase(isPersistent: false);
+      final payloadRecords = PayloadRecordDatabase();
       final record = PayloadRecord(
           accessToken: 'TOKEN1',
           endpoint: 'wwww.site.com',
@@ -165,5 +168,87 @@ void main() {
       expect(payloadRecords.isEmpty, isTrue);
       expect(payloadRecords.contains(record), isFalse);
     });
+
+    test('PayloadRepository database is iterable', () async {
+      final findableRecord = Record.generate().copyWith(accessToken: '1234');
+      final payloadRecords = PayloadRecordDatabase();
+      final records = Iterable.generate(
+        16,
+        (i) => i == 5 ? findableRecord : Record.generate(),
+      ).toSet();
+
+      records.forEach(payloadRecords.add);
+      expect(payloadRecords.length, 16);
+      expect(payloadRecords.map(records.contains).any(f.isFalse), isFalse);
+
+      for (final record in payloadRecords) {
+        expect(records.contains(record), isTrue);
+      }
+
+      final record =
+          payloadRecords.firstWhere((record) => record.accessToken == '1234');
+      expect(record, equals(findableRecord));
+    });
+
+    test('PayloadRepository database conforms to Set', () async {
+      final payloadRecords = PayloadRecordDatabase();
+      [
+        Record.generate(),
+        Record.generate(),
+        Record.generate().copyWith(accessToken: '1234'),
+        Record.generate(),
+        Record.generate().copyWith(accessToken: '1234'),
+        Record.generate()
+      ].forEach(payloadRecords.add);
+      expect(payloadRecords.length, equals(6));
+
+      payloadRecords.removeWhere((r) => r.accessToken == '1234');
+      expect(payloadRecords.length, equals(4));
+      expect(payloadRecords.any((r) => r.accessToken == '1234'), isFalse);
+
+      final newestRecords = {
+        Record.generate().copyWith(accessToken: '1234'),
+        Record.generate().copyWith(accessToken: '1234')
+      };
+
+      payloadRecords.addAll(newestRecords);
+      expect(payloadRecords.length, equals(6));
+
+      payloadRecords.retainWhere((r) => r.accessToken == '1234');
+      expect(payloadRecords.length, equals(2));
+      expect(payloadRecords.all((r) => r.accessToken == '1234'), isTrue);
+
+      final newRecords = Iterable.generate(4, (_) => Record.generate()).toSet();
+      final newDatabase = payloadRecords.union(newRecords);
+      expect(newDatabase.length, equals(6));
+
+      final newestDatabase = newDatabase.difference(newestRecords);
+      expect(newestDatabase.length, equals(4));
+      expect(newestDatabase.any((r) => r.accessToken == '1234'), isFalse);
+
+      newDatabase.clear();
+      expect(newestDatabase.isNotEmpty, isTrue);
+      expect(payloadRecords.isNotEmpty, isTrue);
+
+      newestDatabase.clear();
+      expect(payloadRecords.isNotEmpty, isTrue);
+
+      payloadRecords.clear();
+      expect(newDatabase.isEmpty, isTrue);
+      expect(newestDatabase.isEmpty, isTrue);
+      expect(payloadRecords.isEmpty, isTrue);
+    });
   });
+}
+
+extension Record on PayloadRecord {
+  static final rnd = Random();
+
+  static PayloadRecord generate() {
+    return PayloadRecord(
+        accessToken: rnd.nextString(32),
+        endpoint: rnd.nextString(32),
+        config: rnd.nextString(32),
+        payload: rnd.nextString(32));
+  }
 }

@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 
 import '../ext/object.dart';
-import '../ext/collections.dart';
+import '../ext/collection.dart';
 
 /// Represents the response from the Rollbar API.
 ///

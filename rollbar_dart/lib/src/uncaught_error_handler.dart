@@ -5,7 +5,7 @@ import 'dart:isolate';
 import 'package:meta/meta.dart';
 
 import 'ext/object.dart';
-import 'ext/collections.dart';
+import 'ext/collection.dart';
 import 'ext/tuple.dart';
 
 import '../../rollbar.dart';

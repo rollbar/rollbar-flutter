@@ -5,6 +5,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 import 'ext/object.dart';
 import 'ext/database.dart';
+import 'ext/collection.dart';
 import 'ext/identifiable.dart';
 
 import 'data/payload_record.dart';
@@ -88,6 +89,44 @@ class PayloadRecordDatabase
   @override
   Set<PayloadRecord> toSet() =>
       database.select(_SQL.selectAll).map(PayloadRecord.fromMap).toSet();
+
+  /// Creates a **new** [Database] which contains all the records of this set
+  /// and [other].
+  ///
+  /// That is, the returned [Database] contains all the records of this
+  /// [Database] and all the elements of [other].
+  @override
+  PayloadRecordDatabase union(Set<PayloadRecord> other) {
+    return PayloadRecordDatabase()
+      ..addAll(this)
+      ..addAll(other);
+  }
+
+  /// Creates a **new** [Database] which is the intersection between this
+  /// [Database] and [other].
+  ///
+  /// That is, the returned [Database] contains all the records of this
+  /// [Database] that are _also_ elements of [other] according to
+  /// `other.contains`.
+  @override
+  PayloadRecordDatabase intersection(Set<Object?> other) {
+    final result = PayloadRecordDatabase()..addAll(this);
+    result.where(not(other.contains)).forEach(result.remove);
+    return result;
+  }
+
+  /// Creates a **new** [Database] with the records of this [Database] that
+  /// are not in [other].
+  ///
+  /// That is, the returned [Database] contains all the records of this
+  /// [Database] that are not elements of [other] according to
+  /// `other.contains`.
+  @override
+  PayloadRecordDatabase difference(Set<Object?> other) {
+    final result = PayloadRecordDatabase()..addAll(this);
+    result.where(other.contains).forEach(result.remove);
+    return result;
+  }
 }
 
 extension _ListOfValues on PayloadRecord {
