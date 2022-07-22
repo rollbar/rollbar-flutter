@@ -1,9 +1,9 @@
 import 'package:meta/meta.dart';
 
-import '../rollbar.dart';
-import 'ext/collections.dart';
-import 'ext/environment.dart';
-import 'sender/persistent_sender.dart';
+import '../../rollbar.dart';
+import '../ext/collection.dart';
+import '../ext/environment.dart';
+import '../sender/persistent_sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
 @immutable

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:rollbar_dart/src/api/payload/body.dart';
-import 'package:rollbar_dart/src/api/payload/exception_info.dart';
-import 'package:rollbar_dart/src/api/payload/frame.dart';
+import 'package:rollbar_dart/src/data/payload/body.dart';
+import 'package:rollbar_dart/src/data/payload/exception_info.dart';
+import 'package:rollbar_dart/src/data/payload/frame.dart';
 import 'package:test/test.dart';
 
 void main() {

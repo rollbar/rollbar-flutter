@@ -1,5 +1,5 @@
 import 'package:meta/meta.dart';
-import '../../ext/collections.dart';
+import '../../ext/collection.dart';
 
 /// Contains all the error details except the stack trace.
 @sealed

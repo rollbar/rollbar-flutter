@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:meta/meta.dart';
-import '../../ext/collections.dart';
+import '../../ext/collection.dart';
 
 @sealed
 @immutable

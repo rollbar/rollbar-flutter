@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../ext/collections.dart';
+import '../../ext/collection.dart';
 import '../../ext/trace.dart';
 import 'exception_info.dart';
 import 'frame.dart';

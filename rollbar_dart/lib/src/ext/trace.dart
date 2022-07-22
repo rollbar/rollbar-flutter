@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:stack_trace/stack_trace.dart' as stacktrace;
 import 'package:meta/meta.dart';
 import 'object.dart';
-import 'collections.dart';
-import '../api/payload/frame.dart' as rollbar;
+import 'collection.dart';
+import '../data/payload/frame.dart' as rollbar;
 
 extension _Sig on RegExp {
   static final RegExp dso = RegExp(r'(\n|^)isolate_dso_base:');

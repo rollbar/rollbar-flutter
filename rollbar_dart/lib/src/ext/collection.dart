@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'package:meta/meta.dart';
 import 'package:rollbar_dart/src/ext/tuple.dart';
+import 'function.dart';
 
 typedef JsonMap = Map<String, dynamic>;
 
@@ -24,6 +25,35 @@ bool isNull<T>(T? x) => x == null;
 /// ['a', null, 'c', null, 'd'].where(isNotNull) // ['a', 'c', 'd']
 /// ```
 bool isNotNull<T>(T? x) => x != null;
+
+/// Tests whether the given boolean argument [x] is true.
+///
+/// Useful as a predicate for filter-type higher-order functions.
+///
+/// ```dart
+/// [true, true, true, false, true].all(isTrue) // false
+/// ```
+const isTrue = identity<bool>;
+
+/// Tests whether the given boolean argument [x] is false.
+///
+/// Useful as a predicate for filter-type higher-order functions.
+///
+/// ```dart
+/// [true, true, true, false, true].any(isFalse) // true
+/// ```
+bool isFalse(bool x) => !isTrue(x);
+
+/// Inverses a predicate boolean evaluation.
+///
+/// Useful as a predicate adjunct for filter-type higher-order functions.
+///
+/// ```dart
+/// final xs = [1, 2, 3, 4];
+/// final ys = [2, 4];
+/// final odds = xs.where(not(ys.contains)); // [1, 3]
+/// ```
+bool Function(T) not<T>(bool Function(T) p) => (x) => !p(x);
 
 @internal
 extension TryFirst<E> on Iterable<E> {
@@ -65,6 +95,8 @@ extension Predicates<E> on Iterable<E> {
   /// Maps over elements that satisfy the given predicate.
   Iterable<E> mapIf(Predicate<E> p, Transform<E, E> f) =>
       map((e) => p(e) ? f(e) : e);
+
+  bool notContains(E element) => !contains(element);
 }
 
 @internal

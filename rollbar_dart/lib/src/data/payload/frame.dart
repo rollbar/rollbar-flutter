@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart' as trace;
 
 import '../../ext/trace.dart';
-import '../../ext/collections.dart';
+import '../../ext/collection.dart';
 
 /// Contains the information of a single frame in a stack trace.
 @sealed

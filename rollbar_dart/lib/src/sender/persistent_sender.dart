@@ -3,20 +3,15 @@ import 'dart:developer';
 
 import 'package:meta/meta.dart';
 
-import '../ext/collections.dart';
+import '../ext/collection.dart';
 import '../../rollbar.dart';
 
 /// Persistent [Sender]. Default [Sender] implementation.
 @immutable
 class PersistentSender implements Sender {
   final Config config;
-  late final Destination destination;
 
-  PersistentSender(this.config)
-      : destination = Destination(
-          endpoint: config.endpoint,
-          accessToken: config.accessToken,
-        );
+  const PersistentSender(this.config);
 
   /// Sends the provided payload as the body of POST request to
   /// the configured endpoint.
@@ -27,10 +22,12 @@ class PersistentSender implements Sender {
   Future<bool> sendString(String payload) async {
     try {
       Rollbar.process(
-          record: PayloadRecord.create(
-              configJson: jsonEncode(config.toMap()),
-              payloadJson: payload,
-              destination: destination));
+          record: PayloadRecord(
+              accessToken: config.accessToken,
+              endpoint: config.endpoint,
+              config: jsonEncode(config.toMap()),
+              payload: payload,
+              timestamp: DateTime.now().toUtc()));
 
       return true;
     } catch (error, stackTrace) {

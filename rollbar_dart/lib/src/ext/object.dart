@@ -1,11 +1,4 @@
-/// Identity function a -> a
-T id<T>(T x) => x;
-
-/// Constant function a -> (b -> a)
-T Function(U Function(T)) constant<T, U>(T x) => (U Function(T) f) {
-      f(x);
-      return x;
-    };
+import 'function.dart';
 
 extension TryAs on Object? {
   /// Safely casts `this` to `T` if `this` is `T`,
@@ -27,4 +20,8 @@ extension HigherOrderMap<T> on T? {
 
   T? inspect(void Function(T) f) =>
       this != null ? constant(this as T)(f) : null;
+
+  /// Maps over elements that satisfy the given predicate.
+  U? mapIf<U>(bool Function(T) p, U Function(T) f) =>
+      this != null && p(this as T) ? f(this as T) : null;
 }
