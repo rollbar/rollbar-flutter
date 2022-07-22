@@ -1,4 +1,4 @@
-import 'api/payload/data.dart';
+import 'data/payload/data.dart';
 
 /// Represents a transformation operation on a Rollbar [Data] object.
 abstract class Transformer {

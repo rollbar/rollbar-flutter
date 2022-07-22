@@ -25,8 +25,8 @@ class PersistentSender implements Sender {
           record: PayloadRecord(
               accessToken: config.accessToken,
               endpoint: config.endpoint,
-              configJson: jsonEncode(config.toMap()),
-              payloadJson: payload,
+              config: jsonEncode(config.toMap()),
+              payload: payload,
               timestamp: DateTime.now().toUtc()));
 
       return true;

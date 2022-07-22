@@ -50,8 +50,6 @@ class Response {
         result: (map['result'] as JsonMap?).map(Result.fromMap),
       );
 
-  factory Response.fromJson(String json) => Response.fromMap(jsonDecode(json));
-
   factory Response.from(http.Response response) =>
       Response.fromMap(jsonDecode(response.body));
 
@@ -81,14 +79,11 @@ class Result {
   Result copyWith({String? uuid}) => Result(uuid: uuid ?? this.uuid);
 
   factory Result.fromMap(JsonMap map) => Result(uuid: map['uuid']);
-  factory Result.fromJson(String source) => Result.fromMap(json.decode(source));
 
   JsonMap toMap() => {'uuid': uuid};
 
   @override
   String toString() => 'Result(uuid: $uuid)';
-
-  String toJson() => json.encode(toMap());
 
   @override
   bool operator ==(Object other) =>

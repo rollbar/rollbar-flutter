@@ -6,7 +6,7 @@ import 'dart:developer';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/api/response.dart';
+import 'package:rollbar_dart/src/data/response.dart';
 
 const endpointPrefix = 'http://raw:';
 

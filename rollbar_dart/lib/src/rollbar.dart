@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'config.dart';
-import 'rollbar_infrastructure.dart';
+import 'data/config.dart';
+import 'infrastructure.dart';
 import 'core_notifier.dart';
-import 'payload_repository/payload_record.dart';
-import 'api/payload/level.dart';
+import 'data/payload_record.dart';
+import 'data/payload/level.dart';
 
 @sealed
 class Rollbar {
@@ -41,7 +41,7 @@ class Rollbar {
 
   /// Logs a message as an occurrence.
   static Future<void> message(String message, {Level level = Level.info}) =>
-      current._notifier.message(level, message);
+      current._notifier.notify(level, null, null, message);
 
   /// Sends an error as an occurrence, with [Level.debug] level.
   static Future<void> debug(dynamic error, StackTrace stackTrace) =>

@@ -1,22 +1,21 @@
 library rollbar;
 
-export 'src/config.dart';
+export 'src/data/config.dart';
 export 'src/rollbar.dart';
-export 'src/rollbar_infrastructure.dart';
+export 'src/infrastructure.dart';
 export 'src/sender/sender.dart';
 export 'src/transformer.dart';
 
-export 'src/api/payload/client.dart' show Client;
-export 'src/api/payload/payload.dart' show Payload;
-export 'src/api/payload/level.dart' show Level;
-export 'src/api/payload/data.dart' show Data;
-export 'src/api/payload/body.dart' show Body, Traces, TraceInfo, TraceChain;
-export 'src/api/payload/frame.dart' show Frame;
-export 'src/api/payload/exception_info.dart' show ExceptionInfo;
-
-export 'src/api/response.dart' show Response;
+export 'src/data/payload/client.dart' show Client;
+export 'src/data/payload/payload.dart' show Payload;
+export 'src/data/payload/level.dart' show Level;
+export 'src/data/payload/data.dart' show Data;
+export 'src/data/payload/body.dart' show Body, Traces, TraceInfo, TraceChain;
+export 'src/data/payload/frame.dart' show Frame;
+export 'src/data/payload/exception_info.dart' show ExceptionInfo;
+export 'src/data/response.dart' show Response;
+export 'src/data/payload_record.dart' show PayloadRecord;
 
 export 'src/connectivity_monitor.dart';
 
-export 'src/payload_repository/payload_record.dart';
-export 'src/payload_repository/payload_repository.dart';
+export 'src/payload_record_database.dart';

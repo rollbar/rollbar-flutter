@@ -1,5 +1,5 @@
 import 'package:http/http.dart' as http;
-import 'package:rollbar_dart/src/api/response.dart';
+import 'package:rollbar_dart/src/data/response.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';

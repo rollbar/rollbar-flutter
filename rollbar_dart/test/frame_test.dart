@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:rollbar_dart/src/api/payload/frame.dart';
+import 'package:rollbar_dart/src/data/payload/frame.dart';
 import 'package:test/test.dart';
 
 void main() {

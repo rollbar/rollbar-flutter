@@ -6,9 +6,6 @@ import 'package:meta/meta.dart';
 import '../../rollbar.dart';
 import 'ext/object.dart';
 
-@internal
-typedef DataTransform = Future<Data> Function(Data);
-
 /// A class that performs the core functions for the notifier:
 /// - Prepare a payload from the provided error or message.
 /// - Apply the configured transformation, if any.
@@ -18,20 +15,13 @@ class CoreNotifier {
   final Sender _sender;
   final Transformer? _transformer;
 
-  // notifierVersion to be updated with each new release:
+  // notifier version to be updated with each new release: [todo] automate
   static const version = '0.3.0-beta';
   static const name = 'rollbar-dart';
 
   CoreNotifier({required this.config})
       : _sender = config.sender(config),
         _transformer = config.transformer?.call(config);
-
-  Future<void> message(Level level, String message) async {
-    final body = Body.from(message);
-    final data = await makeData(config, level, body);
-    final payload = Payload(config.accessToken, data);
-    await _sender.send(payload.toMap());
-  }
 
   Future<void> notify(
     Level level,
@@ -40,22 +30,22 @@ class CoreNotifier {
     String? message,
   ]) async {
     final body = Body.from(message, error: error, stackTrace: stackTrace);
-    final data = await makeData(config, level, body, map(error, stackTrace));
+    final data = await createData(config, level, body, map(error, stackTrace));
     final payload = Payload(config.accessToken, data);
     await _sender.send(payload.toMap());
   }
 
   @internal
-  DataTransform? map(dynamic error, StackTrace? stackTrace) =>
+  Future<Data> Function(Data)? map(dynamic error, StackTrace? stackTrace) =>
       (_transformer?.transform).map((transform) =>
           (data) async => await transform(error, stackTrace, data));
 
   @internal
-  Future<Data> makeData(
+  Future<Data> createData(
     Config config,
     Level level,
     Body body, [
-    DataTransform? transform,
+    Future<Data> Function(Data)? transform,
   ]) async {
     final data = Data(
         body: body,

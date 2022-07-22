@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
-import 'package:rollbar_dart/src/ext/identifiable.dart';
 
 import '../ext/identifiable.dart';
 import '../ext/collections.dart';
@@ -14,65 +11,60 @@ class PayloadRecord implements Identifiable {
   final DateTime timestamp;
   final String accessToken;
   final String endpoint;
-  final String configJson;
-  final String payloadJson;
+  final String config;
+  final String payload;
 
   PayloadRecord({
     UUID? id,
-    required this.timestamp,
+    DateTime? timestamp,
     required this.accessToken,
     required this.endpoint,
-    required this.configJson,
-    required this.payloadJson,
-  }) : id = id ?? uuidGen.v4obj();
+    required this.config,
+    required this.payload,
+  })  : id = id ?? uuidGen.v4obj(),
+        timestamp = timestamp ?? DateTime.now().toUtc();
 
   PayloadRecord copyWith({
     UUID? id,
     DateTime? timestamp,
     String? accessToken,
     String? endpoint,
-    String? configJson,
-    String? payloadJson,
+    String? config,
+    String? payload,
   }) =>
       PayloadRecord(
           id: id ?? this.id,
           timestamp: timestamp ?? this.timestamp,
           accessToken: accessToken ?? this.accessToken,
           endpoint: endpoint ?? this.endpoint,
-          configJson: configJson ?? this.configJson,
-          payloadJson: payloadJson ?? this.payloadJson);
+          config: config ?? this.config,
+          payload: payload ?? this.payload);
 
   factory PayloadRecord.fromMap(JsonMap map) => PayloadRecord(
-      id: UUID.new(map.id),
-      timestamp:
-          DateTime.fromMillisecondsSinceEpoch(map.timestamp, isUtc: true),
+      id: map.id,
+      timestamp: map.timestamp,
       accessToken: map.accessToken,
       endpoint: map.endpoint,
-      configJson: map.config,
-      payloadJson: map.payload);
-
-  factory PayloadRecord.fromJson(String source) =>
-      PayloadRecord.fromMap(jsonDecode(source));
+      config: map.config,
+      payload: map.payload);
 
   JsonMap toMap() => {
-        'id': id.uuid,
-        'timestamp': timestamp.millisecondsSinceEpoch,
+        'id': id.toBytes(),
+        'timestamp': timestamp.microsecondsSinceEpoch,
         'accessToken': accessToken,
         'endpoint': endpoint,
-        'configJson': configJson,
-        'payloadJson': payloadJson,
+        'config': config,
+        'payload': payload,
       };
-
-  String toJson() => jsonEncode(toMap());
 
   @override
   String toString() => 'PayloadRecord('
-      'id: ${id.uuid}'
+      'id: ${id.uuid}, '
       'timestamp: $timestamp, '
       'accessToken: $accessToken, '
       'endpoint: $endpoint, '
-      'configJson: $configJson, '
-      'payloadJson: $payloadJson)';
+      'config: $config, '
+      'payload: $payload)';
 
   @override
   bool operator ==(Object other) =>
@@ -82,19 +74,20 @@ class PayloadRecord implements Identifiable {
           other.timestamp == timestamp &&
           other.accessToken == accessToken &&
           other.endpoint == endpoint &&
-          other.configJson == configJson &&
-          other.payloadJson == payloadJson);
+          other.config == config &&
+          other.payload == payload);
 
   @override
-  int get hashCode => Object.hash(
-      id, timestamp, accessToken, endpoint, configJson, payloadJson);
+  int get hashCode =>
+      Object.hash(id, timestamp, accessToken, endpoint, config, payload);
 }
 
-extension _Attributes on JsonMap {
-  String get id => this['id'];
-  int get timestamp => this['timestamp'];
+extension PayloadRecordAttributes on JsonMap {
+  UUID get id => UUID.fromList(this['id'].whereType<int>().toList());
   String get accessToken => this['accessToken'];
   String get endpoint => this['endpoint'];
-  String get config => this['configJson'];
-  String get payload => this['payloadJson'];
+  String get config => this['config'];
+  String get payload => this['payload'];
+  DateTime get timestamp =>
+      DateTime.fromMicrosecondsSinceEpoch(this['timestamp'], isUtc: true);
 }
