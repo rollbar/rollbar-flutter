@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +44,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.rollbar.flutter.example/activity');
 
-  var _lastError = 'No errors yet';
   var _batteryLevel = 'Unknown battery level.';
   var _faultyMsg = 'No successful invocations yet.';
   var _counter = 0;
@@ -69,10 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
     platform
         .invokeMethod('faultyMethod')
         .then((message) => setState(() => _faultyMsg = message))
-        .catchError(
-          (e) => setState(() => _lastError = e.message),
-          test: (_) => false,
-        );
+        .catchError((e) => log(e), test: (_) => false);
   }
 
   void incrementCounter() {
@@ -122,17 +119,6 @@ class _MyHomePageState extends State<MyHomePage> {
         style: Theme.of(context).textTheme.headline4,
       ),
       const Divider(height: 10),
-      Text(
-        'Most recent Flutter error:',
-        style: Theme.of(context).textTheme.headline5,
-      ),
-      Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Text(
-          _lastError,
-          style: Theme.of(context).textTheme.headline6,
-        ),
-      )
     ];
 
     return Scaffold(
