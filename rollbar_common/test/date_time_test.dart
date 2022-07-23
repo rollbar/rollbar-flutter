@@ -1,6 +1,6 @@
 import 'dart:core';
 import 'package:test/test.dart';
-import 'package:rollbar_dart/src/ext/date_time.dart';
+import 'package:rollbar_common/src/extension/date_time.dart';
 
 void main() {
   group('DateTime Extensions', () {

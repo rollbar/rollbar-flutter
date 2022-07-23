@@ -8,6 +8,5 @@ const uuidGen = Uuid();
 typedef UUID = UuidValue;
 
 abstract class Identifiable<T extends Object> {
-  //Comparable<T>> {
   T get id;
 }

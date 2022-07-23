@@ -1,6 +1,5 @@
 import 'package:meta/meta.dart';
-
-import '../../ext/collection.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 import '../../ext/trace.dart';
 import 'exception_info.dart';
 import 'frame.dart';

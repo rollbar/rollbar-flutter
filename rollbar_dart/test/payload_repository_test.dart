@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:test/test.dart';
 
-import 'package:rollbar_dart/src/ext/math.dart';
-import 'package:rollbar_dart/src/ext/collection.dart' as f;
+import 'package:rollbar_common/src/extension/math.dart';
+import 'package:rollbar_common/src/extension/collection.dart' as f;
 import 'package:rollbar_dart/src/data/payload_record.dart';
 import 'package:rollbar_dart/src/payload_record_database.dart';
 

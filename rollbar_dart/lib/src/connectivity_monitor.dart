@@ -3,8 +3,6 @@ import 'dart:io';
 
 import 'package:rollbar_common/rollbar_common.dart';
 
-import 'ext/collection.dart';
-
 /// Service aiding in optimizing network operations.
 /// [ConnectivityMonitor] is designed to work as a singleton.
 class ConnectivityMonitor extends ConnectivityMonitorBase {

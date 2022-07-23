@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
+import 'package:rollbar_common/rollbar_common.dart';
 
-import '../ext/collection.dart';
 import '../data/response.dart';
 import '../logging.dart';
 import 'sender.dart';

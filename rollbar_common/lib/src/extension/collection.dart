@@ -1,6 +1,4 @@
-import 'dart:core';
-import 'package:meta/meta.dart';
-import 'package:rollbar_dart/src/ext/tuple.dart';
+import 'tuple.dart';
 import 'function.dart';
 
 typedef JsonMap = Map<String, dynamic>;
@@ -55,7 +53,6 @@ bool isFalse(bool x) => !isTrue(x);
 /// ```
 bool Function(T) not<T>(bool Function(T) p) => (x) => !p(x);
 
-@internal
 extension TryFirst<E> on Iterable<E> {
   /// Returns the first element or `null` if the list is empty.
   E? get tryFirst => isNotEmpty ? first : null;
@@ -70,7 +67,6 @@ extension TryFirst<E> on Iterable<E> {
   }
 }
 
-@internal
 extension Predicates<E> on Iterable<E> {
   /// Checks whether all elements of this iterable satisfy the given
   /// predicate [p].
@@ -99,7 +95,6 @@ extension Predicates<E> on Iterable<E> {
   bool notContains(E element) => !contains(element);
 }
 
-@internal
 extension SplitString on String {
   Tuple2<String, String> splitOnce(Pattern p) {
     final it = p.allMatches(this).iterator;
@@ -112,13 +107,11 @@ extension SplitString on String {
   }
 }
 
-@internal
 extension CompactList<E> on List<E?> {
   /// Returns a new non-null List by filtering out null values in the this List.
   List<E> compact() => whereType<E>().toList();
 }
 
-@internal
 extension WhereMap<K, V> on Map<K, V> {
   /// Returns a new Map by filtering its elements using the given predicate.
   Map<K, V> where(bool Function(K, V) p) {
@@ -134,7 +127,6 @@ extension WhereMap<K, V> on Map<K, V> {
   }
 }
 
-@internal
 extension CompactMap<K, V> on Map<K, V?> {
   /// Returns a new non-null Map by filtering out null values in the this Map.
   Map<K, V> compact() {

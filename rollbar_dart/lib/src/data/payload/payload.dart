@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
-import '../../ext/collection.dart';
 import 'data.dart';
 
 /// Represents the payload to be sent to Rollbar. A successfully constructed

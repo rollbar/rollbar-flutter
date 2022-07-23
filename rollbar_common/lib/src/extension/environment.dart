@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
 
 @sealed
-@internal
 class Environment {
   static const String mode = isDebug
       ? 'development'
