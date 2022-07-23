@@ -7,6 +7,6 @@ export 'src/extension/math.dart';
 export 'src/extension/date_time.dart';
 export 'src/extension/environment.dart';
 
-export 'src/extension/tuple.dart';
+export 'src/tuple.dart';
 
 export 'src/connectivity_monitor.dart';
