@@ -1,4 +1,4 @@
-import 'tuple.dart';
+import '../tuple.dart';
 import 'function.dart';
 
 typedef JsonMap = Map<String, dynamic>;
