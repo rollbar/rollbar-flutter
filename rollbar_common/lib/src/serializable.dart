@@ -1,4 +1,5 @@
 import 'extension/collection.dart';
+
 import 'record.dart';
 
 /// The class of types that are [Serializable].

@@ -5,81 +5,96 @@ import 'package:sqlite3/sqlite3.dart';
 
 import 'extension/object.dart';
 import 'extension/collection.dart';
+import 'extension/string.dart';
+import 'extension/database.dart';
 import 'identifiable.dart';
 import 'serializable.dart';
 import 'persistable.dart';
-import 'extension/database.dart';
 
+/// TableSet
+///
+/// List of limitations in the generics implementation of the Dart type system
+/// that complicate this implementation:
+/// - https://github.com/dart-lang/language/issues/356
+/// - https://github.com/dart-lang/language/issues/1152
+/// - https://github.com/dart-lang/language/issues/359
 @sealed
 @immutable
 class TableSet<E extends Persistable<UUID>> with SetMixin<E> implements Set<E> {
   final Database database;
 
   TableSet({bool isPersistent = false})
-      : database = isPersistent
-            ? sqlite3.open('rollbar_payloads.db')
-            : sqlite3.openInMemory() {
-    database.execute(_SQL.createTable);
+      : database =
+            isPersistent ? sqlite3.open('rollbar.db') : sqlite3.openInMemory() {
+    final typeDeclarations = _keyTypes.fold('', (String acc, kv) {
+      return '$acc${kv.key} ${kv.value.sqlTypeDeclaration}, ';
+    }).replaceLast(', ', '');
+
+    database.execute('CREATE TABLE IF NOT EXISTS $_table ($typeDeclarations)');
   }
 
   @override
   Iterator<E> get iterator =>
-      database.select(_SQL.selectAll).map(deserialize).iterator;
+      database.select('SELECT * FROM $_table').map(_deserialize).iterator;
 
   @override
-  int get length => database.select(_SQL.selectCountAll).intValue;
+  int get length => database.select('SELECT COUNT(*) FROM $_table').intValue;
 
   @override
   bool get isEmpty => length == 0;
 
   E? record({required UUID id}) => database
-      .select(_SQL.select, [id.toBytes()])
+      .select('SELECT ${_keyTypes.keys.join(', ')} FROM $_table WHERE id = ?',
+          [id.toBytes()])
       .trySingle
-      .map((result) => Serializable.of<E>().fromMap(result) as E);
+      .map(_deserialize);
 
   @override
-  E? lookup(Object? element) {
-    if (element is! E) return null;
-    return record(id: element.id);
-  }
+  E? lookup(Object? element) => element is E ? record(id: element.id) : null;
 
   @override
   bool contains(Object? element) {
     if (element is! E) return false;
-    return database.select(_SQL.selectExists, [element.id.toBytes()]).boolValue;
+    final result = database.select(
+        'SELECT EXISTS(SELECT 1 FROM $_table WHERE id = ?)',
+        [element.id.toBytes()]);
+    return result.boolValue;
   }
 
   @override
   bool add(Object? value) {
     if (value is! E || contains(value)) return false;
-    database.execute(_SQL.insert, value.values);
+    database.execute(
+        'INSERT INTO $_table (${_keyTypes.keys.join(', ')}) '
+        'VALUES (${_keyTypes.keys.map((_) => '?').join(', ')})',
+        value.toMap().values.toList());
     return true;
   }
+
+  /// Updates [element] on the Set.
+  ///
+  /// Returns `true` if [element] was updated. If the `element` isn't in the
+  /// set, returns `false` and the set is not changed.
+  bool update(E element) => remove(element) ? add(element) : false;
 
   @override
   bool remove(Object? value) {
     if (value is! E || !contains(value)) return false;
-    database.execute(_SQL.delete, [value.id.toBytes()]);
+    database.execute('DELETE FROM $_table WHERE id = ?', [value.id.toBytes()]);
     return true;
   }
 
-  void removeOlderThan(DateTime date) =>
-      database.execute(_SQL.deleteOlderThan, [date.microsecondsSinceEpoch]);
-
   @override
-  Set<E> toSet() => database.select(_SQL.selectAll).map(deserialize).toSet();
+  Set<E> toSet() =>
+      database.select('SELECT * FROM $_table').map(_deserialize).toSet();
 
   /// Creates a **new** [Database] which contains all the records of this set
   /// and [other].
   ///
   /// That is, the returned [Database] contains all the records of this
-  /// [Database] and all the elements of [other].
+  /// [Database] and all the elements of [other] that are not in this database.
   @override
-  TableSet<E> union(Set<E> other) {
-    return TableSet()
-      ..addAll(this)
-      ..addAll(other);
-  }
+  TableSet<E> union(Set<E> other) => TableSet()..addAll({...this, ...other});
 
   /// Creates a **new** [Database] which is the intersection between this
   /// [Database] and [other].
@@ -107,65 +122,7 @@ class TableSet<E extends Persistable<UUID>> with SetMixin<E> implements Set<E> {
     return result;
   }
 
-  @internal
-  @protected
-  E deserialize(JsonMap map) => Serializable.of<E>().fromMap(map) as E;
-}
-
-class _SQL {
-  static const String table = 'payload_records';
-  static const String id = 'id';
-  static const String token = 'accessToken';
-  static const String endpoint = 'endpoint';
-  static const String config = 'config';
-  static const String payload = 'payload';
-  static const String timestamp = 'timestamp';
-
-  static const String createTable = '''
-    CREATE TABLE IF NOT EXISTS $table (
-      $id	BINARY(16) NOT NULL PRIMARY KEY,
-      $token TEXT NOT NULL,
-      $endpoint TEXT NOT NULL,
-      $config TEXT NOT NULL,
-      $payload TEXT NOT NULL,
-      $timestamp INTEGER NOT NULL)
-    ''';
-
-  static const String select = '''
-    SELECT $id, $token, $endpoint, $config, $payload, $timestamp
-    FROM $table
-    WHERE $id = ?
-    ''';
-
-  static const String selectAll = '''
-    SELECT *
-    FROM $table
-    ''';
-
-  static const String selectCountAll = '''
-    SELECT COUNT(*)
-    FROM $table
-    ''';
-
-  static const String selectExists = '''
-    SELECT EXISTS(
-      SELECT 1
-      FROM $table
-      WHERE $id = ?)
-    ''';
-
-  static const String insert = '''
-    INSERT INTO $table ($id, $token, $endpoint, $config, $payload, $timestamp)
-    VALUES (?, ?, ?, ?, ?, ?)
-    ''';
-
-  static const String delete = '''
-    DELETE FROM $table
-    WHERE $id = ?
-    ''';
-
-  static const String deleteOlderThan = '''
-    DELETE FROM $table
-    WHERE $timestamp <= ?
-    ''';
+  String get _table => E.runtimeType.toString().toSnakeCase();
+  Map<String, Datatype> get _keyTypes => Persistable.of<E>().persistingKeyTypes;
+  E _deserialize(JsonMap map) => Serializable.of<E>().fromMap(map) as E;
 }

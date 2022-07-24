@@ -1,3 +1,8 @@
+import 'package:meta/meta.dart';
+
+/// A finite ordered sequence of two elements.
+@sealed
+@immutable
 class Tuple2<T1, T2> {
   final T1 first;
   final T2 second;
@@ -28,4 +33,22 @@ class Tuple2<T1, T2> {
 
   @override
   int get hashCode => Object.hash(first, second);
+}
+
+/// A `key` [K] `value` [V] pair.
+@sealed
+@immutable
+class KeyValue<K, V> implements Tuple2<K, V> {
+  @override
+  final K first;
+  @override
+  final V second;
+
+  const KeyValue(this.first, this.second);
+
+  K get key => first;
+  V get value => second;
+
+  @override
+  String toString() => '{$key: $value}';
 }

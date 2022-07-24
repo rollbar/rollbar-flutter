@@ -2,10 +2,10 @@
 T identity<T>(T x) => x;
 
 /// Constant function a -> (b -> a)
-T Function(U Function(T)) constant<T, U>(T x) => (U Function(T) f) {
-      f(x);
-      return x;
-    };
+///
+/// Returns a constant function, which always returns the same value no matter
+/// what argument it is given.
+T Function(U) constant<T, U>(T x) => (_) => x;
 
 /// Binary function currying. Allows for partial application of binary
 /// functions.
