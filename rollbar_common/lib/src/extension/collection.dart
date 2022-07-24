@@ -1,4 +1,3 @@
-import '../tuple.dart';
 import 'function.dart';
 
 typedef JsonMap = Map<String, dynamic>;
@@ -53,9 +52,12 @@ bool isFalse(bool x) => !isTrue(x);
 /// ```
 bool Function(T) not<T>(bool Function(T) p) => (x) => !p(x);
 
-extension TryFirst<E> on Iterable<E> {
+extension IterableExtensions<E> on Iterable<E> {
   /// Returns the first element or `null` if the list is empty.
   E? get tryFirst => isNotEmpty ? first : null;
+
+  /// Returns the last element or `null` if the list is empty.
+  E? get tryLast => isNotEmpty ? last : null;
 
   /// Returns the [index]th element or `null` if out of bounds.
   E? tryElementAt(int index) {
@@ -65,9 +67,7 @@ extension TryFirst<E> on Iterable<E> {
       return null;
     }
   }
-}
 
-extension Predicates<E> on Iterable<E> {
   /// Checks whether all elements of this iterable satisfy the given
   /// predicate [p].
   ///
@@ -91,20 +91,6 @@ extension Predicates<E> on Iterable<E> {
   /// Maps over elements that satisfy the given predicate.
   Iterable<E> mapIf(Predicate<E> p, Transform<E, E> f) =>
       map((e) => p(e) ? f(e) : e);
-
-  bool notContains(E element) => !contains(element);
-}
-
-extension SplitString on String {
-  Tuple2<String, String> splitOnce(Pattern p) {
-    final it = p.allMatches(this).iterator;
-    if (it.moveNext()) {
-      final match = it.current;
-      return Tuple2(substring(0, match.start), substring(match.end));
-    }
-
-    return Tuple2('', '');
-  }
 }
 
 extension CompactList<E> on List<E?> {
@@ -112,7 +98,7 @@ extension CompactList<E> on List<E?> {
   List<E> compact() => whereType<E>().toList();
 }
 
-extension WhereMap<K, V> on Map<K, V> {
+extension MapExtensions<K, V> on Map<K, V> {
   /// Returns a new Map by filtering its elements using the given predicate.
   Map<K, V> where(bool Function(K, V) p) {
     Map<K, V> map = {};
@@ -125,9 +111,7 @@ extension WhereMap<K, V> on Map<K, V> {
 
     return map;
   }
-}
 
-extension CompactMap<K, V> on Map<K, V?> {
   /// Returns a new non-null Map by filtering out null values in the this Map.
   Map<K, V> compact() {
     Map<K, V> map = {};
@@ -139,5 +123,44 @@ extension CompactMap<K, V> on Map<K, V?> {
     });
 
     return map;
+  }
+
+  /// Reduces the [Map] to a single key/value pair [MapEntry] by iteratively
+  /// combining [combine] each [entry] of the [Map] into an [accumulator].
+  ///
+  /// The [Map] must have at least one key/value pair. If it has only one pair,
+  /// that pair is returned.
+  ///
+  /// Otherwise this method starts with the first pair from the [Map] iterator,
+  /// and then combines it with the remaining pairs in iteration order.
+  MapEntry<K, V> reduce(
+    MapEntry<K, V> Function(MapEntry<K, V> accumulator, MapEntry<K, V> entry)
+        combine,
+  ) {
+    Iterator<MapEntry<K, V>> iterator = entries.iterator;
+    if (!iterator.moveNext()) throw ArgumentError('$this cannot be empty.');
+
+    var entry = iterator.current;
+    while (iterator.moveNext()) {
+      entry = combine(entry, iterator.current);
+    }
+
+    return entry;
+  }
+
+  /// Reduces the [Map] to a single _value_ by iteratively combining [combine]
+  /// each key/value pair [entry] in the [Map] with an existing value
+  /// [initialValue].
+  ///
+  /// Uses [initialValue] as the initial value,
+  /// then iterates through the key/value pairs and updates the value with
+  /// the result of the [combine] function.
+  T fold<T>(
+    T initialValue,
+    T Function(T previousValue, MapEntry<K, V> element) combine,
+  ) {
+    var result = initialValue;
+    forEach((k, v) => result = combine(result, MapEntry(k, v)));
+    return result;
   }
 }
