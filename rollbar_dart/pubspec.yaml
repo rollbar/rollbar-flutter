@@ -15,7 +15,7 @@ dependencies:
   sqlite3: ^1.5.1
   uuid: ^3.0.0
   logging: ^1.0.2
-  rollbar_common: ^0.3.0-beta
+  rollbar_common: ^0.3.1-beta
 
 dependency_overrides:
   rollbar_common:

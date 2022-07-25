@@ -2,7 +2,7 @@
 
 [Flutter](https://flutter.dev/) notifier for reporting exceptions, errors and log messages to [Rollbar](https://rollbar.com).
 
-## `rollbar-flutter` is currently in Beta. We are looking for beta-testers and feedback!
+## `rollbar-flutter` is currently in Beta. We are looking for beta-testers and feedback
 
 ## Usage
 
@@ -10,64 +10,42 @@ A simple usage example:
 
 ```dart
 import 'package:flutter/services.dart';
-import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/rollbar.dart';
 
 Future<void> main() async {
-  var config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
-        ..environment = 'production'
-        ..codeVersion = '1.0.0'
-        ..handleUncaughtErrors = true)
-      .build();
+  const config = Config(
+    accessToken: 'YOUR-ROLLBAR-ACCESSTOKEN',
+    package: 'rollbar_flutter_example',
+  );
 
-  await RollbarFlutter.run(config, (_rollbar) {
-    runApp(MyApp());
-  });
-}
-
-class MyApp extends StatelessWidget {
-  // Your application code here...
+  await RollbarFlutter.run(config, () => runApp(const MyApp()));
 }
 ```
 
 With this setup, `rollbar-flutter` will automatically catch and report any unhandled errors in your application.
 
-You can also use the rollbar instance to explicitly report errors or messages to Rollbar:
+You can also explicitly report errors or messages to Rollbar:
 
 ```dart
-import 'package:flutter/services.dart';
-import 'package:rollbar_flutter/rollbar.dart';
-
-Future<void> main() async {
-  var config = (ConfigBuilder('<YOUR ROLLBAR TOKEN HERE>')
-        ..environment = 'production'
-        ..codeVersion = '1.0.0'
-        ..handleUncaughtErrors = true)
-      .build();
-
-  await RollbarFlutter.run(config, (rollbar) async {
-    await rollbar.infoMsg('Nothing out of the ordinary so far...');
-  });
-}
+await Rollbar.info('Nothing out of the ordinary so far...');
 ```
 
 See the [`example` directory](./example/) for a complete example.
 
 ## Compatibility
 
-- Flutter 1: version **1.20.4** and above
-- Flutter 2: version **2.0.5** and above
+- Flutter 2: version **2.8.1** and above
 
 Logging version-specific issues, even outside of the supported versions, is welcome and they will be fixed whenever possible.
 
 ## Platform Support
 
-* Android: Yes
-* iOS: Yes
-* Web: No
-* Windows: No
-* macOS: No
-* Linux: No
+- Android: Yes
+- iOS: Yes
+- Web: No
+- Windows: No
+- macOS: No
+- Linux: No
 
 Additional platforms will be prioritized based on feedback from users.
 
