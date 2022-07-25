@@ -22,7 +22,7 @@ class PersistentSender implements Sender {
   Future<bool> sendString(String payload) async {
     try {
       Rollbar.process(
-          record: PayloadRecord(
+          record: Record(
               accessToken: config.accessToken,
               endpoint: config.endpoint,
               config: jsonEncode(config.toMap()),

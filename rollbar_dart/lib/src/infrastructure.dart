@@ -22,14 +22,14 @@ class Infrastructure {
     _isolate.kill(priority: Isolate.beforeNextEvent);
   }
 
-  void process({required PayloadRecord record}) {
+  void process({required Record record}) {
     _sendPort.send(record);
   }
 }
 
 extension InfrastructureIsolate on Infrastructure {
   static late ConnectivityMonitor connectivity;
-  static late PayloadRecordDatabase payloadRecords;
+  static late TableSet<Record> payloadRecords;
 
   static Future<Infrastructure> spawn({required Config config}) async {
     final receivePort = ReceivePort();
@@ -46,11 +46,11 @@ extension InfrastructureIsolate on Infrastructure {
 
     final shouldPersistPayloads = tuple.second;
     connectivity = ConnectivityMonitor();
-    payloadRecords = PayloadRecordDatabase(isPersistent: shouldPersistPayloads);
+    payloadRecords = TableSet<Record>(isPersistent: shouldPersistPayloads);
 
     await processPendingRecords();
 
-    await for (final PayloadRecord? record in receivePort) {
+    await for (final Record? record in receivePort) {
       record.map(payloadRecords.add);
       await processPendingRecords();
       if (record == null) break;

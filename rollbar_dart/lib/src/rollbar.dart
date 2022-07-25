@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
 import 'data/config.dart';
 import 'infrastructure.dart';
 import 'core_notifier.dart';
-import 'data/payload_record.dart';
 import 'data/payload/level.dart';
 
 @sealed
@@ -35,7 +35,7 @@ class Rollbar {
   }
 
   @internal
-  static void process({required PayloadRecord record}) {
+  static void process({required Record record}) {
     current._infrastructure.process(record: record);
   }
 

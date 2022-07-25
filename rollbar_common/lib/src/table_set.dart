@@ -11,7 +11,19 @@ import 'identifiable.dart';
 import 'serializable.dart';
 import 'persistable.dart';
 
-/// TableSet
+/// A collection of [Persistable] objects that leverages the `sqlite3` library
+/// in which each record can occur only once.
+///
+/// The [Database] has two modes, persistent and in-memory.
+///
+/// A persistent [Database] is a _shared_ database that will store all its
+/// records on the _same_ [Database] file.
+///
+/// An in-memory [Database] works on its own independent [Database] but it
+/// won't persist multiple library runs.
+///
+/// Access, store or remove [Persistable] objects as if this were any given
+/// [Set], all common [Set] rules apply.
 ///
 /// List of limitations in the generics implementation of the Dart type system
 /// that complicate this implementation:
