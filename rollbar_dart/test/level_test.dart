@@ -7,19 +7,19 @@ void main() {
       for (final level in Level.values) {
         switch (level) {
           case Level.debug:
-            expect(level, equals('debug'));
+            expect(level.name, equals('debug'));
             break;
           case Level.info:
-            expect(level, equals('info'));
+            expect(level.name, equals('info'));
             break;
           case Level.warning:
-            expect(level, equals('warning'));
+            expect(level.name, equals('warning'));
             break;
           case Level.error:
-            expect(level, equals('error'));
+            expect(level.name, equals('error'));
             break;
           case Level.critical:
-            expect(level, equals('critical'));
+            expect(level.name, equals('critical'));
             break;
         }
       }

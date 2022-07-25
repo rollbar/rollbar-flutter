@@ -3,6 +3,11 @@ import 'package:rollbar_common/src/extension/string.dart';
 
 void main() {
   group('String Extensions', () {
+    test('String replaceLast replaces the last occurrence in a string', () {
+      expect('0.0001'.replaceLast(RegExp(r'0'), ''), equals('0.001'));
+      expect('0.0001'.replaceLast(RegExp(r'0'), '1'), equals('0.0011'));
+    });
+
     test('String CamelCase to snake_case conversion', () {
       expect('CamelCase'.toSnakeCase(), equals('camel_case'));
       expect('camelCase'.toSnakeCase(), equals('camel_case'));
