@@ -13,8 +13,6 @@ class PersistentSender implements Sender {
 
   const PersistentSender(this.config);
 
-  /// Sends the provided payload as the body of POST request to
-  /// the configured endpoint.
   @override
   Future<bool> send(JsonMap payload) async => sendString(jsonEncode(payload));
 
@@ -26,8 +24,7 @@ class PersistentSender implements Sender {
               accessToken: config.accessToken,
               endpoint: config.endpoint,
               config: jsonEncode(config.toMap()),
-              payload: payload,
-              timestamp: DateTime.now().toUtc()));
+              payload: payload));
 
       return true;
     } catch (error, stackTrace) {

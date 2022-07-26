@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:rollbar_common/src/record.dart';
+import 'package:rollbar_common/src/data/record.dart';
 import 'package:rollbar_common/src/persistable.dart';
 import 'package:test/test.dart';
 

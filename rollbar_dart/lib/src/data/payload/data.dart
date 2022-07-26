@@ -3,7 +3,9 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 import 'body.dart' show Body;
 import 'client.dart' show Client;
-import 'level.dart';
+
+/// The level of an occurrence.
+enum Level { debug, info, warning, error, critical }
 
 /// Contains the data for the occurrence to be sent to Rollbar.
 @sealed

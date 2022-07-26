@@ -1,6 +1,6 @@
 import 'extension/collection.dart';
 
-import 'record.dart';
+import 'data/record.dart';
 
 /// The class of types that are [Serializable].
 abstract class Serializable {

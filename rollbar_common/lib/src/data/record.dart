@@ -1,9 +1,9 @@
 import 'package:meta/meta.dart';
 
-import 'extension/collection.dart';
-import 'identifiable.dart';
-import 'persistable.dart';
-import 'serializable.dart';
+import '../extension/collection.dart';
+import '../identifiable.dart';
+import '../persistable.dart';
+import '../serializable.dart';
 
 @sealed
 @immutable

@@ -5,7 +5,7 @@ import 'package:rollbar_common/src/extension/function.dart';
 import 'package:rollbar_common/src/extension/math.dart';
 import 'package:rollbar_common/src/extension/collection.dart' as f;
 import 'package:rollbar_common/src/persistable.dart';
-import 'package:rollbar_common/src/record.dart';
+import 'package:rollbar_common/src/data/record.dart';
 import 'package:rollbar_common/src/table_set.dart';
 import 'package:test/test.dart';
 

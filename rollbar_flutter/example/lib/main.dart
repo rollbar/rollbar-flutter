@@ -9,7 +9,7 @@ import 'package:rollbar_flutter/rollbar.dart';
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
   const config = Config(
-    accessToken: 'YOUR-ROLLBAR-ACCESSTOKEN',
+    accessToken: '71ec6c76a22f46f0be567c633a3fb894',
     package: 'rollbar_flutter_example',
   );
 
@@ -38,17 +38,17 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.rollbar.flutter.example/activity');
 
   var _batteryLevel = 'Unknown battery level.';
   var _faultyMsg = 'No successful invocations yet.';
   var _counter = 0;
 
-  _MyHomePageState();
+  MyHomePageState();
 
   void batteryLevel() async {
     String batteryLevel;

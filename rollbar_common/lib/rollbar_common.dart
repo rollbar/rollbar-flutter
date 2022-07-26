@@ -8,8 +8,12 @@ export 'src/extension/math.dart';
 export 'src/extension/date_time.dart';
 export 'src/extension/environment.dart';
 
+export 'src/identifiable.dart';
+export 'src/serializable.dart';
+export 'src/persistable.dart';
+
 export 'src/table_set.dart';
-export 'src/record.dart';
+export 'src/data/record.dart';
 
 export 'src/tuple.dart';
 

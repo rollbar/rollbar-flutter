@@ -4,19 +4,16 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import 'data/config.dart';
+import 'data/payload/reading.dart';
+import 'data/payload/data.dart';
 import 'infrastructure.dart';
 import 'core_notifier.dart';
-import 'data/payload/level.dart';
 
 @sealed
 class Rollbar {
   static Rollbar? _current;
-  static Rollbar get current {
-    if (_current == null) {
-      throw StateError('Rollbar has not been initialized, call [Rollbar.run].');
-    }
-    return _current!;
-  }
+  static Rollbar get current => _current.orElse(() =>
+      throw StateError('Rollbar has not been initialized, call Rollbar.run.'));
 
   final Infrastructure _infrastructure;
   final CoreNotifier _notifier;
@@ -62,4 +59,7 @@ class Rollbar {
   /// Sends an error as an occurrence, with [Level.critical] level.
   static Future<void> critical(dynamic error, StackTrace stackTrace) =>
       current._notifier.notify(Level.critical, error, stackTrace);
+
+  /// Rollbar.add(Breadcrumb.navigation(from: ..., to: ...));
+  //static Future<void> telemetry(Reading reading) {}
 }

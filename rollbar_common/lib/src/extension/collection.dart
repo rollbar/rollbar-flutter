@@ -104,9 +104,7 @@ extension MapExtensions<K, V> on Map<K, V> {
     Map<K, V> map = {};
 
     forEach((k, v) {
-      if (p(k, v)) {
-        map[k] = v;
-      }
+      if (p(k, v)) map[k] = v;
     });
 
     return map;
@@ -117,9 +115,7 @@ extension MapExtensions<K, V> on Map<K, V> {
     Map<K, V> map = {};
 
     forEach((k, v) {
-      if (v != null) {
-        map[k] = v;
-      }
+      if (v != null) map[k] = v;
     });
 
     return map;

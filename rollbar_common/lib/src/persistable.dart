@@ -1,7 +1,7 @@
 import 'identifiable.dart';
 import 'serializable.dart';
 
-import 'record.dart';
+import 'data/record.dart';
 
 /// A type identifier.
 enum Datatype { uuid, integer, real, text, blob }
@@ -13,7 +13,7 @@ extension DatatypeSqlType on Datatype {
       case Datatype.uuid:
         return 'BINARY(16) NOT NULL PRIMARY KEY';
       default:
-        return toString().split('.').last.toUpperCase() + ' NOT NULL';
+        return '${toString().split('.').last.toUpperCase()} NOT NULL';
     }
   }
 }

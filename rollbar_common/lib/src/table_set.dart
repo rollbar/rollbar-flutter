@@ -27,6 +27,7 @@ import 'persistable.dart';
 ///
 /// List of limitations in the generics implementation of the Dart type system
 /// that complicate this implementation:
+/// - https://github.com/dart-lang/language/issues/349
 /// - https://github.com/dart-lang/language/issues/356
 /// - https://github.com/dart-lang/language/issues/1152
 /// - https://github.com/dart-lang/language/issues/359

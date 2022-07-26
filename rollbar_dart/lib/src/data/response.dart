@@ -7,53 +7,41 @@ import 'package:rollbar_common/rollbar_common.dart';
 /// Represents the response from the Rollbar API.
 ///
 /// Rollbar will respond with either an error [message] xor a [Result].
-///
-/// [todo] if we ever drop support for Dart <2.17.0, turn this into an
-/// [Either monad](https://hackage.haskell.org/package/base-4.16.2.0/docs/Data-Either.html)
-/// [Result](https://doc.rust-lang.org/std/result/)
 @sealed
 @immutable
 class Response {
   final int error;
   final String? message;
-  final Result? result;
+  final UUID? result;
 
-  const Response({
-    required this.error,
-    this.message,
-    this.result,
-  });
+  Response({this.error = 0, this.message, this.result}) {
+    if (error == 0 && message == null) {
+      ArgumentError.checkNotNull(result, 'result');
+    }
+  }
 
   bool get isError => error != 0;
 
-  Response copyWith({
-    int? error,
-    String? message,
-    Result? result,
-  }) =>
-      Response(
-          error: error ?? this.error,
-          message: message ?? this.message,
-          result: result ?? this.result);
+  Response copyWith({int? error, String? message, UUID? result}) => Response(
+      error: error ?? this.error,
+      message: message ?? this.message,
+      result: result ?? this.result);
 
   JsonMap toMap() => {
         'err': error,
         'message': message,
-        'result': result?.toMap(),
-      };
+        'result': {'uuid': result?.uuid}.compact()
+      }.compact();
 
-  factory Response.fromMap(JsonMap map) => Response(
-        error: map['err']?.toInt() ?? 0,
-        message: map['message'],
-        result: (map['result'] as JsonMap?).map(Result.fromMap),
-      );
+  factory Response.fromMap(JsonMap map) =>
+      Response(error: map.error, message: map.message, result: map.uuid);
 
   factory Response.from(http.Response response) =>
       Response.fromMap(jsonDecode(response.body));
 
   @override
   String toString() =>
-      'Response(err: $error, message: $message, result: $result)';
+      'Response(error: $error, message: $message, result: $result)';
 
   @override
   bool operator ==(Object other) =>
@@ -64,29 +52,20 @@ class Response {
           other.result == result);
 
   @override
-  int get hashCode => error.hashCode ^ message.hashCode ^ result.hashCode;
+  int get hashCode => Object.hash(error, message, result);
 }
 
-@sealed
-@immutable
-class Result {
-  final String uuid;
+extension _Attributes on JsonMap {
+  int get error => this['err']?.toInt() ?? 0;
 
-  const Result({required this.uuid});
+  String? get message => this['message'];
 
-  Result copyWith({String? uuid}) => Result(uuid: uuid ?? this.uuid);
-
-  factory Result.fromMap(JsonMap map) => Result(uuid: map['uuid']);
-
-  JsonMap toMap() => {'uuid': uuid};
-
-  @override
-  String toString() => 'Result(uuid: $uuid)';
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || (other is Result && other.uuid == uuid);
-
-  @override
-  int get hashCode => uuid.hashCode;
+  UUID? get uuid {
+    final uuid = this['result']?['uuid'] as String?;
+    final byteList = uuid
+        .map(RegExp(r'\w\w').allMatches)
+        ?.map((match) => int.parse(match[0]!, radix: 16))
+        .toList();
+    return byteList.map(UUID.fromList);
+  }
 }
