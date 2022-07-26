@@ -17,6 +17,10 @@ dependencies:
   logging: ^1.0.2
   rollbar_common: ^0.3.1-beta
 
+dependency_overrides:
+  rollbar_common:
+    path: ../rollbar_common
+
 dev_dependencies:
   lints: '>=1.0.0 <3.0.0'
   test: ^1.16.0
