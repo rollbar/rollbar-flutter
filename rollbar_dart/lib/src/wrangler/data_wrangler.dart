@@ -7,7 +7,7 @@ import '../data/payload/client.dart';
 import '../data/payload/data.dart';
 import '../data/payload/payload.dart';
 import '../data/event.dart';
-import '../data/config.dart';
+import '../config.dart';
 import '../transformer/transformer.dart';
 import '../notifier/notifier.dart';
 import 'wrangler.dart';

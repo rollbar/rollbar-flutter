@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/src/notifier/notifier.dart';
 
-import 'data/config.dart';
+import 'config.dart';
 import 'data/event.dart';
 import 'data/payload/reading.dart';
 import 'data/payload/data.dart';

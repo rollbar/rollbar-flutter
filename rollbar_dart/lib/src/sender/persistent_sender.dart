@@ -6,7 +6,7 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 //import '../../rollbar.dart';
 import 'sender.dart';
-import '../data/config.dart';
+import '../config.dart';
 import 'http_sender.dart';
 
 /// Persistent [Sender]. Default [Sender] implementation.

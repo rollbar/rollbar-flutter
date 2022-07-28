@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
-import '../../rollbar.dart';
-import '../notifier/isolated_notifier.dart';
-import '../wrangler/data_wrangler.dart';
-import '../transformer/noop_transformer.dart';
-import '../sender/persistent_sender.dart';
+import '../rollbar.dart';
+import 'notifier/isolated_notifier.dart';
+import 'wrangler/data_wrangler.dart';
+import 'transformer/noop_transformer.dart';
+import 'sender/persistent_sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
 @immutable

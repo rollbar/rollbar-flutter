@@ -14,7 +14,7 @@ export 'src/data/payload/body.dart' show Body, Traces, TraceInfo, TraceChain;
 export 'src/data/payload/frame.dart' show Frame;
 export 'src/data/payload/exception_info.dart' show ExceptionInfo;
 
-export 'src/data/config.dart' show Config;
+export 'src/config.dart' show Config;
 export 'src/data/response.dart' show Response;
 export 'src/data/event.dart' show Event;
 

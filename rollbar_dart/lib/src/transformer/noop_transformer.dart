@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../data/payload/data.dart';
-import '../data/config.dart';
+import '../config.dart';
 import '../data/event.dart';
 import 'transformer.dart';
 
