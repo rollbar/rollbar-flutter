@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import '../../rollbar.dart';
+import '../notifier/isolated_notifier.dart';
+import '../wrangler/data_wrangler.dart';
+import '../transformer/noop_transformer.dart';
 import '../sender/persistent_sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
@@ -17,7 +22,9 @@ class Config {
   final bool handleUncaughtErrors;
   final bool includePlatformLogs;
 
-  final Transformer Function(Config)? transformer;
+  final FutureOr<Notifier> Function(Config) notifier;
+  final Wrangler Function(Config) wrangler;
+  final Transformer Function(Config) transformer;
   final Sender Function(Config) sender;
 
   const Config({
@@ -30,7 +37,9 @@ class Config {
     this.persistPayloads = false,
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
-    this.transformer,
+    this.notifier = IsolatedNotifier.spawn,
+    this.wrangler = DataWrangler.new,
+    this.transformer = NoopTransformer.new,
     this.sender = PersistentSender.new,
   });
 
@@ -46,6 +55,7 @@ class Config {
     bool? includePlatformLogs,
     Transformer Function(Config)? transformer,
     Sender Function(Config)? sender,
+    Notifier Function(Config)? notifier,
   }) =>
       Config(
         accessToken: accessToken ?? this.accessToken,
@@ -59,6 +69,7 @@ class Config {
         includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
         transformer: transformer ?? this.transformer,
         sender: sender ?? this.sender,
+        notifier: notifier ?? this.notifier,
       );
 
   /// Converts the [Map] instance into a [Config] object.

@@ -25,8 +25,8 @@ dependency_overrides:
     path: ../rollbar_dart
 
 dev_dependencies:
-  lints: '>=2.0.0 <3.0.0'
-  flutter_lints: ^2.0.1
+  lints: '>=1.0.0 <3.0.0'
+  flutter_lints: ^1.0.4
   flutter_test:
     sdk: flutter
   connectivity_plus_platform_interface: ^1.2.1

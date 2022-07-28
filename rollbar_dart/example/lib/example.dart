@@ -20,7 +20,7 @@ void main() async {
     try {
       throw ArgumentError('$i: An error occurred in the dart example app');
     } catch (error, stackTrace) {
-      await Rollbar.error(error, stackTrace);
+      Rollbar.error(error, stackTrace);
     }
   }
 

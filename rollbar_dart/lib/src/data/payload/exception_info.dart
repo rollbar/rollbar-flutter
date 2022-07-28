@@ -48,19 +48,11 @@ class ExceptionInfo {
         'class': type,
         'message': message,
         'description': description,
-      }..compact();
+      }.compact();
 }
 
 extension _Attributes on JsonMap {
-  String get type {
-    assert(containsKey('class'));
-    return this['class'];
-  }
-
-  String get message {
-    assert(containsKey('message'));
-    return this['message'];
-  }
-
+  String get type => this['class'];
+  String get message => this['message'];
   String? get description => this['description'];
 }

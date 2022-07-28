@@ -102,5 +102,5 @@ class Data {
         'framework': framework,
         'code_version': codeVersion,
         'platform_payload': platformPayload,
-      }..removeWhere((key, value) => value == null);
+      }.compact();
 }

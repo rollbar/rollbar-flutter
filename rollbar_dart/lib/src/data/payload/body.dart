@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 import '../../ext/trace.dart';
+import '../event.dart';
 import 'exception_info.dart';
 import 'frame.dart';
 
@@ -23,20 +24,20 @@ abstract class Body {
     }
   }
 
-  factory Body.from(String? message, {dynamic error, StackTrace? stackTrace}) {
-    if (error == null && message == null) {
+  factory Body.from({required Event event}) {
+    if (event.error == null && event.message == null) {
       throw ArgumentError(
           'Either an error or a message must be provided.', 'error');
     }
 
-    if (error != null) {
+    if (event.error != null) {
       return TraceInfo(
-          frames: stackTrace?.frames ?? [],
-          exception: ExceptionInfo.from(error, message),
-          rawTrace: stackTrace?.rawTrace);
+          frames: event.stackTrace?.frames ?? [],
+          exception: ExceptionInfo.from(event.error, event.message),
+          rawTrace: event.stackTrace?.rawTrace);
     }
 
-    return Message(message!);
+    return Message(event.message!);
   }
 }
 

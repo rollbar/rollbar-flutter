@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -9,11 +10,13 @@ import 'package:rollbar_flutter/rollbar.dart';
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
   const config = Config(
-    accessToken: '71ec6c76a22f46f0be567c633a3fb894',
-    package: 'rollbar_flutter_example',
-  );
+      accessToken: '71ec6c76a22f46f0be567c633a3fb894',
+      package: 'rollbar_flutter_example');
 
-  await RollbarFlutter.run(config, () => runApp(const MyApp()));
+  await RollbarFlutter.run(config, () async {
+    Rollbar.log('Rollbar initialized');
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -57,7 +60,7 @@ class MyHomePageState extends State<MyHomePage> {
       batteryLevel = 'Battery at $level%.';
     } on PlatformException catch (e, stackTrace) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
-      await Rollbar.warn(e, stackTrace);
+      Rollbar.warn(e, stackTrace);
     }
 
     setState(() {
@@ -77,7 +80,7 @@ class MyHomePageState extends State<MyHomePage> {
       if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
       } else {
-        Rollbar.message('Counter incremented to $_counter');
+        Rollbar.log('Counter incremented to $_counter');
       }
     });
   }

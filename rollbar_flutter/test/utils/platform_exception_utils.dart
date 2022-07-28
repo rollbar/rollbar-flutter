@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-
-typedef JsonMap = Map<String, dynamic>;
+import 'package:rollbar_common/rollbar_common.dart';
 
 PlatformException androidPlatformException({
   String? topFrameMethod,

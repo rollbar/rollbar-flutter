@@ -38,7 +38,7 @@ extension TraceAdapter on StackTrace {
 }
 
 @internal
-extension FrameExtensions on stacktrace.Frame {
+extension StackTraceFrameExtensions on stacktrace.Frame {
   /// The full path to the file in which the code is located.
   String get path => Uri.parse(uri.toString()).path;
 

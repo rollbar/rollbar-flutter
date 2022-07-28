@@ -42,7 +42,7 @@ class RollbarFlutter {
 
       FlutterError.onError = (error) async {
         FlutterError.presentError(error);
-        await Rollbar.error(error.exception, error.stack ?? StackTrace.empty);
+        Rollbar.error(error.exception, error.stack ?? StackTrace.empty);
       };
 
       await _platform.initialize(config: config);

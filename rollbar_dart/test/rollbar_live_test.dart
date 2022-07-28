@@ -15,7 +15,7 @@ void main() {
     tearDown(() {});
 
     test('basic test', () async {
-      await Rollbar.message('Rollbar Flutter live test', level: Level.critical);
+      Rollbar.log('Rollbar Flutter live test', level: Level.critical);
       await Future.delayed(Duration(milliseconds: 500));
     });
   });

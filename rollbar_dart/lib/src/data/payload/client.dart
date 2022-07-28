@@ -20,12 +20,11 @@ class Client {
   });
 
   factory Client.fromPlatform() => Client(
-        locale: Platform.localeName,
-        hostname: Platform.localHostname,
-        os: Platform.operatingSystem,
-        osVersion: Platform.operatingSystemVersion,
-        dartVersion: Platform.version,
-      );
+      locale: Platform.localeName,
+      hostname: Platform.localHostname,
+      os: Platform.operatingSystem,
+      osVersion: Platform.operatingSystemVersion,
+      dartVersion: Platform.version);
 
   /// Converts the object into a Json encodable map.
   JsonMap toMap() => {

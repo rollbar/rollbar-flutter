@@ -41,8 +41,7 @@ void main() {
         final body = platformTraceInfo(exception, frames);
         final original = data(body: body);
         final transformed = await transformer.transform(
-          exception,
-          StackTrace.empty,
+          Event(error: exception, stackTrace: StackTrace.empty),
           original,
         );
 
@@ -72,8 +71,10 @@ void main() {
 
         final body = platformTraceInfo(exception, frames);
         final original = data(body: body);
-        final transformed =
-            await transformer.transform(exception, StackTrace.empty, original);
+        final transformed = await transformer.transform(
+          Event(error: exception, stackTrace: StackTrace.empty),
+          original,
+        );
 
         final traces = transformed.body.traces;
         expect(traces, hasLength(3));
@@ -112,8 +113,10 @@ void main() {
 
         final body = platformTraceInfo(exception, frames);
         final original = data(body: body);
-        final transformed =
-            await transformer.transform(exception, StackTrace.empty, original);
+        final transformed = await transformer.transform(
+          Event(error: exception, stackTrace: StackTrace.empty),
+          original,
+        );
 
         final traces = transformed.body.traces;
         expect(traces, hasLength(1));
@@ -146,8 +149,10 @@ void main() {
 
         final body = platformTraceInfo(exception, frames);
         final original = data(body: body);
-        final transformed =
-            await transformer.transform(exception, StackTrace.empty, original);
+        final transformed = await transformer.transform(
+          Event(error: exception, stackTrace: StackTrace.empty),
+          original,
+        );
 
         final traces = transformed.body.traces;
         expect(traces, hasLength(1));

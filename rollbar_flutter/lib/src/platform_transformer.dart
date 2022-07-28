@@ -2,10 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show PlatformException;
+import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar.dart'
-    show Body, Data, TraceChain, Traces, Transformer;
-
-typedef JsonMap = Map<String, dynamic>;
+    show Event, Body, Data, TraceChain, Traces, Transformer;
 
 /// This trasformer inspects some platform specific exception types, which
 /// carry additional occurrence details in their exception messages.
@@ -18,13 +17,13 @@ class PlatformTransformer implements Transformer {
   PlatformTransformer({this.wrapped, this.appendToChain = false});
 
   @override
-  Future<Data> transform(dynamic error, StackTrace? trace, Data data) async {
+  Future<Data> transform(Event event, Data data) async {
     if (defaultTargetPlatform == TargetPlatform.android &&
-        error is PlatformException) {
-      data = _enrichAndroidTrace(error.message, data);
+        event.error is PlatformException) {
+      data = _enrichAndroidTrace(event.error.message, data);
     }
 
-    return await wrapped?.transform(error, trace, data) ?? data;
+    return await wrapped?.transform(event, data) ?? data;
   }
 }
 

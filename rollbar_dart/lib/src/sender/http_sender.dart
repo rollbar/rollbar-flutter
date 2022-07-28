@@ -15,16 +15,23 @@ typedef HttpHeaders = Map<String, String>;
 @sealed
 @immutable
 class HttpSender implements Sender {
-  final Uri endpoint;
-  final HttpHeaders headers;
+  final Uri _endpoint;
+  final HttpHeaders _headers;
 
   HttpSender({required String endpoint, required String accessToken})
-      : endpoint = Uri.parse(endpoint),
-        headers = {
+      : _endpoint = Uri.parse(endpoint),
+        _headers = {
           'User-Agent': 'rollbar-dart',
           'Content-Type': 'application/json',
           'X-Rollbar-Access-Token': accessToken,
         };
+
+  static Future<bool> sendRecord(Record record) async {
+    return await HttpSender(
+      endpoint: record.endpoint,
+      accessToken: record.accessToken,
+    ).sendString(record.payload);
+  }
 
   /// Sends the provided payload as the body of POST request to the configured
   /// endpoint.
@@ -35,13 +42,13 @@ class HttpSender implements Sender {
   Future<bool> sendString(String payload) async {
     try {
       final response = await http
-          .post(endpoint, headers: headers, body: payload)
+          .post(_endpoint, headers: _headers, body: payload)
           .then(Response.from);
 
       if (response.isError) {
         throw HttpException(
           '${response.error}: ${response.message}',
-          uri: endpoint,
+          uri: _endpoint,
         );
       }
 

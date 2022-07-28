@@ -40,8 +40,9 @@ void main() {
   test('Initialize platform component when running application', () async {
     final config = defaultConfig();
     await RollbarFlutter.run(config, () {
-      final initCalls =
-          callsReceived.where((call) => call.method == 'initialize').toList();
+      final initCalls = callsReceived //
+          .where((call) => call.method == 'initialize')
+          .toList();
       expect(initCalls.length, equals(1));
 
       final init = initCalls[0];
@@ -91,7 +92,7 @@ void main() {
 
 class MockSender extends Mock implements Sender {
   @override
-  Future<bool> send(JsonMap? payload) {
+  Future<bool> send(Map<String, dynamic>? payload) {
     return super.noSuchMethod(
       Invocation.method(#send, [payload]),
       returnValue: Future<bool>.value(true),
