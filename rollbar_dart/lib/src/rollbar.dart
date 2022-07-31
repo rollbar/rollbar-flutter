@@ -7,7 +7,7 @@ import 'package:rollbar_dart/src/notifier/notifier.dart';
 import 'config.dart';
 import 'data/event.dart';
 import 'data/payload/reading.dart';
-import 'data/payload/data.dart';
+import 'telemetry.dart';
 
 @sealed
 class Rollbar {
@@ -16,16 +16,15 @@ class Rollbar {
       throw StateError('Rollbar has not been initialized, call Rollbar.run.'));
 
   final Notifier _notifier;
+  final Telemetry _telemetry;
 
-  Rollbar._(this._notifier);
+  Rollbar._(this._notifier, this._telemetry);
 
   static Future<void> run(Config config) async {
-    if (_current != null) {
-      current._notifier.dispose();
-    }
-
+    _current?._notifier.dispose();
     _current = Rollbar._(
       await config.notifier(config),
+      Telemetry(config),
     );
   }
 
@@ -39,6 +38,7 @@ class Rollbar {
       current._notifier.notify(Event(
         level: level,
         message: message,
+        telemetry: current._telemetry,
       ));
 
   /// Sends an error as an occurrence, with [Level.debug] level.
@@ -47,6 +47,7 @@ class Rollbar {
         level: Level.debug,
         error: error,
         stackTrace: stackTrace,
+        telemetry: current._telemetry,
       ));
 
   /// Sends an error as an occurrence, with [Level.info] level.
@@ -55,6 +56,7 @@ class Rollbar {
         level: Level.info,
         error: error,
         stackTrace: stackTrace,
+        telemetry: current._telemetry,
       ));
 
   /// Sends an error as an occurrence, with [Level.warning] level.
@@ -63,6 +65,7 @@ class Rollbar {
         level: Level.warning,
         error: error,
         stackTrace: stackTrace,
+        telemetry: current._telemetry,
       ));
 
   /// Sends an error as an occurrence, with [Level.error] level.
@@ -71,6 +74,7 @@ class Rollbar {
         level: Level.error,
         error: error,
         stackTrace: stackTrace,
+        telemetry: current._telemetry,
       ));
 
   /// Sends an error as an occurrence, with [Level.critical] level.
@@ -79,8 +83,10 @@ class Rollbar {
         level: Level.critical,
         error: error,
         stackTrace: stackTrace,
+        telemetry: current._telemetry,
       ));
 
-  /// Rollbar.add(Breadcrumb.navigation(from: ..., to: ...));
-  //static Future<void> telemetry(Reading reading) {}
+  static FutureOr<void> telemetry(Reading reading) {
+    current._telemetry.register(reading);
+  }
 }

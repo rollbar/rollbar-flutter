@@ -19,3 +19,4 @@ export 'src/data/response.dart' show Response;
 export 'src/data/event.dart' show Event;
 
 export 'src/connectivity_monitor.dart';
+export 'src/telemetry.dart';
