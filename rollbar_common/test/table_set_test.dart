@@ -237,16 +237,61 @@ void main() {
       expect(payloadRecords.isEmpty, isTrue);
     });
   });
+
+  test('Bad sorting symbols throw appropriate errors', () async {
+    final records = TableSet<PayloadRecord>();
+    expect(() => records.sorted(by: #PayloadRecord.test), throwsArgumentError);
+    expect(() => records.sorted(by: #ReadingRecord.test), throwsArgumentError);
+    expect(() => records.sorted(by: #ReadingRecord.timestamp),
+        throwsArgumentError);
+  });
+
+  test('Is sortable', () async {
+    final records = TableSet<PayloadRecord>(isPersistent: false);
+    final orderedList = [
+      _Record.generate(timestamp: DateTime(0).toUtc()),
+      _Record.generate(timestamp: DateTime.now().toUtc() - 1.days),
+      _Record.generate(timestamp: DateTime.now().toUtc()),
+      _Record.generate(timestamp: DateTime.now().toUtc() + 1.days),
+      _Record.generate(timestamp: DateTime(0x1EB208C2DC0000).toUtc()),
+    ];
+    final list = orderedList.toList();
+
+    for (var _ in 1.to(10)) {
+      (list..shuffle(_Record.rnd)).forEach(records.add);
+      expect(list.length, equals(records.length));
+      {
+        final itl = list.iterator, itr = records.iterator;
+        while (itl.moveNext() && itr.moveNext()) {
+          expect(itl.current, equals(itr.current));
+        }
+      }
+
+      {
+        list.sort((lhs, rhs) => lhs.timestamp.compareTo(rhs.timestamp));
+        final sorted = records.sorted(by: #PayloadRecord.timestamp);
+        final itl = list.iterator, itr = sorted.iterator;
+        while (itl.moveNext() && itr.moveNext()) {
+          expect(itl.current, equals(itr.current));
+        }
+
+        for (var i = 0; i < sorted.length; ++i) {
+          expect(sorted.elementAt(i), equals(orderedList.elementAt(i)));
+        }
+      }
+
+      records.clear();
+    }
+  });
 }
 
-extension _Record on Record {
-  static final rnd = Random();
+extension _Record on PayloadRecord {
+  static final rnd = Random(0x5f3759df);
 
-  static Record generate() {
-    return Record(
-        accessToken: rnd.nextString(32),
-        endpoint: rnd.nextString(32),
-        config: rnd.nextString(32),
-        payload: rnd.nextString(32));
-  }
+  static PayloadRecord generate({DateTime? timestamp}) => PayloadRecord(
+      accessToken: rnd.nextString(32),
+      endpoint: rnd.nextString(32),
+      config: rnd.nextString(32),
+      payload: rnd.nextString(32),
+      timestamp: timestamp);
 }

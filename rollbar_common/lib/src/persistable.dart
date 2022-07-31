@@ -24,7 +24,7 @@ extension DatatypeSqlType on Datatype {
 /// [Persistable] types leverage serialization to store and recover
 /// `(key, value)` pairs through [Serializable.fromMap] and [toMap].
 abstract class Persistable<T extends Object>
-    implements Serializable, Identifiable<T> {
+    implements Serializable, Comparable, Identifiable<T> {
   static const _map = <Type, PersistableFor>{
     Persistable: PersistableFor(),
     PayloadRecord: PersistablePayloadRecord(),

@@ -3,8 +3,10 @@ import 'dart:collection';
 import 'package:meta/meta.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import 'extension/function.dart';
 import 'extension/object.dart';
 import 'extension/collection.dart';
+import 'extension/mirror.dart';
 import 'extension/string.dart';
 import 'extension/database.dart';
 import 'identifiable.dart';
@@ -39,37 +41,68 @@ class TableSet<E extends Persistable<UUID>> with SetMixin<E> implements Set<E> {
   TableSet({bool isPersistent = false})
       : database =
             isPersistent ? sqlite3.open('rollbar.db') : sqlite3.openInMemory() {
-    final typeDeclarations = _keyTypes.fold('', (String acc, kv) {
+    final typeDeclarations = keyTypes.fold('', (String acc, kv) {
       return '$acc${kv.key} ${kv.value.sqlTypeDeclaration}, ';
     }).replaceLast(', ', '');
 
-    database.execute('CREATE TABLE IF NOT EXISTS $_table ($typeDeclarations)');
+    database.execute(
+      'CREATE TABLE IF NOT EXISTS $tableName ($typeDeclarations)',
+    );
   }
+
+  /// The name of the table.
+  ///
+  /// This is the name of [E] in `snake_case`.
+  String get tableName => (E).toString().toSnakeCase();
 
   @override
   Iterator<E> get iterator =>
-      database.select('SELECT * FROM $_table').map(_deserialize).iterator;
+      database.select('SELECT * FROM $tableName').map(deserialize).iterator;
 
+  /// Returns the number of rows in the table.
   @override
-  int get length => database.select('SELECT COUNT(*) FROM $_table').intValue;
+  int get length => database.select('SELECT COUNT(*) FROM $tableName').intValue;
 
+  /// Whether this table has no rows.
   @override
   bool get isEmpty => length == 0;
 
   E? record({required UUID id}) => database
-      .select('SELECT ${_keyTypes.keys.join(', ')} FROM $_table WHERE id = ?',
+      .select('SELECT ${keys.join(', ')} FROM $tableName WHERE id = ?',
           [id.toBytes()])
       .trySingle
-      .map(_deserialize);
+      .map(deserialize);
 
   @override
   E? lookup(Object? element) => element is E ? record(id: element.id) : null;
+
+  /// Returns an iterable with this table's rows in this table by the given key
+  /// column [by].
+  Iterable<E> sorted({required Symbol by, bool descending = false}) {
+    final symbol = by.name.split('.');
+    final type = symbol.first, key = symbol.last;
+    final ordering = descending ? 'DESC' : 'ASC';
+
+    if (type != (E).toString()) {
+      throw ArgumentError.value('#${by.name}', 'by',
+          'Type mismatch, found $type, expected ${(E).toString()}');
+    }
+
+    if (!keys.contains(key)) {
+      throw ArgumentError.value('#${by.name}', 'by',
+          '\'$key\' does not match any persisting field in ${(E).toString()}');
+    }
+
+    return database
+        .select('SELECT * FROM $tableName ORDER BY $key $ordering')
+        .map(deserialize);
+  }
 
   @override
   bool contains(Object? element) {
     if (element is! E) return false;
     final result = database.select(
-        'SELECT EXISTS(SELECT 1 FROM $_table WHERE id = ?)',
+        'SELECT EXISTS(SELECT 1 FROM $tableName WHERE id = ?)',
         [element.id.toBytes()]);
     return result.boolValue;
   }
@@ -78,13 +111,15 @@ class TableSet<E extends Persistable<UUID>> with SetMixin<E> implements Set<E> {
   bool add(Object? value) {
     if (value is! E || contains(value)) return false;
     database.execute(
-        'INSERT INTO $_table (${_keyTypes.keys.join(', ')}) '
-        'VALUES (${_keyTypes.keys.map((_) => '?').join(', ')})',
+        'INSERT INTO $tableName (${keys.join(', ')}) '
+        'VALUES (${keys.map(constf('?')).join(', ')})',
         value.toMap().values.toList());
     return true;
   }
 
   /// Updates [element] on the Set.
+  ///
+  /// Elements are matched by their uuid [id], not equality.
   ///
   /// Returns `true` if [element] was updated. If the `element` isn't in the
   /// set, returns `false` and the set is not changed.
@@ -93,13 +128,19 @@ class TableSet<E extends Persistable<UUID>> with SetMixin<E> implements Set<E> {
   @override
   bool remove(Object? value) {
     if (value is! E || !contains(value)) return false;
-    database.execute('DELETE FROM $_table WHERE id = ?', [value.id.toBytes()]);
+    database.execute(
+      'DELETE FROM $tableName WHERE id = ?',
+      [value.id.toBytes()],
+    );
     return true;
   }
 
+  /// Creates a [Set] with the same elements as this [TableSet].
+  ///
+  /// The returned [Set] will _not_ modify the [Database].
   @override
   Set<E> toSet() =>
-      database.select('SELECT * FROM $_table').map(_deserialize).toSet();
+      database.select('SELECT * FROM $tableName').map(deserialize).toSet();
 
   /// Creates a **new** [Database] which contains all the records of this set
   /// and [other].
@@ -135,7 +176,12 @@ class TableSet<E extends Persistable<UUID>> with SetMixin<E> implements Set<E> {
     return result;
   }
 
-  String get _table => E.runtimeType.toString().toSnakeCase();
-  Map<String, Datatype> get _keyTypes => Persistable.of<E>().persistingKeyTypes;
-  E _deserialize(JsonMap map) => Serializable.of<E>().fromMap(map) as E;
+  @internal
+  Map<String, Datatype> get keyTypes => Persistable.of<E>().persistingKeyTypes;
+
+  @internal
+  Iterable<String> get keys => keyTypes.keys;
+
+  @internal
+  E deserialize(JsonMap map) => Serializable.of<E>().fromMap(map) as E;
 }
