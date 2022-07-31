@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:rollbar_common/rollbar_common.dart';
 
 import '../data/response.dart';
-import '../logging.dart';
 import 'sender.dart';
 
 typedef HttpHeaders = Map<String, String>;
@@ -53,8 +52,7 @@ class HttpSender implements Sender {
       }
 
       return true;
-    } catch (error, stackTrace) {
-      err('Error posting payload', error, stackTrace);
+    } catch (error) {
       return false;
     }
   }
