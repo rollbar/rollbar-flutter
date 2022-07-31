@@ -104,7 +104,7 @@ class Trace with Report {
   @override
   JsonMap toMap() => {
         'trace': {
-          'frames': frames.map((f) => f.toMap()).toList(),
+          'frames': frames.map((frame) => frame.toMap()).toList(),
           'exception': exception.toMap(),
           'raw': rawTrace,
         }.compact()

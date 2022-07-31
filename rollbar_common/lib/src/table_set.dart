@@ -112,14 +112,14 @@ class TableSet<E extends Persistable<UUID>> with SetMixin<E> implements Set<E> {
     if (value is! E || contains(value)) return false;
     database.execute(
         'INSERT INTO $tableName (${keys.join(', ')}) '
-        'VALUES (${keys.map(constf('?')).join(', ')})',
+        'VALUES (${keys.map(constant('?')).join(', ')})',
         value.toMap().values.toList());
     return true;
   }
 
   /// Updates [element] on the Set.
   ///
-  /// Elements are matched by their uuid [id], not equality.
+  /// Elements are matched by their uuid [identity], not equality.
   ///
   /// Returns `true` if [element] was updated. If the `element` isn't in the
   /// set, returns `false` and the set is not changed.

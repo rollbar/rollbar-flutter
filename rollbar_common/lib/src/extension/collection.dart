@@ -1,58 +1,7 @@
-import 'function.dart';
-
 typedef JsonMap = Map<String, dynamic>;
 
 typedef Predicate<E> = bool Function(E);
 typedef Transform<T, E> = T Function(E);
-
-/// Tests whether the given argument [x] is `null`.
-///
-/// Useful as a predicate for filter-type higher-order functions.
-///
-/// ```dart
-/// ['a', null, 'c', null, 'd'].any(isNull) // true
-/// ```
-bool isNull<T>(T? x) => x == null;
-
-/// Tests whether the given argument [x] is not `null`.
-///
-/// Useful as a predicate for filter-type higher-order functions.
-///
-/// ```dart
-/// ['a', null, 'c', null, 'd'].where(isNotNull) // ['a', 'c', 'd']
-/// ```
-bool isNotNull<T>(T? x) => x != null;
-
-/// Tests whether the given boolean argument [x] is true.
-///
-/// Useful as a predicate for filter-type higher-order functions.
-///
-/// ```dart
-/// [true, true, true, false, true].all(isTrue) // false
-/// ```
-const isTrue = idf<bool>;
-// the identity function on bool forms its predicate.
-// id := λx.x where x: bool ≡ bool isTrue(bool x) => x;
-
-/// Tests whether the given boolean argument [x] is false.
-///
-/// Useful as a predicate for filter-type higher-order functions.
-///
-/// ```dart
-/// [true, true, true, false, true].any(isFalse) // true
-/// ```
-bool isFalse(bool x) => !isTrue(x);
-
-/// Inverses a predicate boolean evaluation.
-///
-/// Useful as a predicate adjunct for filter-type higher-order functions.
-///
-/// ```dart
-/// final xs = [1, 2, 3, 4];
-/// final ys = [2, 4];
-/// final odds = xs.where(not(ys.contains)); // [1, 3]
-/// ```
-bool Function(T) not<T>(bool Function(T) p) => (x) => !p(x);
 
 extension IterableExtensions<E> on Iterable<E> {
   /// Returns the first element or `null` if the list is empty.
@@ -93,8 +42,8 @@ extension IterableExtensions<E> on Iterable<E> {
 
   Iterable<T> compactMap<T>(T? Function(E) f) sync* {
     for (final e in this) {
-      final _e = f(e);
-      if (_e != null) yield _e;
+      final te = f(e);
+      if (te != null) yield te;
     }
   }
 }
@@ -102,23 +51,6 @@ extension IterableExtensions<E> on Iterable<E> {
 extension CompactList<E> on Iterable<E?> {
   /// Returns a new non-null List by filtering out null values in the this List.
   Iterable<E> compact() => whereType<E>();
-}
-
-extension Ranges on int {
-  /// Creates an iterable range.
-  ///
-  /// Both ends of the range are _inclusive_.
-  ///
-  /// ```dart
-  /// for (var i in 1.to(5)) {
-  ///   print(i); // prints 1, 2, 3, 4, 5
-  /// }
-  /// ```
-  Iterable<int> to(int length) sync* {
-    for (var i = 0; i <= length; ++i) {
-      yield i;
-    }
-  }
 }
 
 extension MapExtensions<K, V> on Map<K, V> {

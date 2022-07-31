@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:rollbar_common/src/extension/function.dart';
+import 'package:rollbar_common/src/extension/function.dart'
+    hide isTrue, isFalse, isNull, isNotNull;
 import 'package:rollbar_common/src/extension/string.dart';
 import 'package:rollbar_common/src/extension/math.dart';
 import 'package:rollbar_common/src/extension/date_time.dart';
-import 'package:rollbar_common/src/extension/collection.dart' as f;
+import 'package:rollbar_common/src/extension/collection.dart';
 import 'package:rollbar_common/src/persistable.dart';
 import 'package:rollbar_common/src/table_set.dart';
 import 'package:rollbar_common/src/data/payload_record.dart';
@@ -81,7 +82,7 @@ void main() {
         expect(payloadRecords.length, ++recordsCount);
       }
 
-      for (final record in payloadRecords.map(idf)) {
+      for (final record in payloadRecords.map(identity)) {
         expect(payloadRecords.remove(record), isTrue);
         expect(payloadRecords.record(id: record.id), isNull);
         expect(payloadRecords.length, --recordsCount);
@@ -176,7 +177,7 @@ void main() {
       expect(payloadRecords.length, 16);
 
       final transformResult = payloadRecords.map(records.contains);
-      expect(transformResult.any(f.isFalse), isFalse);
+      expect(transformResult.all(identity), isTrue);
 
       for (final record in payloadRecords) {
         expect(records.contains(record), isTrue);
@@ -257,7 +258,7 @@ void main() {
     ];
     final list = orderedList.toList();
 
-    for (var _ in 1.to(10)) {
+    repeat(10, () {
       (list..shuffle(_Record.rnd)).forEach(records.add);
       expect(list.length, equals(records.length));
       {
@@ -281,7 +282,7 @@ void main() {
       }
 
       records.clear();
-    }
+    });
   });
 }
 

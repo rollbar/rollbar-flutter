@@ -1,5 +1,3 @@
-import 'function.dart';
-
 extension TryAs on Object? {
   /// Safely casts the value to [T] if it is [T], otherwise returns `null`.
   T? tryAs<T>() => this is T ? this as T : null;
@@ -35,5 +33,9 @@ extension HigherOrderFunctions<T> on T? {
 
   /// Calls the provided closure with a reference to the value if it is not
   /// `null` and returns the value.
-  T? inspect(void Function(T) f) => this != null ? constf(this as T)(f) : null;
+  T? inspect(void Function(T) f) {
+    final self = this;
+    if (self != null) f(self);
+    return self;
+  }
 }
