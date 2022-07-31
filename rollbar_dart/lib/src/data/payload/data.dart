@@ -4,9 +4,6 @@ import 'package:rollbar_common/rollbar_common.dart';
 import 'body.dart' show Body;
 import 'client.dart' show Client;
 
-/// The level of an occurrence.
-enum Level { debug, info, warning, error, critical }
-
 /// Contains the data for the occurrence to be sent to Rollbar.
 @sealed
 @immutable
@@ -89,6 +86,7 @@ class Data {
       server: other.server);
 
   JsonMap toMap() => {
+        'body': body.toMap(),
         'notifier': notifier,
         'environment': environment,
         'client': client.toMap(),
@@ -96,7 +94,6 @@ class Data {
         'language': language,
         'level': level.name,
         'timestamp': timestamp,
-        'body': body.toMap(),
         'custom': custom,
         'server': server,
         'framework': framework,

@@ -15,6 +15,7 @@ export 'src/persistable.dart';
 export 'src/table_set.dart';
 export 'src/data/record.dart';
 
+export 'src/level.dart';
 export 'src/tuple.dart';
 
 export 'src/connectivity_monitor.dart';

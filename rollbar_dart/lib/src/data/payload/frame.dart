@@ -7,7 +7,7 @@ import '../../ext/trace.dart';
 /// Contains the information of a single frame in a stack trace.
 @sealed
 @immutable
-class Frame {
+class Frame implements Serializable {
   final String filename;
   final String? type;
   final String? method;
@@ -29,7 +29,6 @@ class Frame {
       line: frame.line,
       column: frame.column);
 
-  @override
   factory Frame.fromMap(JsonMap map) => Frame(
       filename: map['filename'],
       method: map['method'],
@@ -55,6 +54,7 @@ class Frame {
         '($location)',
       ].join();
 
+  @override
   JsonMap toMap() => {
         'filename': filename,
         'class_name': type,

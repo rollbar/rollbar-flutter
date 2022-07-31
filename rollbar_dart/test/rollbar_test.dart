@@ -110,21 +110,28 @@ class ExpandableTransformer implements Transformer {
   Future<Data> transform(Event event, Data data) async {
     expect(event.error, TypeMatcher<ExpandableException>());
 
-    final traceChain = (event.error.messages as List<String>)
-        .map((message) => TraceInfo(
-            frames: [],
-            exception: ExceptionInfo(type: 'testing', message: message)))
-        .toList()
-      ..addAll(data.body.traces);
+    final report = data.body.report;
+    final messages = event.error.messages as List<String>;
+    final traces = [
+      ...messages.map(
+        (m) => Trace(exception: ExceptionInfo(type: 'test', message: m)),
+      ),
+      if (report is Trace) report,
+      if (report is Traces) ...report.traces,
+    ];
 
-    return data.copyWith(body: TraceChain(traceChain));
+    return data.copyWith(
+      body: data.body.copyWith(
+        report: Traces(traces),
+      ),
+    );
   }
 }
 
 class ExpandableException implements Exception {
-  List<String> messages;
+  final List<String> messages;
 
-  ExpandableException(this.messages);
+  const ExpandableException(this.messages);
 
   @override
   String toString() => 'ExpandableException with ${messages.length} messages';

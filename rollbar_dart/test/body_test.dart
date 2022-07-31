@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('Serialization tests', () {
-    test('TraceInfo json roundtrip serialization test', () {
+    test('Trace json roundtrip serialization test', () {
       const frames = [
         Frame(
             filename: 'test.dart',
@@ -21,7 +21,7 @@ void main() {
             method: '_AnotherMethod')
       ];
 
-      final traceInfo = TraceInfo(
+      final trace = Trace(
         rawTrace: 'stack frame 1 2 3',
         frames: frames,
         exception: ExceptionInfo(
@@ -30,15 +30,12 @@ void main() {
         ),
       );
 
-      final asJson = jsonEncode(traceInfo.toMap());
-
-      for (final fromMap in [TraceInfo.fromMap, Body.fromMap]) {
-        final ti = fromMap(jsonDecode(asJson)) as TraceInfo;
-        expect(ti.exception.type, equals('TestException'));
-        expect(ti.exception.message, equals('Attempted to test some code'));
-        expect(ti.frames.length, equals(2));
-        expect(ti.rawTrace, equals('stack frame 1 2 3'));
-      }
+      final asJson = jsonEncode(trace.toMap());
+      final t = Trace.fromMap(jsonDecode(asJson));
+      expect(t.exception.type, equals('TestException'));
+      expect(t.exception.message, equals('Attempted to test some code'));
+      expect(t.frames.length, equals(2));
+      expect(t.rawTrace, equals('stack frame 1 2 3'));
     });
 
     test('TraceChain json roundtrip serialization test', () {
@@ -56,13 +53,13 @@ void main() {
       ];
 
       final traces = [
-        TraceInfo(
+        Trace(
             frames: frames,
             exception: ExceptionInfo(
               type: 'TestException',
               message: 'Attempted to test some code',
             )),
-        TraceInfo(
+        Trace(
             frames: [frames[1]],
             exception: ExceptionInfo(
               type: 'TestException',
@@ -70,28 +67,21 @@ void main() {
             ))
       ];
 
-      final asJson = jsonEncode(TraceChain(traces).toMap());
-
-      for (final fromMap in [TraceChain.fromMap, Body.fromMap]) {
-        final tc = fromMap(jsonDecode(asJson)) as TraceChain;
-
-        expect(tc.traces.length, equals(2));
-        expect(tc.traces[0].frames.length, equals(2));
-        expect(tc.traces[0].frames.first.method, equals('inAChain'));
-
-        expect(tc.traces[1].frames.length, equals(1));
-        expect(tc.traces[1].frames.first.method, equals('_AnotherMethod'));
-      }
+      final asJson = jsonEncode(Traces(traces).toMap());
+      final ts = Traces.fromMap(jsonDecode(asJson));
+      expect(ts.traces.length, equals(2));
+      expect(ts.traces.elementAt(0).frames.length, equals(2));
+      expect(ts.traces.elementAt(0).frames.first.method, equals('inAChain'));
+      expect(ts.traces.elementAt(1).frames.length, equals(1));
+      expect(
+          ts.traces.elementAt(1).frames.first.method, equals('_AnotherMethod'));
     });
 
     test('Message json roundtrip serialization test', () {
       const message = Message('This is a test message');
       final asJson = jsonEncode(message.toMap());
-
-      for (final fromMap in [Message.fromMap, Body.fromMap]) {
-        final recovered = fromMap(jsonDecode(asJson)) as Message;
-        expect(recovered.text, equals('This is a test message'));
-      }
+      final recovered = Message.fromMap(jsonDecode(asJson));
+      expect(recovered.text, equals('This is a test message'));
     });
   });
 }
