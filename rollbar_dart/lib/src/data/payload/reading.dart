@@ -1,11 +1,11 @@
+import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
-import 'data.dart';
-import '../../ext/http.dart';
 
 enum Source { client, server }
 
-class Reading {
-  final UUID id;
+@sealed
+@immutable
+class Reading implements Serializable {
   final String type;
   final Level level;
   final Source source;
@@ -13,14 +13,12 @@ class Reading {
   final JsonMap body;
 
   Reading._({
-    UUID? id,
     DateTime? timestamp,
     required this.type,
     required this.level,
     required this.source,
     required this.body,
-  })  : id = id ?? uuidGen.v4obj(),
-        timestamp = timestamp ?? DateTime.now().toUtc();
+  }) : timestamp = timestamp ?? DateTime.now().toUtc();
 
   factory Reading.log(
     String message, {
@@ -89,4 +87,13 @@ class Reading {
       Reading._(type: 'dom', level: level, source: source, body: {
         'body': {'element': element, ...extra}
       });
+
+  @override
+  JsonMap toMap() => {
+        'type': type,
+        'level': level.name,
+        'source': source.name,
+        'timestamp': timestamp.microsecondsSinceEpoch,
+        'body': body,
+      };
 }

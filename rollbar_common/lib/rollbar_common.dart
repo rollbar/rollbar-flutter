@@ -13,7 +13,8 @@ export 'src/serializable.dart';
 export 'src/persistable.dart';
 
 export 'src/table_set.dart';
-export 'src/data/record.dart';
+export 'src/data/payload_record.dart';
+export 'src/data/reading_record.dart';
 
 export 'src/level.dart';
 export 'src/tuple.dart';

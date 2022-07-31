@@ -26,7 +26,7 @@ class HttpSender implements Sender {
           'X-Rollbar-Access-Token': accessToken,
         };
 
-  static Future<bool> sendRecord(Record record) async {
+  static Future<bool> sendRecord(PayloadRecord record) async {
     return await HttpSender(
       endpoint: record.endpoint,
       accessToken: record.accessToken,

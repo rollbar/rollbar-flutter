@@ -2,11 +2,14 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:rollbar_common/src/extension/function.dart';
+import 'package:rollbar_common/src/extension/string.dart';
 import 'package:rollbar_common/src/extension/math.dart';
+import 'package:rollbar_common/src/extension/date_time.dart';
 import 'package:rollbar_common/src/extension/collection.dart' as f;
 import 'package:rollbar_common/src/persistable.dart';
-import 'package:rollbar_common/src/data/record.dart';
 import 'package:rollbar_common/src/table_set.dart';
+import 'package:rollbar_common/src/data/payload_record.dart';
+import 'package:rollbar_common/src/data/reading_record.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -47,15 +50,26 @@ void main() {
       final file = File(databaseFilename);
       expect(file.existsSync(), false);
 
-      TableSet<Record>();
+      TableSet<PayloadRecord>();
       expect(file.existsSync(), false);
 
-      TableSet<Record>(isPersistent: true);
+      TableSet<PayloadRecord>(isPersistent: true);
       expect(file.existsSync(), true);
     });
 
+    test('Tables are aptly named', () async {
+      expect(
+        TableSet<PayloadRecord>().tableName,
+        equals((PayloadRecord).toString().toSnakeCase()),
+      );
+      expect(
+        TableSet<ReadingRecord>().tableName,
+        equals((ReadingRecord).toString().toSnakeCase()),
+      );
+    });
+
     test('Adding and removing records', () async {
-      final payloadRecords = TableSet<Record>();
+      final payloadRecords = TableSet<PayloadRecord>();
       expect(payloadRecords.length, 0);
 
       int recordsCount = 0;
@@ -77,7 +91,7 @@ void main() {
     });
 
     test('Stored records preserve original data', () async {
-      final payloadRecords = TableSet<Record>();
+      final payloadRecords = TableSet<PayloadRecord>();
       final record = _Record.generate();
 
       payloadRecords.add(record);
@@ -116,7 +130,7 @@ void main() {
     });
 
     test('Duplicates are ignored when adding', () async {
-      final payloadRecords = TableSet<Record>();
+      final payloadRecords = TableSet<PayloadRecord>();
       final record = _Record.generate();
 
       expect(payloadRecords.add(record), isTrue);
@@ -136,7 +150,7 @@ void main() {
     });
 
     test('Updates entries correctly', () async {
-      final tableSet = TableSet<Record>();
+      final tableSet = TableSet<PayloadRecord>();
       final record = _Record.generate();
       final oldConfig = record.config;
 
@@ -150,9 +164,9 @@ void main() {
       expect(tableSet.any((record) => record.config == '1234'), isTrue);
     });
 
-    test('PayloadRepository database is iterable', () async {
+    test('Is iterable', () async {
       final findableRecord = _Record.generate().copyWith(accessToken: '1234');
-      final payloadRecords = TableSet<Record>();
+      final payloadRecords = TableSet<PayloadRecord>();
       final records = Iterable.generate(
         16,
         (i) => i == 5 ? findableRecord : _Record.generate(),
@@ -173,8 +187,8 @@ void main() {
       expect(record, equals(findableRecord));
     });
 
-    test('PayloadRepository database conforms to Set', () async {
-      final payloadRecords = TableSet<Record>();
+    test('Set operations', () async {
+      final payloadRecords = TableSet<PayloadRecord>();
       [
         _Record.generate(),
         _Record.generate(),

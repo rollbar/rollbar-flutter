@@ -1,15 +1,19 @@
 import 'extension/collection.dart';
 
-import 'data/record.dart';
+import 'data/payload_record.dart';
+import 'data/reading_record.dart';
 
 /// The class of types that are [Serializable].
 abstract class Serializable {
   static const _map = <Type, SerializableFor>{
     Serializable: SerializableFor(),
-    Record: SerializableRecord(),
+    PayloadRecord: SerializablePayloadRecord(),
+    ReadingRecord: SerializableReadingRecord(),
   };
 
   static SerializableFor of<T extends Serializable>() => _map[T]!;
+
+  //factory Serializable.fromMap(JsonMap map); // Not supported by Dart
 
   JsonMap toMap();
 }

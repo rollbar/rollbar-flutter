@@ -1,13 +1,17 @@
 import 'package:meta/meta.dart';
-
-import '../extension/collection.dart';
-import '../identifiable.dart';
-import '../persistable.dart';
-import '../serializable.dart';
+import '../../rollbar_common.dart'
+    show
+        Persistable,
+        PersistableFor,
+        SerializableFor,
+        UUID,
+        uuidGen,
+        Datatype,
+        JsonMap;
 
 @sealed
 @immutable
-class Record implements Persistable<UUID> {
+class PayloadRecord implements Persistable<UUID> {
   @override
   final UUID id;
   final String accessToken;
@@ -25,7 +29,7 @@ class Record implements Persistable<UUID> {
         'timestamp': Datatype.integer,
       };
 
-  Record({
+  PayloadRecord({
     UUID? id,
     required this.accessToken,
     required this.endpoint,
@@ -35,7 +39,7 @@ class Record implements Persistable<UUID> {
   })  : id = id ?? uuidGen.v4obj(),
         timestamp = timestamp ?? DateTime.now().toUtc();
 
-  Record copyWith({
+  PayloadRecord copyWith({
     UUID? id,
     String? accessToken,
     String? endpoint,
@@ -43,16 +47,16 @@ class Record implements Persistable<UUID> {
     String? payload,
     DateTime? timestamp,
   }) =>
-      Record(
+      PayloadRecord(
           id: id ?? this.id,
-          timestamp: timestamp ?? this.timestamp,
           accessToken: accessToken ?? this.accessToken,
           endpoint: endpoint ?? this.endpoint,
           config: config ?? this.config,
-          payload: payload ?? this.payload);
+          payload: payload ?? this.payload,
+          timestamp: timestamp ?? this.timestamp);
 
   @override
-  factory Record.fromMap(JsonMap map) => Record(
+  factory PayloadRecord.fromMap(JsonMap map) => PayloadRecord(
       id: map.id,
       accessToken: map.accessToken,
       endpoint: map.endpoint,
@@ -70,6 +74,28 @@ class Record implements Persistable<UUID> {
         'timestamp': timestamp.microsecondsSinceEpoch,
       };
 
+  /// Compares this [ReadingRecord] to another [ReadingRecord].
+  ///
+  /// Comparison is timestamp-based.
+  ///
+  /// If [other] is not a [ReadingRecord] instance, an [ArgumentError] is
+  /// thrown.
+  ///
+  /// Returns a value like a [Comparator] when comparing this to [other]. That
+  /// is, it returns a negative integer if this is ordered before [other], a
+  /// positive integer if this is ordered after [other], and zero if this and
+  /// [other] are ordered together.
+  ///
+  /// The [other] argument must be a value that is comparable to this object.
+  @override
+  int compareTo(other) {
+    if (other is! PayloadRecord) {
+      throw ArgumentError('Cannot compare between different types.', other);
+    }
+
+    return timestamp.compareTo(other.timestamp);
+  }
+
   @override
   String toString() => 'Record('
       'id: ${id.uuid}, '
@@ -82,7 +108,7 @@ class Record implements Persistable<UUID> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Record &&
+      (other is PayloadRecord &&
           other.id == id &&
           other.accessToken == accessToken &&
           other.endpoint == endpoint &&
@@ -96,27 +122,30 @@ class Record implements Persistable<UUID> {
 }
 
 @sealed
-class SerializableRecord implements SerializableFor {
-  const SerializableRecord();
+class SerializablePayloadRecord implements SerializableFor {
+  const SerializablePayloadRecord();
 
   @override
-  Record fromMap(JsonMap map) => Record.fromMap(map);
+  PayloadRecord fromMap(JsonMap map) => PayloadRecord.fromMap(map);
 }
 
 @sealed
-class PersistableRecord implements PersistableFor {
-  const PersistableRecord();
+class PersistablePayloadRecord implements PersistableFor {
+  const PersistablePayloadRecord();
 
   @override
-  Map<String, Datatype> get persistingKeyTypes => Record.persistingKeyTypes;
+  Map<String, Datatype> get persistingKeyTypes =>
+      PayloadRecord.persistingKeyTypes;
 }
 
-extension RecordAttributes on JsonMap {
+extension PayloadRecordAttributes on JsonMap {
   UUID get id => UUID.fromList(this['id'].whereType<int>().toList());
   String get accessToken => this['accessToken'];
   String get endpoint => this['endpoint'];
   String get config => this['config'];
   String get payload => this['payload'];
-  DateTime get timestamp =>
-      DateTime.fromMicrosecondsSinceEpoch(this['timestamp'], isUtc: true);
+  DateTime get timestamp => DateTime.fromMicrosecondsSinceEpoch(
+        this['timestamp'],
+        isUtc: true,
+      );
 }

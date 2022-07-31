@@ -4,9 +4,8 @@ import 'dart:developer';
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
-//import '../../rollbar.dart';
-import 'sender.dart';
 import '../config.dart';
+import 'sender.dart';
 import 'http_sender.dart';
 
 /// Persistent [Sender]. Default [Sender] implementation.
@@ -14,7 +13,7 @@ import 'http_sender.dart';
 @immutable
 class PersistentSender implements Sender {
   final Config _config;
-  final TableSet<Record> _payloadRecords;
+  final TableSet<PayloadRecord> _payloadRecords;
 
   PersistentSender(this._config)
       : _payloadRecords = TableSet(isPersistent: _config.persistPayloads);
@@ -25,7 +24,7 @@ class PersistentSender implements Sender {
   @override
   Future<bool> sendString(String payload) async {
     try {
-      final newRecord = Record(
+      final newRecord = PayloadRecord(
           accessToken: _config.accessToken,
           endpoint: _config.endpoint,
           config: jsonEncode(_config.toMap()),

@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:rollbar_common/src/data/record.dart';
+import 'package:rollbar_common/src/data/payload_record.dart';
 import 'package:rollbar_common/src/persistable.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('PayloadRecord serialization tests', () {
     test('Json roundtrip serialization test', () {
-      final record = Record(
+      final record = PayloadRecord(
           accessToken: 'TOKEN1',
           endpoint: 'wwww.site.com',
           config: 'CONFIG1',
@@ -15,7 +15,7 @@ void main() {
 
       final asMap = record.toMap();
       final asJson = jsonEncode(asMap);
-      final recovered = Record.fromMap(jsonDecode(asJson));
+      final recovered = PayloadRecord.fromMap(jsonDecode(asJson));
       expect(recovered, equals(record));
       expect(recovered.id, equals(record.id));
       expect(recovered.timestamp, equals(record.timestamp));
@@ -25,7 +25,7 @@ void main() {
     });
 
     test('Persisting key types are well-formed', () {
-      final kt = Record.persistingKeyTypes;
+      final kt = PayloadRecord.persistingKeyTypes;
       expect(kt.containsKey('id'), isTrue);
       expect(kt.containsKey('accessToken'), isTrue);
       expect(kt.containsKey('endpoint'), isTrue);
