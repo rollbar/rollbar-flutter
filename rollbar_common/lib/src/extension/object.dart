@@ -13,7 +13,7 @@ extension HigherOrderFunctions<T> on T? {
   /// if it is not `null`.
   U? flatMap<U>(U? Function(T) f) => this != null ? f(this as T) : null;
 
-  /// Maps over elements that satisfy the given predicate.
+  /// Maps over the value if it is not null and satisfies the given predicate.
   U? mapIf<U>(bool Function(T) p, U Function(T) f) =>
       this != null && p(this as T) ? f(this as T) : null;
 
@@ -35,6 +35,5 @@ extension HigherOrderFunctions<T> on T? {
 
   /// Calls the provided closure with a reference to the value if it is not
   /// `null` and returns the value.
-  T? inspect(void Function(T) f) =>
-      this != null ? constant(this as T)(f) : null;
+  T? inspect(void Function(T) f) => this != null ? constf(this as T)(f) : null;
 }

@@ -81,7 +81,7 @@ void main() {
         expect(payloadRecords.length, ++recordsCount);
       }
 
-      for (final record in payloadRecords.map(identity)) {
+      for (final record in payloadRecords.map(idf)) {
         expect(payloadRecords.remove(record), isTrue);
         expect(payloadRecords.record(id: record.id), isNull);
         expect(payloadRecords.length, --recordsCount);

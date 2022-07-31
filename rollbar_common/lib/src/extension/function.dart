@@ -1,11 +1,15 @@
 /// Identity function a -> a
-T identity<T>(T x) => x;
+///
+/// Due to Dart's inference being very rudimentary, we suffix this ƒ with f.
+T idf<T>(T x) => x;
 
 /// Constant function a -> (b -> a)
 ///
 /// Returns a constant function, which always returns the same value no matter
 /// what argument it is given.
-T Function(U) constant<T, U>(T x) => (_) => x;
+///
+/// Due to Dart's inference being very rudimentary, we suffix this ƒ with f.
+T Function(U) constf<T, U>(T x) => (_) => x;
 
 /// Binary function currying. Allows for partial application of binary
 /// functions.

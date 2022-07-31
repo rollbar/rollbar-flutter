@@ -30,7 +30,9 @@ bool isNotNull<T>(T? x) => x != null;
 /// ```dart
 /// [true, true, true, false, true].all(isTrue) // false
 /// ```
-const isTrue = identity<bool>;
+const isTrue = idf<bool>;
+// the identity function on bool forms its predicate.
+// id := λx.x where x: bool ≡ bool isTrue(bool x) => x;
 
 /// Tests whether the given boolean argument [x] is false.
 ///
@@ -59,14 +61,8 @@ extension IterableExtensions<E> on Iterable<E> {
   /// Returns the last element or `null` if the list is empty.
   E? get tryLast => isNotEmpty ? last : null;
 
-  /// Returns the [index]th element or `null` if out of bounds.
-  E? tryElementAt(int index) {
-    try {
-      return elementAt(index);
-    } catch (_) {
-      return null;
-    }
-  }
+  /// Returns the [i]th element or `null` if out of bounds.
+  E? tryElementAt(int i) => i >= 0 && i < length ? elementAt(i) : null;
 
   /// Checks whether all elements of this iterable satisfy the given
   /// predicate [p].
@@ -81,7 +77,7 @@ extension IterableExtensions<E> on Iterable<E> {
   /// result = numbers.all((n) => n < 10); // true;
   /// ```
   bool all(Predicate<E> p) {
-    for (E e in this) {
+    for (final e in this) {
       if (!p(e)) return false;
     }
 
@@ -89,16 +85,49 @@ extension IterableExtensions<E> on Iterable<E> {
   }
 
   /// Maps over elements that satisfy the given predicate.
-  Iterable<E> mapIf(Predicate<E> p, Transform<E, E> f) =>
-      map((e) => p(e) ? f(e) : e);
+  Iterable<E> mapWhere(Predicate<E> p, Transform<E, E> f) sync* {
+    for (final e in this) {
+      if (p(e)) yield f(e);
+    }
+  }
+
+  Iterable<T> compactMap<T>(T? Function(E) f) sync* {
+    for (final e in this) {
+      final _e = f(e);
+      if (_e != null) yield _e;
+    }
+  }
 }
 
-extension CompactList<E> on List<E?> {
+extension CompactList<E> on Iterable<E?> {
   /// Returns a new non-null List by filtering out null values in the this List.
-  List<E> compact() => whereType<E>().toList();
+  Iterable<E> compact() => whereType<E>();
+}
+
+extension Ranges on int {
+  /// Creates an iterable range.
+  ///
+  /// Both ends of the range are _inclusive_.
+  ///
+  /// ```dart
+  /// for (var i in 1.to(5)) {
+  ///   print(i); // prints 1, 2, 3, 4, 5
+  /// }
+  /// ```
+  Iterable<int> to(int length) sync* {
+    for (var i = 0; i <= length; ++i) {
+      yield i;
+    }
+  }
 }
 
 extension MapExtensions<K, V> on Map<K, V> {
+  /// Returns an list of values for the given list of keys.
+  ///
+  /// The returned list respect the ordering of the keys.
+  Iterable<V> valuesForKeys(Iterable<K> keys) =>
+      keys.compactMap((key) => this[key]);
+
   /// Returns a new Map by filtering its elements using the given predicate.
   Map<K, V> where(bool Function(K, V) p) {
     Map<K, V> map = {};
