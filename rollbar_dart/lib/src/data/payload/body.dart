@@ -7,13 +7,11 @@ import '../event.dart';
 import 'exception_info.dart';
 import 'frame.dart';
 
-@sealed
 @immutable
-abstract class Report implements Serializable {
+mixin Report implements Serializable {
   bool get isTrace => this is Trace || this is Traces;
 
-  @override
-  factory Report.fromMap(JsonMap map) {
+  static Report fromMap(JsonMap map) {
     if (map.containsKey('message')) return Message.fromMap(map);
     if (map.containsKey('trace')) return Trace.fromMap(map);
     if (map.containsKey('trace_chain')) return Traces.fromMap(map);
