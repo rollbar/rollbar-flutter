@@ -7,7 +7,7 @@ import '../rollbar.dart';
 import 'notifier/isolated_notifier.dart';
 import 'wrangler/data_wrangler.dart';
 import 'transformer/noop_transformer.dart';
-import 'sender/persistent_sender.dart';
+import 'sender/persistent_http_sender.dart';
 
 /// Configuration for the [Rollbar] notifier.
 @immutable
@@ -40,7 +40,7 @@ class Config {
     this.notifier = IsolatedNotifier.spawn,
     this.wrangler = DataWrangler.new,
     this.transformer = NoopTransformer.new,
-    this.sender = PersistentSender.new,
+    this.sender = PersistentHttpSender.new,
   });
 
   Config copyWith({

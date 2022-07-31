@@ -8,14 +8,15 @@ import '../config.dart';
 import 'sender.dart';
 import 'http_sender.dart';
 
-/// Persistent [Sender]. Default [Sender] implementation.
+/// A [Sender] that persists payloads and defers its transport in case of
+/// client connectivity issues, temporary server errors, or interruptions.
 @sealed
 @immutable
-class PersistentSender implements Sender {
+class PersistentHttpSender implements Sender {
   final Config _config;
   final TableSet<PayloadRecord> _payloadRecords;
 
-  PersistentSender(this._config)
+  PersistentHttpSender(this._config)
       : _payloadRecords = TableSet(isPersistent: _config.persistPayloads);
 
   @override
