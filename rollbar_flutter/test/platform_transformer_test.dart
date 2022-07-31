@@ -1,12 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:rollbar_common/src/table_set.dart';
-import 'package:rollbar_common/src/persistable.dart';
-import 'package:rollbar_common/src/identifiable.dart';
-import 'package:rollbar_common/src/data/reading_record.dart';
 import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/data/payload/reading.dart';
 import 'package:rollbar_flutter/src/platform_transformer.dart';
 
 import 'utils/payload_utils.dart';
@@ -15,7 +9,6 @@ import 'utils/platform_exception_utils.dart';
 void main() {
   group('PlatformTransformer tests', () {
     const filename = 'test/platform_transformer_test.dart';
-    final telemetryMock = Telemetry$Mock();
     String? expectedMessage;
 
     setUp(() {
@@ -45,14 +38,15 @@ void main() {
           Frame(filename: filename, method: 'what'),
         ];
 
-        final body = Body(report: platformTraceInfo(exception, frames));
+        final body = Body(
+            telemetry: const [], report: platformTraceInfo(exception, frames));
         final original = dataFrom(body: body);
         final transformed = await transformer.transform(
-          Event(
+          original,
+          event: Event(
               error: exception,
               stackTrace: StackTrace.empty,
-              telemetry: telemetryMock),
-          original,
+              telemetry: const []),
         );
 
         final traces = transformed.body.report.traces;
@@ -80,13 +74,14 @@ void main() {
         ];
 
         final trace = platformTraceInfo(exception, frames);
-        final original = dataFrom(body: Body(report: trace));
+        final original =
+            dataFrom(body: Body(telemetry: const [], report: trace));
         final transformed = await transformer.transform(
-          Event(
+          original,
+          event: Event(
               error: exception,
               stackTrace: StackTrace.empty,
-              telemetry: telemetryMock),
-          original,
+              telemetry: const []),
         );
 
         final traces = transformed.body.report.traces;
@@ -127,13 +122,14 @@ void main() {
         const frames = [Frame(filename: filename, method: 'thisFails')];
 
         final platformTrace = platformTraceInfo(exception, frames);
-        final original = dataFrom(body: Body(report: platformTrace));
+        final original =
+            dataFrom(body: Body(telemetry: const [], report: platformTrace));
         final transformed = await transformer.transform(
-          Event(
+          original,
+          event: Event(
               error: exception,
               stackTrace: StackTrace.empty,
-              telemetry: telemetryMock),
-          original,
+              telemetry: const []),
         );
 
         final traces = transformed.body.report.traces;
@@ -166,13 +162,14 @@ void main() {
         ];
 
         final trace = platformTraceInfo(exception, frames);
-        final original = dataFrom(body: Body(report: trace));
+        final original =
+            dataFrom(body: Body(telemetry: const [], report: trace));
         final transformed = await transformer.transform(
-          Event(
+          original,
+          event: Event(
               error: exception,
               stackTrace: StackTrace.empty,
-              telemetry: telemetryMock),
-          original,
+              telemetry: const []),
         );
 
         final traces = transformed.body.report.traces;
@@ -198,26 +195,3 @@ void main() {
     });
   });
 }
-
-// ignore: subtype_of_sealed_class, must_be_immutable
-class Telemetry$Mock extends Mock implements Telemetry {
-  Telemetry$Mock() {
-    throwOnMissingStub(this);
-  }
-
-  @override
-  TableSet<ReadingRecord> get readings => super.noSuchMethod(
-        Invocation.getter(#readings),
-        returnValue: TableSet$Fake<ReadingRecord>(),
-      );
-
-  @override
-  bool register(Reading? reading) => super.noSuchMethod(
-        Invocation.method(#register, [reading]),
-        returnValue: false,
-      );
-}
-
-// ignore: subtype_of_sealed_class
-class TableSet$Fake<E extends Persistable<UUID>> extends Fake
-    implements TableSet<E> {}

@@ -2,9 +2,11 @@ import 'dart:io' show Platform;
 
 import 'package:meta/meta.dart';
 
+import '../extension/trace.dart';
 import '../data/payload/body.dart';
 import '../data/payload/client.dart';
 import '../data/payload/data.dart';
+import '../data/payload/exception_info.dart';
 import '../data/payload/payload.dart';
 import '../data/event.dart';
 import '../config.dart';
@@ -25,25 +27,80 @@ class DataWrangler implements Wrangler {
   @override
   Future<Payload> payload({required Event from}) async {
     final event = from;
-    final body = Body.from(event: event);
-    final data = await _dataFrom(event, body);
-    return Payload(config.accessToken, data);
+    final data = await _Data.from(event: event, config: config);
+    final transformedData = await transformer.transform(data, event: event);
+    return Payload(config.accessToken, transformedData);
   }
+}
 
-  Future<Data> _dataFrom(Event event, Body body) async {
-    final data = Data(
-        body: body,
-        timestamp: DateTime.now().microsecondsSinceEpoch,
-        language: 'dart',
-        level: event.level,
-        platform: Platform.operatingSystem,
-        framework: config.framework,
-        codeVersion: config.codeVersion,
-        client: Client.fromPlatform(),
-        environment: config.environment,
-        notifier: {'version': Notifier.version, 'name': Notifier.name},
-        server: {'root': config.package});
-
-    return await transformer.transform(event, data);
+extension _Data on Data {
+  static Future<Data> from({
+    required Event event,
+    required Config config,
+  }) async {
+    return Data(
+      body: _Body.from(event: event),
+      client: _Client.fromPlatform(),
+      codeVersion: config.codeVersion,
+      environment: config.environment,
+      framework: config.framework,
+      language: 'dart',
+      level: event.level,
+      notifier: {'version': Notifier.version, 'name': Notifier.name},
+      platform: Platform.operatingSystem,
+      server: {'root': config.package},
+      timestamp: DateTime.now().toUtc().microsecondsSinceEpoch,
+    );
   }
+}
+
+extension _Body on Body {
+  static Body from({required Event event}) {
+    final error = event.error, message = event.message;
+
+    if (error != null) {
+      return Body(
+        telemetry: event.telemetry,
+        report: Trace(
+            exception: _ExceptionInfo.from(error: error, description: message),
+            frames: event.stackTrace?.frames ?? [],
+            rawTrace: event.stackTrace?.rawTrace),
+      );
+    }
+
+    if (message != null) {
+      return Body(
+        telemetry: event.telemetry,
+        report: Message(message),
+      );
+    }
+
+    throw ArgumentError.value(
+        event, 'An Event must have either an error or a message.', 'event');
+  }
+}
+
+extension _ExceptionInfo on ExceptionInfo {
+  static ExceptionInfo from({
+    required dynamic error,
+    required String? description,
+  }) {
+    if (error is ExceptionInfo) {
+      return error.copyWith(description: error.description ?? description);
+    }
+
+    return ExceptionInfo(
+        type: error.runtimeType.toString(),
+        message: error.toString(),
+        description: description);
+  }
+}
+
+extension _Client on Client {
+  static Client fromPlatform() => Client(
+      locale: Platform.localeName,
+      hostname: Platform.localHostname,
+      os: Platform.operatingSystem,
+      osVersion: Platform.operatingSystemVersion,
+      dartVersion: Platform.version);
 }

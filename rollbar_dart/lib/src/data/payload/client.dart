@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
@@ -18,13 +17,6 @@ class Client {
     required this.osVersion,
     required this.dartVersion,
   });
-
-  factory Client.fromPlatform() => Client(
-      locale: Platform.localeName,
-      hostname: Platform.localHostname,
-      os: Platform.operatingSystem,
-      osVersion: Platform.operatingSystemVersion,
-      dartVersion: Platform.version);
 
   /// Converts the object into a Json encodable map.
   JsonMap toMap() => {

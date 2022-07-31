@@ -4,14 +4,13 @@ import 'dart:isolate';
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
+import 'async_notifier.dart';
 
-/// A class that performs the core functions for the notifier:
-/// - Prepare a payload from the provided error or message.
-/// - Apply the configured transformation, if any.
-/// - Send the occurrence payload to Rollbar via a [Sender].
+/// An asynchronous notifier that leverages Dart's Isolated execution contexts
+/// to achieve asynchrony via a separate thread.
 @sealed
 @immutable
-class IsolatedNotifier implements Notifier {
+class IsolatedNotifier implements AsyncNotifier {
   @override
   final Sender sender;
 

@@ -20,17 +20,6 @@ class ExceptionInfo {
       message: attributes.message,
       description: attributes.description);
 
-  factory ExceptionInfo.from(dynamic error, String? description) {
-    if (error is ExceptionInfo) {
-      return error.copyWith(description: error.description ?? description);
-    }
-
-    return ExceptionInfo(
-        type: error.runtimeType.toString(),
-        message: error.toString(),
-        description: description);
-  }
-
   ExceptionInfo copyWith({
     String? type,
     String? message,

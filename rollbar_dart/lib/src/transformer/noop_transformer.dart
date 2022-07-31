@@ -11,5 +11,5 @@ class NoopTransformer implements Transformer {
   const NoopTransformer(Config _);
 
   @override
-  Data transform(Event _, Data data) => data;
+  Data transform(Data data, {required Event event}) => data;
 }

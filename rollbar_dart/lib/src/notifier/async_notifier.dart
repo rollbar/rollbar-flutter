@@ -1,10 +1,8 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
 
-/// A class that performs the core functions for the notifier:
-/// - Prepare a payload from the provided error or message.
-/// - Apply the configured transformation, if any.
-/// - Send the occurrence payload to Rollbar via a [Sender].
 @sealed
 @immutable
 class AsyncNotifier implements Notifier {
@@ -19,7 +17,7 @@ class AsyncNotifier implements Notifier {
         sender = config.sender(config);
 
   @override
-  Future<void> notify(Event event) async {
+  FutureOr<void> notify(Event event) async {
     final payload = await wrangler.payload(from: event);
     await sender.send(payload.toMap());
   }

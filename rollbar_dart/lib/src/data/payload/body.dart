@@ -1,10 +1,8 @@
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
-import '../../extension/trace.dart';
-import '../../telemetry.dart';
-import '../event.dart';
 import 'exception_info.dart';
+import 'reading.dart';
 import 'frame.dart';
 
 @immutable
@@ -28,37 +26,13 @@ mixin Report implements Serializable {
 @sealed
 @immutable
 class Body implements Serializable {
-  final Telemetry? telemetry;
+  final Iterable<Reading> telemetry;
   final Report report;
 
-  const Body({this.telemetry, required this.report});
-
-  factory Body.from({required Event event}) {
-    final error = event.error, message = event.message;
-
-    if (error != null) {
-      return Body(
-        telemetry: event.telemetry,
-        report: Trace(
-            exception: ExceptionInfo.from(error, message),
-            frames: event.stackTrace?.frames ?? [],
-            rawTrace: event.stackTrace?.rawTrace),
-      );
-    }
-
-    if (message != null) {
-      return Body(
-        telemetry: event.telemetry,
-        report: Message(message),
-      );
-    }
-
-    throw ArgumentError.value(
-        event, 'Either an error or a message must be provided.', 'error');
-  }
+  const Body({required this.telemetry, required this.report});
 
   Body copyWith({
-    Telemetry? telemetry,
+    Iterable<Reading>? telemetry,
     Report? report,
   }) =>
       Body(
@@ -67,7 +41,7 @@ class Body implements Serializable {
 
   @override
   JsonMap toMap() => {
-        'telemetry': 'telemetry',
+        'telemetry': telemetry.map((reading) => reading.toMap()),
         ...report.toMap(),
       };
 }

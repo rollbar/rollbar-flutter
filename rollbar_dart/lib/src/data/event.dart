@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import '../telemetry.dart';
+import 'payload/reading.dart';
 
 @sealed
 @immutable
@@ -10,14 +11,14 @@ class Event {
   final dynamic error;
   final StackTrace? stackTrace;
   final String? message;
-  final Telemetry telemetry;
+  final Iterable<Reading> telemetry;
 
   const Event({
     this.level = Level.info,
     this.error,
     this.stackTrace,
     this.message,
-    required this.telemetry,
+    this.telemetry = const [],
   });
 
   @override

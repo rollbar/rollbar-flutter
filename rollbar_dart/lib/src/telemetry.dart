@@ -18,4 +18,8 @@ class Telemetry {
   bool register(Reading reading) => readings.add(
         ReadingRecord(reading: jsonEncode(reading.toMap())),
       );
+
+  Iterable<Reading> snapshot() {
+    throw UnimplementedError();
+  }
 }

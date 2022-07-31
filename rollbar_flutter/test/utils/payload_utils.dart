@@ -11,7 +11,12 @@ Data dataFrom({required Body body}) => Data(
       platform: Platform.operatingSystem,
       framework: 'flutter',
       codeVersion: 'someCodeVersion',
-      client: Client.fromPlatform(),
+      client: Client(
+          locale: Platform.localeName,
+          hostname: Platform.localHostname,
+          os: Platform.operatingSystem,
+          osVersion: Platform.operatingSystemVersion,
+          dartVersion: Platform.version),
       environment: 'unitTesting',
       notifier: const {'version': 'someVersion', 'name': 'someName'},
       server: const {'root': 'com.some.package'},
