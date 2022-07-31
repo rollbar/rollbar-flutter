@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:rollbar_dart/src/notifier/async_notifier.dart';
 import 'package:rollbar_flutter/rollbar.dart';
 
 import 'utils/platform_exception_utils.dart';
@@ -12,13 +13,6 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late List<MethodCall> callsReceived;
   late MockSender sender;
-
-  Config defaultConfig() => Config(
-      accessToken: 'SomeAccessToken',
-      package: 'some_package_name',
-      includePlatformLogs: true,
-      handleUncaughtErrors: true,
-      sender: (_) => sender);
 
   setUp(() async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -38,7 +32,14 @@ void main() {
   });
 
   test('Initialize platform component when running application', () async {
-    final config = defaultConfig();
+    final config = Config(
+        accessToken: 'SomeAccessToken',
+        package: 'some_package_name',
+        includePlatformLogs: true,
+        handleUncaughtErrors: true,
+        notifier: AsyncNotifier.new,
+        sender: (_) => sender);
+
     await RollbarFlutter.run(config, () {
       final initCalls = callsReceived //
           .where((call) => call.method == 'initialize')
@@ -62,13 +63,16 @@ void main() {
     });
   });
 
-  test('if error is default PlatformException it should parse java trace',
-      () async {
-    //fail('TODO');
-  });
-
   test('Add platform_payload if PlatformException is enriched', () async {
-    await RollbarFlutter.run(defaultConfig(), () async {
+    final config = Config(
+        accessToken: 'SomeAccessToken',
+        package: 'some_package_name',
+        includePlatformLogs: true,
+        handleUncaughtErrors: true,
+        notifier: AsyncNotifier.new,
+        sender: (_) => sender);
+
+    await RollbarFlutter.run(config, () async {
       final exception = androidPlatformException(
         topFrameMethod: 'platformSpecificStuff',
       );
