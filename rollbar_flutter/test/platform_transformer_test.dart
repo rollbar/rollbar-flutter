@@ -1,18 +1,21 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:rollbar_common/src/table_set.dart';
+import 'package:rollbar_common/src/persistable.dart';
+import 'package:rollbar_common/src/identifiable.dart';
+import 'package:rollbar_common/src/data/reading_record.dart';
 import 'package:rollbar_dart/rollbar.dart';
+import 'package:rollbar_dart/src/data/payload/reading.dart';
 import 'package:rollbar_flutter/src/platform_transformer.dart';
 
-import 'platform_transformer_test.mocks.dart';
 import 'utils/payload_utils.dart';
 import 'utils/platform_exception_utils.dart';
 
-@GenerateMocks([Telemetry])
 void main() {
   group('PlatformTransformer tests', () {
     const filename = 'test/platform_transformer_test.dart';
-    final telemetryMock = MockTelemetry();
+    final telemetryMock = Telemetry$Mock();
     String? expectedMessage;
 
     setUp(() {
@@ -195,3 +198,26 @@ void main() {
     });
   });
 }
+
+// ignore: subtype_of_sealed_class, must_be_immutable
+class Telemetry$Mock extends Mock implements Telemetry {
+  Telemetry$Mock() {
+    throwOnMissingStub(this);
+  }
+
+  @override
+  TableSet<ReadingRecord> get readings => super.noSuchMethod(
+        Invocation.getter(#readings),
+        returnValue: TableSet$Fake<ReadingRecord>(),
+      );
+
+  @override
+  bool register(Reading? reading) => super.noSuchMethod(
+        Invocation.method(#register, [reading]),
+        returnValue: false,
+      );
+}
+
+// ignore: subtype_of_sealed_class
+class TableSet$Fake<E extends Persistable<UUID>> extends Fake
+    implements TableSet<E> {}
