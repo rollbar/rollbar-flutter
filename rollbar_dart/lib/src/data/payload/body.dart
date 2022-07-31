@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
-import '../../ext/trace.dart';
+import '../../extension/trace.dart';
 import '../../telemetry.dart';
 import '../event.dart';
 import 'exception_info.dart';
