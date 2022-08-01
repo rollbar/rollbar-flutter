@@ -19,7 +19,8 @@ class Telemetry {
         ReadingRecord(reading: jsonEncode(reading.toMap())),
       );
 
-  Iterable<Reading> snapshot() {
-    throw UnimplementedError();
-  }
+  Iterable<Reading> snapshot() => readings
+      .sorted(by: #ReadingRecord.timestamp)
+      .map((record) => jsonDecode(record.reading) as JsonMap)
+      .map(Reading.fromMap);
 }
