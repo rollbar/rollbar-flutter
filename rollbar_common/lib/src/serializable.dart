@@ -1,7 +1,9 @@
-import 'extension/collection.dart';
+import 'package:collection/collection.dart';
 
 import 'data/payload_record.dart';
 import 'data/reading_record.dart';
+
+typedef JsonMap = Map<String, dynamic>;
 
 /// The class of types that are [Serializable].
 abstract class Serializable {
@@ -32,4 +34,25 @@ class SerializableFor {
     throw NoSuchMethodError.withInvocation(
         this, Invocation.method(#fromMap, [map]));
   }
+}
+
+abstract class Equatable {
+  @override
+  int get hashCode;
+
+  @override
+  bool operator ==(Object other);
+}
+
+mixin EquatableSerializableMixin implements Serializable, Equatable {
+  static const _eq = DeepCollectionEquality();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Serializable && _eq.equals(toMap(), other.toMap());
+
+  @override
+  int get hashCode => Object.hashAll(
+      toMap().values.map((e) => e is Map || e is Iterable ? _eq.hash(e) : e));
 }

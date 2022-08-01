@@ -1,5 +1,3 @@
-typedef JsonMap = Map<String, dynamic>;
-
 typedef Predicate<E> = bool Function(E);
 typedef Transform<T, E> = T Function(E);
 

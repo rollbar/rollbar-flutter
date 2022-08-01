@@ -3,7 +3,9 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 @sealed
 @immutable
-class Client {
+class Client
+    with EquatableSerializableMixin
+    implements Equatable, Serializable {
   final String locale;
   final String hostname;
   final String os;
@@ -18,12 +20,20 @@ class Client {
     required this.dartVersion,
   });
 
+  factory Client.fromMap(JsonMap map) => Client(
+      locale: map['locale'],
+      hostname: map['hostname'],
+      os: map['os'],
+      osVersion: map['os_version'],
+      dartVersion: map['dart']['version'],
+
   /// Converts the object into a Json encodable map.
+  @override
   JsonMap toMap() => {
         'locale': locale,
         'hostname': hostname,
         'os': os,
         'os_version': osVersion,
-        'dart': {'version': dartVersion}
+        'dart': {'version': dartVersion},
       };
 }

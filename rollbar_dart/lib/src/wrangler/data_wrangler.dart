@@ -49,7 +49,7 @@ extension _Data on Data {
       notifier: {'version': Notifier.version, 'name': Notifier.name},
       platform: Platform.operatingSystem,
       server: {'root': config.package},
-      timestamp: DateTime.now().toUtc().microsecondsSinceEpoch,
+      timestamp: DateTime.now().toUtc(),
     );
   }
 }
@@ -71,7 +71,7 @@ extension _Body on Body {
     if (message != null) {
       return Body(
         telemetry: event.telemetry,
-        report: Message(message),
+        report: Message(text: message),
       );
     }
 
@@ -102,5 +102,5 @@ extension _Client on Client {
       hostname: Platform.localHostname,
       os: Platform.operatingSystem,
       osVersion: Platform.operatingSystemVersion,
-      dartVersion: Platform.version);
+      dartVersion: Platform.version,
 }

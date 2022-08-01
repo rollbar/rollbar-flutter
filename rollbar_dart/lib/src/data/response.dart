@@ -9,7 +9,9 @@ import 'package:rollbar_common/rollbar_common.dart';
 /// Rollbar will respond with either an error [message] xor a [Result].
 @sealed
 @immutable
-class Response {
+class Response
+    with EquatableSerializableMixin
+    implements Serializable, Equatable {
   final int error;
   final String? message;
   final UUID? result;
@@ -27,6 +29,7 @@ class Response {
       message: message ?? this.message,
       result: result ?? this.result);
 
+  @override
   JsonMap toMap() => {
         'err': error,
         'message': message,
@@ -42,17 +45,6 @@ class Response {
   @override
   String toString() =>
       'Response(error: $error, message: $message, result: $result)';
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Response &&
-          other.error == error &&
-          other.message == message &&
-          other.result == result);
-
-  @override
-  int get hashCode => Object.hash(error, message, result);
 }
 
 extension _Attributes on JsonMap {

@@ -7,7 +7,7 @@ import '../../extension/trace.dart';
 /// Contains the information of a single frame in a stack trace.
 @sealed
 @immutable
-class Frame implements Serializable {
+class Frame with EquatableSerializableMixin implements Equatable, Serializable {
   final String filename;
   final String? type;
   final String? method;

@@ -5,12 +5,14 @@ enum Source { client, server }
 
 @sealed
 @immutable
-class Reading implements Serializable {
+class Reading
+    with EquatableSerializableMixin
+    implements Equatable, Serializable {
   final String type;
   final Level level;
   final Source source;
-  final DateTime timestamp;
   final JsonMap body;
+  final DateTime timestamp;
 
   Reading._({
     DateTime? timestamp,
@@ -19,6 +21,16 @@ class Reading implements Serializable {
     required this.source,
     required this.body,
   }) : timestamp = timestamp ?? DateTime.now().toUtc();
+
+  factory Reading.fromMap(JsonMap map) => Reading._(
+      type: map['type'],
+      level: Level.values.firstWhere((level) => level.name == map['level']),
+      source: Source.values.firstWhere((src) => src.name == map['source']),
+      body: map['body'],
+      timestamp: DateTime.fromMicrosecondsSinceEpoch(
+        map['timestamp'],
+        isUtc: true,
+      ));
 
   factory Reading.log(
     String message, {
@@ -96,4 +108,12 @@ class Reading implements Serializable {
         'timestamp': timestamp.microsecondsSinceEpoch,
         'body': body,
       };
+
+  @override
+  String toString() => 'Reading('
+      'type: $type, '
+      'level: $level, '
+      'source: $source, '
+      'body: $body, '
+      'timestamp: $timestamp)';
 }

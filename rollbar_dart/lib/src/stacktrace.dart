@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart' as stacktrace;
 import 'package:rollbar_common/rollbar_common.dart';
 
-import '../data/payload/frame.dart' as rollbar;
+import 'data/payload/frame.dart' as rollbar;
 
 extension _Sig on RegExp {
   static final RegExp dso = RegExp(r'(\n|^)isolate_dso_base:');

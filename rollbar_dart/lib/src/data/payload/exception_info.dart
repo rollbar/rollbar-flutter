@@ -4,12 +4,14 @@ import 'package:rollbar_common/rollbar_common.dart';
 /// Contains all the error details except the stack trace.
 @sealed
 @immutable
-class ExceptionInfo {
+class ExceptionInfo
+    with EquatableSerializableMixin
+    implements Equatable, Serializable {
   final String type;
   final String message;
   final String? description;
 
-  ExceptionInfo({
+  const ExceptionInfo({
     required this.type,
     required this.message,
     this.description,
@@ -34,6 +36,7 @@ class ExceptionInfo {
   String toString() =>
       'ExceptionInfo(type: $type, message: $message, description: $description)';
 
+  @override
   JsonMap toMap() => {
         'class': type,
         'message': message,

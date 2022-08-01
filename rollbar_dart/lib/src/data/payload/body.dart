@@ -6,7 +6,7 @@ import 'reading.dart';
 import 'frame.dart';
 
 @immutable
-mixin Report implements Serializable {
+mixin Report implements Equatable, Serializable {
   bool get isTrace => this is Trace || this is Traces;
 
   static Report fromMap(JsonMap map) {
@@ -25,11 +25,16 @@ mixin Report implements Serializable {
 
 @sealed
 @immutable
-class Body implements Serializable {
+class Body with EquatableSerializableMixin implements Equatable, Serializable {
   final Iterable<Reading> telemetry;
   final Report report;
 
   const Body({required this.telemetry, required this.report});
+
+  factory Body.fromMap(JsonMap map) => Body(
+        telemetry: map.telemetry,
+        report: Report.fromMap(map),
+      );
 
   Body copyWith({
     Iterable<Reading>? telemetry,
@@ -41,7 +46,7 @@ class Body implements Serializable {
 
   @override
   JsonMap toMap() => {
-        'telemetry': telemetry.map((reading) => reading.toMap()),
+        'telemetry': telemetry.map((reading) => reading.toMap()).toList(),
         ...report.toMap(),
       };
 }
@@ -49,7 +54,7 @@ class Body implements Serializable {
 /// An individual error with its corresponding stack trace if available.
 @sealed
 @immutable
-class Trace with Report {
+class Trace with Report, EquatableSerializableMixin {
   final ExceptionInfo exception;
   final Iterable<Frame> frames;
   final String? rawTrace;
@@ -89,7 +94,7 @@ class Trace with Report {
 /// root cause of the error.
 @sealed
 @immutable
-class Traces with Report {
+class Traces with Report, EquatableSerializableMixin {
   @override
   final Iterable<Trace> traces;
 
@@ -108,12 +113,12 @@ class Traces with Report {
 /// A text message to be sent to Rollbar.
 @sealed
 @immutable
-class Message with Report {
+class Message with Report, EquatableSerializableMixin {
   final String text;
 
-  const Message([this.text = '']);
+  const Message({required this.text});
 
-  factory Message.fromMap(JsonMap map) => Message(map.message);
+  factory Message.fromMap(JsonMap map) => Message(text: map.message);
 
   @override
   JsonMap toMap() => {
@@ -123,12 +128,17 @@ class Message with Report {
 
 extension _KeyValuePath on JsonMap {
   ExceptionInfo get exception => ExceptionInfo.fromMap(this['exception']);
-  String get message => this['message']?['body'] ?? '';
+  String get message => this['message']['body'];
   String? get rawTrace => this['raw'];
-  JsonMap get trace => this['trace'] ?? {};
+  JsonMap get trace => this['trace'];
 
-  Iterable<Frame> get frames =>
-      (this['frames'] ?? []).whereType<JsonMap>().map<Frame>(Frame.fromMap);
-  Iterable<JsonMap> get traces =>
-      (this['trace_chain'] ?? []).whereType<JsonMap>();
+  Iterable<Reading> get telemetry => this['telemetry']
+      .whereType<JsonMap>()
+      .map<Reading>(Reading.fromMap)
+      .toList();
+  Iterable<Frame> get frames => this['frames'] //
+      .whereType<JsonMap>()
+      .map<Frame>(Frame.fromMap)
+      .toList();
+  Iterable<JsonMap> get traces => this['trace_chain'].whereType<JsonMap>();
 }
