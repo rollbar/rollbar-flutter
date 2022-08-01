@@ -1,4 +1,4 @@
-import 'package:rollbar_dart/src/extension/trace.dart';
+import 'package:rollbar_dart/src/stacktrace.dart';
 import 'package:test/test.dart';
 
 void main() {

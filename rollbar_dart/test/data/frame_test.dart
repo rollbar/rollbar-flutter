@@ -5,23 +5,6 @@ import 'package:test/test.dart';
 
 void main() {
   group('Frame serialization tests', () {
-    test('Json roundtrip serialization test', () {
-      const frame = Frame(
-          filename: 'test.dart',
-          type: 'ignore.this.Class',
-          method: 'someMethod',
-          line: 100,
-          column: 3);
-
-      final asJson = jsonEncode(frame.toMap());
-      final recovered = Frame.fromMap(jsonDecode(asJson));
-      expect(recovered.filename, equals(frame.filename));
-      expect(recovered.type, equals(frame.type));
-      expect(recovered.method, equals(frame.method));
-      expect(recovered.line, equals(frame.line));
-      expect(recovered.column, equals(frame.column));
-    });
-
     test('Serialization is null-safe test', () {
       const nullFrame = Frame(filename: 'test.dart');
       final asJson = jsonEncode(nullFrame.toMap());
