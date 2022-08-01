@@ -13,6 +13,7 @@ export 'src/identifiable.dart';
 export 'src/serializable.dart';
 export 'src/persistable.dart';
 
+export 'src/zipped.dart';
 export 'src/table_set.dart';
 export 'src/data/payload_record.dart';
 export 'src/data/reading_record.dart';
