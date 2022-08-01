@@ -2,7 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:meta/meta.dart';
 
-import '../extension/trace.dart';
+import '../stacktrace.dart';
 import '../data/payload/body.dart';
 import '../data/payload/client.dart';
 import '../data/payload/data.dart';
@@ -103,4 +103,5 @@ extension _Client on Client {
       os: Platform.operatingSystem,
       osVersion: Platform.operatingSystemVersion,
       dartVersion: Platform.version,
+      numberOfProcessors: Platform.numberOfProcessors);
 }

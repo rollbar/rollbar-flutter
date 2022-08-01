@@ -11,6 +11,7 @@ class Client
   final String os;
   final String osVersion;
   final String dartVersion;
+  final int numberOfProcessors;
 
   const Client({
     required this.locale,
@@ -18,6 +19,7 @@ class Client
     required this.os,
     required this.osVersion,
     required this.dartVersion,
+    required this.numberOfProcessors,
   });
 
   factory Client.fromMap(JsonMap map) => Client(
@@ -26,6 +28,7 @@ class Client
       os: map['os'],
       osVersion: map['os_version'],
       dartVersion: map['dart']['version'],
+      numberOfProcessors: map['number_of_processors']);
 
   /// Converts the object into a Json encodable map.
   @override
@@ -35,5 +38,6 @@ class Client
         'os': os,
         'os_version': osVersion,
         'dart': {'version': dartVersion},
+        'number_of_processors': numberOfProcessors,
       };
 }
