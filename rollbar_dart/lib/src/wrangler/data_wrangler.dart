@@ -29,7 +29,7 @@ class DataWrangler implements Wrangler {
     final event = from;
     final data = await _Data.from(event: event, config: config);
     final transformedData = await transformer.transform(data, event: event);
-    return Payload(config.accessToken, transformedData);
+    return Payload(data: transformedData);
   }
 }
 

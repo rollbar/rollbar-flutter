@@ -16,7 +16,6 @@ class PayloadRecord implements Persistable<UUID> {
   final UUID id;
   final String accessToken;
   final String endpoint;
-  final String config;
   final String payload;
   final DateTime timestamp;
 
@@ -24,7 +23,6 @@ class PayloadRecord implements Persistable<UUID> {
         'id': Datatype.uuid,
         'accessToken': Datatype.text,
         'endpoint': Datatype.text,
-        'config': Datatype.text,
         'payload': Datatype.text,
         'timestamp': Datatype.integer,
       };
@@ -33,7 +31,6 @@ class PayloadRecord implements Persistable<UUID> {
     UUID? id,
     required this.accessToken,
     required this.endpoint,
-    required this.config,
     required this.payload,
     DateTime? timestamp,
   })  : id = id ?? uuidGen.v4obj(),
@@ -43,7 +40,6 @@ class PayloadRecord implements Persistable<UUID> {
     UUID? id,
     String? accessToken,
     String? endpoint,
-    String? config,
     String? payload,
     DateTime? timestamp,
   }) =>
@@ -51,7 +47,6 @@ class PayloadRecord implements Persistable<UUID> {
           id: id ?? this.id,
           accessToken: accessToken ?? this.accessToken,
           endpoint: endpoint ?? this.endpoint,
-          config: config ?? this.config,
           payload: payload ?? this.payload,
           timestamp: timestamp ?? this.timestamp);
 
@@ -60,7 +55,6 @@ class PayloadRecord implements Persistable<UUID> {
       id: map.id,
       accessToken: map.accessToken,
       endpoint: map.endpoint,
-      config: map.config,
       payload: map.payload,
       timestamp: map.timestamp);
 
@@ -69,7 +63,6 @@ class PayloadRecord implements Persistable<UUID> {
         'id': id.toBytes(),
         'accessToken': accessToken,
         'endpoint': endpoint,
-        'config': config,
         'payload': payload,
         'timestamp': timestamp.microsecondsSinceEpoch,
       };
@@ -101,7 +94,6 @@ class PayloadRecord implements Persistable<UUID> {
       'id: ${id.uuid}, '
       'accessToken: $accessToken, '
       'endpoint: $endpoint, '
-      'config: $config, '
       'payload: $payload, '
       'timestamp: $timestamp)';
 
@@ -112,13 +104,12 @@ class PayloadRecord implements Persistable<UUID> {
           other.id == id &&
           other.accessToken == accessToken &&
           other.endpoint == endpoint &&
-          other.config == config &&
           other.payload == payload &&
           other.timestamp == timestamp);
 
   @override
   int get hashCode =>
-      Object.hash(id, accessToken, endpoint, config, payload, timestamp);
+      Object.hash(id, accessToken, endpoint, payload, timestamp);
 }
 
 @sealed
@@ -142,7 +133,6 @@ extension PayloadRecordAttributes on JsonMap {
   UUID get id => UUID.fromList(this['id'].whereType<int>().toList());
   String get accessToken => this['accessToken'];
   String get endpoint => this['endpoint'];
-  String get config => this['config'];
   String get payload => this['payload'];
   DateTime get timestamp => DateTime.fromMicrosecondsSinceEpoch(
         this['timestamp'],

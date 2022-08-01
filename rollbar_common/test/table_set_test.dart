@@ -92,40 +92,37 @@ void main() {
     });
 
     test('Stored records preserve original data', () async {
-      final payloadRecords = TableSet<PayloadRecord>();
+      final records = TableSet<PayloadRecord>();
       final record = _Record.generate();
 
-      payloadRecords.add(record);
-      expect(payloadRecords.isNotEmpty, isTrue);
-      expect(payloadRecords.length, 1);
-      expect(payloadRecords.contains(record), isTrue);
+      records.add(record);
+      expect(records.isNotEmpty, isTrue);
+      expect(records.length, 1);
+      expect(records.contains(record), isTrue);
 
-      final first = payloadRecords.first;
+      final first = records.first;
       expect(first, equals(record));
       expect(first.id, equals(record.id));
       expect(first.accessToken, equals(record.accessToken));
       expect(first.endpoint, equals(record.endpoint));
-      expect(first.config, equals(record.config));
       expect(first.payload, equals(record.payload));
       expect(first.timestamp, equals(record.timestamp));
 
-      final other = payloadRecords.record(id: record.id);
+      final other = records.record(id: record.id);
       expect(other, isNotNull);
       expect(other, equals(record));
       expect(other?.id, equals(record.id));
       expect(other?.accessToken, equals(record.accessToken));
       expect(other?.endpoint, equals(record.endpoint));
-      expect(other?.config, equals(record.config));
       expect(other?.payload, equals(record.payload));
       expect(other?.timestamp, equals(record.timestamp));
 
-      final another = payloadRecords.lookup(record);
+      final another = records.lookup(record);
       expect(another, isNotNull);
       expect(another, equals(record));
       expect(another?.id, equals(record.id));
       expect(another?.accessToken, equals(record.accessToken));
       expect(another?.endpoint, equals(record.endpoint));
-      expect(another?.config, equals(record.config));
       expect(another?.payload, equals(record.payload));
       expect(another?.timestamp, equals(record.timestamp));
     });
@@ -151,18 +148,20 @@ void main() {
     });
 
     test('Updates entries correctly', () async {
-      final tableSet = TableSet<PayloadRecord>();
+      final records = TableSet<PayloadRecord>();
       final record = _Record.generate();
-      final oldConfig = record.config;
+      final oldToken = record.accessToken;
 
-      expect(tableSet.update(record), isFalse);
-      expect(tableSet.add(record), isTrue);
-      expect(tableSet.any((record) => record.config == oldConfig), isTrue);
+      expect(records.update(record), isFalse);
+      expect(records.add(record), isTrue);
+      expect(records.any((record) => record.accessToken == oldToken), isTrue);
+      expect(records.any((record) => record.accessToken == '1234'), isFalse);
 
-      final updated = tableSet.record(id: record.id)!.copyWith(config: '1234');
-      expect(tableSet.update(updated), isTrue);
-      expect(tableSet.any((record) => record.config == oldConfig), isFalse);
-      expect(tableSet.any((record) => record.config == '1234'), isTrue);
+      final updated =
+          records.record(id: record.id)!.copyWith(accessToken: '1234');
+      expect(records.update(updated), isTrue);
+      expect(records.any((record) => record.accessToken == oldToken), isFalse);
+      expect(records.any((record) => record.accessToken == '1234'), isTrue);
     });
 
     test('Is iterable', () async {
@@ -249,14 +248,14 @@ void main() {
 
   test('Is sortable', () async {
     final records = TableSet<PayloadRecord>(isPersistent: false);
-    final orderedList = [
+    final originalList = [
       _Record.generate(timestamp: DateTime(0).toUtc()),
       _Record.generate(timestamp: DateTime.now().toUtc() - 1.days),
       _Record.generate(timestamp: DateTime.now().toUtc()),
       _Record.generate(timestamp: DateTime.now().toUtc() + 1.days),
       _Record.generate(timestamp: DateTime(0x1EB208C2DC0000).toUtc()),
     ];
-    final list = orderedList.toList();
+    final list = originalList.toList();
 
     repeat(10, () {
       (list..shuffle(_Record.rnd)).forEach(records.add);
@@ -277,7 +276,7 @@ void main() {
         }
 
         for (var i = 0; i < sorted.length; ++i) {
-          expect(sorted.elementAt(i), equals(orderedList.elementAt(i)));
+          expect(sorted.elementAt(i), equals(originalList.elementAt(i)));
         }
       }
 
@@ -292,7 +291,6 @@ extension _Record on PayloadRecord {
   static PayloadRecord generate({DateTime? timestamp}) => PayloadRecord(
       accessToken: rnd.nextString(32),
       endpoint: rnd.nextString(32),
-      config: rnd.nextString(32),
       payload: rnd.nextString(32),
       timestamp: timestamp);
 }

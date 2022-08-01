@@ -28,7 +28,6 @@ class PersistentHttpSender implements Sender {
       final newRecord = PayloadRecord(
           accessToken: _config.accessToken,
           endpoint: _config.endpoint,
-          config: jsonEncode(_config.toMap()),
           payload: payload);
 
       _payloadRecords.add(newRecord);
