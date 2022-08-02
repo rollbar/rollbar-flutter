@@ -43,7 +43,7 @@ extension _PlatformException on PlatformException {
   /// ¹On Android, [PlatformException.message] contains the entire exception
   /// payload in a json string.
   Iterable<Trace>? get traces =>
-      (payload?['data']['body']).map(Report.fromMap)?.traces;
+      (payload?['data']['body'] as JsonMap?).map(Report.fromMap)?.traces;
 
   JsonMap? get payload => message.mapIf(
       (rawPayload) => rawPayload.startsWith(_prefix),
