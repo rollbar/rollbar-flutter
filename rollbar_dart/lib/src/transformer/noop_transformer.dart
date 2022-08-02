@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../data/payload/data.dart';
 import '../config.dart';
-import '../data/event.dart';
+import '../event.dart';
 import 'transformer.dart';
 
 @sealed

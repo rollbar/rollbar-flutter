@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 
 import 'package:rollbar_dart/rollbar.dart';
 
-import 'isolated_notifier.dart';
 import 'platform_transformer.dart';
 
 extension _Methods on MethodChannel {
@@ -28,7 +27,7 @@ class RollbarFlutter {
   ) async {
     await Rollbar.run(config.copyWith(
       framework: 'flutter',
-      notifier: IsolatedNotifier.spawn,
+//      notifier: IsolatedNotifier.spawn,
       transformer: (_) => PlatformTransformer(),
     ));
 

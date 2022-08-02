@@ -5,13 +5,20 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 import '../rollbar.dart';
 import 'notifier/async_notifier.dart';
+import 'notifier/isolated_notifier.dart';
 import 'wrangler/data_wrangler.dart';
 import 'transformer/noop_transformer.dart';
 import 'sender/persistent_http_sender.dart';
 
+/// The class of types that are [Configurable] through a [Config] instance.
+@immutable
+abstract class Configurable {
+  Config get config;
+}
+
 /// Configuration for the [Rollbar] notifier.
 @immutable
-class Config {
+class Config implements Serializable {
   final String accessToken;
   final String endpoint;
   final String environment;
@@ -37,7 +44,7 @@ class Config {
     this.persistPayloads = true,
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
-    this.notifier = AsyncNotifier.new,
+    this.notifier = IsolatedNotifier.spawn, // AsyncNotifier.new,
     this.wrangler = DataWrangler.new,
     this.transformer = NoopTransformer.new,
     this.sender = PersistentHttpSender.new,
@@ -54,6 +61,7 @@ class Config {
     bool? handleUncaughtErrors,
     bool? includePlatformLogs,
     FutureOr<Notifier> Function(Config)? notifier,
+    Wrangler Function(Config)? wrangler,
     Transformer Function(Config)? transformer,
     Sender Function(Config)? sender,
   }) =>
@@ -68,11 +76,12 @@ class Config {
         handleUncaughtErrors: handleUncaughtErrors ?? this.handleUncaughtErrors,
         includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
         notifier: notifier ?? this.notifier,
+        wrangler: wrangler ?? this.wrangler,
         transformer: transformer ?? this.transformer,
         sender: sender ?? this.sender,
       );
 
-  /// Converts the [Map] instance into a [Config] object.
+  @override
   factory Config.fromMap(JsonMap map) => Config(
       accessToken: map['accessToken'],
       endpoint: map['endpoint'],
@@ -84,6 +93,7 @@ class Config {
       handleUncaughtErrors: map['handleUncaughtErrors'],
       includePlatformLogs: map['includePlatformLogs']);
 
+  @override
   JsonMap toMap() => {
         'accessToken': accessToken,
         'endpoint': endpoint,

@@ -5,28 +5,23 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
 
+import 'async_notifier.dart';
+
 /// An asynchronous notifier that leverages Dart's Isolated execution contexts
 /// to achieve asynchrony via a separate thread.
 @sealed
 @immutable
-class IsolatedNotifier implements Notifier {
-  @override
-  final Sender sender;
-
-  @override
-  final Wrangler wrangler;
-
+class IsolatedNotifier extends AsyncNotifier {
   final SendPort _sendPort;
   final ReceivePort _receivePort;
   final Isolate _isolate;
 
   IsolatedNotifier._(
-    Config config,
+    super.config,
     this._isolate,
     this._receivePort,
     this._sendPort,
-  )   : wrangler = config.wrangler(config),
-        sender = config.sender(config);
+  );
 
   @override
   void notify(Event event) {
@@ -42,18 +37,20 @@ class IsolatedNotifier implements Notifier {
   static Future<IsolatedNotifier> spawn(Config config) async {
     final receivePort = ReceivePort();
     final isolate = await Isolate.spawn(
-        _AsyncNotifier$Isolate.run, //
-        Tuple2(receivePort.sendPort, config),
-        debugName: 'AsyncNotifier\$Isolate');
+        _IsolatedNotifier$Isolate.run, Tuple2(receivePort.sendPort, config),
+        paused: false,
+        errorsAreFatal: true,
+        debugName: 'IsolatedNotifier\$Isolate');
     final sendPort = await receivePort.first;
 
     return IsolatedNotifier._(config, isolate, receivePort, sendPort);
   }
 }
 
-extension _AsyncNotifier$Isolate on IsolatedNotifier {
+extension _IsolatedNotifier$Isolate on IsolatedNotifier {
   static late final Wrangler wrangler;
   static late final Sender sender;
+  static late final Telemetry telemetry;
 
   static Future<void> run(Tuple2<SendPort, Config> tuple) async {
     final sendPort = tuple.first;
@@ -63,10 +60,18 @@ extension _AsyncNotifier$Isolate on IsolatedNotifier {
     final config = tuple.second;
     sender = config.sender(config);
     wrangler = config.wrangler(config);
+    telemetry = Telemetry(config);
 
     await for (final Event event in receivePort) {
-      final payload = await wrangler.payload(from: event);
-      await sender.send(payload.toMap());
+      // [todo] this is awful.
+      if (event.reading != null) {
+        telemetry.register(event.reading!); // [todo] this is awful.
+      } else {
+        // [todo] this is all awful.
+        final eventWithTelemetry = event.copyWith(telemetry: telemetry);
+        final payload = await wrangler.payload(event: eventWithTelemetry);
+        await sender.send(payload.toMap());
+      }
     }
   }
 }
