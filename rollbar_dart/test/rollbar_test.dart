@@ -22,7 +22,6 @@ Future<void> main() async {
           environment: 'production',
           codeVersion: '0.23.2',
           package: 'some_package_name',
-          handleUncaughtErrors: true,
           notifier: AsyncNotifier.new,
           sender: (_) => sender);
 

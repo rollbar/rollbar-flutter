@@ -1,4 +1,5 @@
 typedef Predicate<E> = bool Function(E);
+typedef KeyValuePredicate<K, V> = bool Function(K, V);
 typedef Transform<T, E> = T Function(E);
 
 extension IterableExtensions<E> on Iterable<E> {
@@ -52,14 +53,24 @@ extension CompactList<E> on Iterable<E?> {
 }
 
 extension MapExtensions<K, V> on Map<K, V> {
+  /// The value for the given [key], or `null` if [key] is not in the map.
+  ///
+  /// A functional version of `operator []` akin to [Iterable.elementAt].
+  ///
+  /// Some maps allow `null` as a value.
+  /// For those maps, a lookup using this operator cannot distinguish between a
+  /// key not being in the map, and the key being there with a `null` value.
+  /// Methods like [containsKey] or [putIfAbsent] can be used if the distinction
+  /// is important.
+  V? valueFor(K key) => this[key];
+
   /// Returns an list of values for the given list of keys.
   ///
   /// The returned list respect the ordering of the keys.
-  Iterable<V> valuesForKeys(Iterable<K> keys) =>
-      keys.compactMap((key) => this[key]);
+  Iterable<V> valuesForKeys(Iterable<K> keys) => keys.compactMap(valueFor);
 
-  /// Returns a new Map by filtering its elements using the given predicate.
-  Map<K, V> where(bool Function(K, V) p) {
+  /// Returns a new Map by filtering its entries using the given predicate.
+  Map<K, V> where(KeyValuePredicate<K, V> p) {
     Map<K, V> map = {};
 
     forEach((k, v) {
@@ -67,6 +78,61 @@ extension MapExtensions<K, V> on Map<K, V> {
     });
 
     return map;
+  }
+
+  /// Returns a new Map by filtering its keys using the given predicate.
+  Map<K, V> whereKey(Predicate<K> p) {
+    Map<K, V> map = {};
+
+    forEach((k, v) {
+      if (p(k)) map[k] = v;
+    });
+
+    return map;
+  }
+
+  /// Returns a new Map by filtering its values using the given predicate.
+  Map<K, V> whereValue(Predicate<V> p) {
+    Map<K, V> map = {};
+
+    forEach((k, v) {
+      if (p(v)) map[k] = v;
+    });
+
+    return map;
+  }
+
+  bool any(KeyValuePredicate<K, V> p) {
+    final it = entries.iterator;
+    while (it.moveNext()) {
+      if (p(it.current.key, it.current.value)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool anyKey(Predicate<K> p) {
+    final it = entries.iterator;
+    while (it.moveNext()) {
+      if (p(it.current.key)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool anyValue(Predicate<V> p) {
+    final it = entries.iterator;
+    while (it.moveNext()) {
+      if (p(it.current.value)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /// Returns a new non-null Map by filtering out null values in the this Map.

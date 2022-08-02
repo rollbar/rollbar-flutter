@@ -38,16 +38,15 @@ import 'persistable.dart';
 class TableSet<E extends Persistable<UUID>> with SetMixin<E> implements Set<E> {
   final Database database;
 
-  TableSet({bool isPersistent = false})
-      : database =
-            isPersistent ? sqlite3.open('rollbar.db') : sqlite3.openInMemory() {
+  TableSet({Database? database})
+      : database = database ?? sqlite3.openInMemory() {
     final typeDeclarations = keyTypes.fold('', (String acc, kv) {
       return '$acc${kv.key} ${kv.value.sqlTypeDeclaration}, ';
     }).replaceLast(', ', '');
 
-    database.execute(
-      'CREATE TABLE IF NOT EXISTS $tableName ($typeDeclarations)',
-    );
+    this.database.execute(
+          'CREATE TABLE IF NOT EXISTS $tableName ($typeDeclarations)',
+        );
   }
 
   /// The name of the table.

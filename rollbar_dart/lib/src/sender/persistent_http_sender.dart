@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import '../config.dart';
+import '../persistence.dart';
 import 'sender.dart';
 import 'http_sender.dart';
 
@@ -12,12 +13,13 @@ import 'http_sender.dart';
 /// client connectivity issues, temporary server errors, or interruptions.
 @sealed
 @immutable
-class PersistentHttpSender implements Sender {
-  final Config _config;
-  final TableSet<PayloadRecord> _payloadRecords;
+class PersistentHttpSender
+    with Persistence<PayloadRecord>
+    implements Configurable, Sender {
+  @override
+  final Config config;
 
-  PersistentHttpSender(this._config)
-      : _payloadRecords = TableSet(isPersistent: _config.persistPayloads);
+  PersistentHttpSender(this.config);
 
   @override
   Future<bool> send(JsonMap payload) async => sendString(jsonEncode(payload));
@@ -26,17 +28,17 @@ class PersistentHttpSender implements Sender {
   Future<bool> sendString(String payload) async {
     try {
       final newRecord = PayloadRecord(
-          accessToken: _config.accessToken,
-          endpoint: _config.endpoint,
+          accessToken: config.accessToken,
+          endpoint: config.endpoint,
           payload: payload);
 
-      _payloadRecords.add(newRecord);
+      records.add(newRecord);
 
-      for (final record in _payloadRecords) {
+      for (final record in records) {
         final success = await HttpSender.sendRecord(record);
 
         if (success || record.timestamp < DateTime.now().toUtc() - 1.days) {
-          _payloadRecords.remove(record);
+          records.remove(record);
         }
 
         if (!success) return false;

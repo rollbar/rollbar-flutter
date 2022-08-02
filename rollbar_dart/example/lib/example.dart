@@ -11,7 +11,6 @@ void main() async {
   final config = Config(
     accessToken: 'YOUR-ROLLBAR-ACCESSTOKEN',
     package: 'rollbar_dart_example',
-    persistPayloads: true,
   );
 
   await Rollbar.run(config);

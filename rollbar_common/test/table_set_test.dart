@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:rollbar_common/src/extension/function.dart'
@@ -35,29 +34,6 @@ void main() {
   });
 
   group('TableSet tests', () {
-    const databaseFilename = 'rollbar.db';
-
-    setUp(() {
-      final file = File(databaseFilename);
-      if (file.existsSync()) file.deleteSync();
-    });
-
-    tearDown(() {
-      final file = File(databaseFilename);
-      if (file.existsSync()) file.deleteSync();
-    });
-
-    test('Persistent vs non-persistent repository', () async {
-      final file = File(databaseFilename);
-      expect(file.existsSync(), false);
-
-      TableSet<PayloadRecord>();
-      expect(file.existsSync(), false);
-
-      TableSet<PayloadRecord>(isPersistent: true);
-      expect(file.existsSync(), true);
-    });
-
     test('Tables are aptly named', () async {
       expect(
         TableSet<PayloadRecord>().tableName,
@@ -247,7 +223,7 @@ void main() {
   });
 
   test('Is sortable', () async {
-    final records = TableSet<PayloadRecord>(isPersistent: false);
+    final records = TableSet<PayloadRecord>();
     final originalList = [
       _Record.generate(timestamp: DateTime(0).toUtc()),
       _Record.generate(timestamp: DateTime.now().toUtc() - 1.days),
