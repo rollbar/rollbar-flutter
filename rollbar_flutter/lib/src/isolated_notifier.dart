@@ -4,13 +4,12 @@ import 'dart:isolate';
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar_dart.dart';
-import 'async_notifier.dart';
 
 /// An asynchronous notifier that leverages Dart's Isolated execution contexts
 /// to achieve asynchrony via a separate thread.
 @sealed
 @immutable
-class IsolatedNotifier implements AsyncNotifier {
+class IsolatedNotifier implements Notifier {
   @override
   final Sender sender;
 

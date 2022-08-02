@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import '../rollbar.dart';
-import 'notifier/isolated_notifier.dart';
+import 'notifier/async_notifier.dart';
 import 'wrangler/data_wrangler.dart';
 import 'transformer/noop_transformer.dart';
 import 'sender/persistent_http_sender.dart';
@@ -37,7 +37,7 @@ class Config {
     this.persistPayloads = true,
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
-    this.notifier = IsolatedNotifier.spawn,
+    this.notifier = AsyncNotifier.new,
     this.wrangler = DataWrangler.new,
     this.transformer = NoopTransformer.new,
     this.sender = PersistentHttpSender.new,
@@ -53,9 +53,9 @@ class Config {
     bool? persistPayloads,
     bool? handleUncaughtErrors,
     bool? includePlatformLogs,
+    FutureOr<Notifier> Function(Config)? notifier,
     Transformer Function(Config)? transformer,
     Sender Function(Config)? sender,
-    Notifier Function(Config)? notifier,
   }) =>
       Config(
         accessToken: accessToken ?? this.accessToken,
@@ -67,9 +67,9 @@ class Config {
         persistPayloads: persistPayloads ?? this.persistPayloads,
         handleUncaughtErrors: handleUncaughtErrors ?? this.handleUncaughtErrors,
         includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
+        notifier: notifier ?? this.notifier,
         transformer: transformer ?? this.transformer,
         sender: sender ?? this.sender,
-        notifier: notifier ?? this.notifier,
       );
 
   /// Converts the [Map] instance into a [Config] object.
