@@ -55,7 +55,7 @@ extension _Message on Iterable<Trace> {
   /// attaches the given [extraTraces] to this collection of traces.
   Iterable<Trace> attach(Iterable<Trace> extraTraces, bool append) =>
       (extraTraces.tryFirst?.exception.message)
-          .map((message) => 'PlatformException(error, \'$message\')')
+          .map((message) => 'PlatformException(error, "$message")')
           .map(replaceExceptionMessages)
           .map(append ? extraTraces.followedBy : identity)
           .or(this);

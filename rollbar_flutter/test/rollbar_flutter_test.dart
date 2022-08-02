@@ -73,11 +73,11 @@ void main() {
         sender: (_) => sender);
 
     await RollbarFlutter.run(config, () async {
-      final exception = androidPlatformException(
+      final platformException = androidPlatformException(
         topFrameMethod: 'platformSpecificStuff',
       );
 
-      await Rollbar.error(exception, StackTrace.empty);
+      await Rollbar.error(platformException, StackTrace.empty);
 
       final payload = verify(await sender.send(captureAny)).captured.single;
       expect(payload['data']['framework'], equals('flutter'));
@@ -86,10 +86,25 @@ void main() {
       expect(platformPayload, isNotNull);
       expect(
           platformPayload['data']['notifier']['name'], equals('rollbar-java'));
+      expect(platformPayload['data']['notifier']['version'], equals('0.0.1'));
+
+      final exception = platformPayload['data']['body']['trace']['exception'];
+      expect(exception['description'], equals('Invalid counter state: 1'));
+      expect(exception['message'], equals('Invalid counter state: 1'));
+      expect(exception['class'], equals('java.lang.IllegalStateException'));
 
       final frames = platformPayload['data']['body']['trace']['frames'];
       expect(frames.length, equals(2));
+      expect(frames[0]['filename'], equals('MainActivity.java'));
       expect(frames[0]['method'], equals('platformSpecificStuff'));
+      expect(frames[0]['lineno'], equals(47));
+      expect(frames[0]['class_name'],
+          equals('com.rollbar.flutter.example.MainActivity'));
+      expect(frames[1]['filename'], equals('MainActivity.java'));
+      expect(frames[1]['method'], equals('onMethodCall'));
+      expect(frames[1]['lineno'], equals(37));
+      expect(frames[1]['class_name'],
+          equals('com.rollbar.flutter.example.MainActivity'));
     });
   });
 }

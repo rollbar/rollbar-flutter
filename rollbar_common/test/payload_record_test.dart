@@ -28,13 +28,11 @@ void main() {
       expect(kt.containsKey('id'), isTrue);
       expect(kt.containsKey('accessToken'), isTrue);
       expect(kt.containsKey('endpoint'), isTrue);
-      expect(kt.containsKey('config'), isTrue);
       expect(kt.containsKey('payload'), isTrue);
       expect(kt.containsKey('timestamp'), isTrue);
 
       expect(kt['accessToken']?.sqlTypeDeclaration, equals('TEXT NOT NULL'));
       expect(kt['endpoint']?.sqlTypeDeclaration, equals('TEXT NOT NULL'));
-      expect(kt['config']?.sqlTypeDeclaration, equals('TEXT NOT NULL'));
       expect(kt['payload']?.sqlTypeDeclaration, equals('TEXT NOT NULL'));
       expect(kt['timestamp']?.sqlTypeDeclaration, equals('INTEGER NOT NULL'));
       expect(kt['id']?.sqlTypeDeclaration,
@@ -65,13 +63,11 @@ void main() {
       expect(kt.containsKey('id'), isTrue);
       expect(kt.containsKey('accessToken'), isTrue);
       expect(kt.containsKey('endpoint'), isTrue);
-      expect(kt.containsKey('config'), isTrue);
       expect(kt.containsKey('payload'), isTrue);
       expect(kt.containsKey('timestamp'), isTrue);
 
       expect(kt['accessToken']?.sqlTypeDeclaration, equals('TEXT NOT NULL'));
       expect(kt['endpoint']?.sqlTypeDeclaration, equals('TEXT NOT NULL'));
-      expect(kt['config']?.sqlTypeDeclaration, equals('TEXT NOT NULL'));
       expect(kt['payload']?.sqlTypeDeclaration, equals('TEXT NOT NULL'));
       expect(kt['timestamp']?.sqlTypeDeclaration, equals('INTEGER NOT NULL'));
       expect(kt['id']?.sqlTypeDeclaration,
