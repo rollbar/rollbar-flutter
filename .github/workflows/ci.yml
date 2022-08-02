@@ -32,7 +32,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-deps-${{ matrix.flutter_version }}-
     - name: Enable pana
-      run: flutter pub global activate pana 0.21.12
+      run: flutter pub global activate pana
     - name: Show Flutter environment
       run: |
         which flutter
