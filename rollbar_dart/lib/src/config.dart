@@ -34,7 +34,7 @@ class Config {
     this.framework = 'dart',
     this.codeVersion = 'main',
     this.package,
-    this.persistPayloads = false,
+    this.persistPayloads = true,
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
     this.notifier = IsolatedNotifier.spawn,
