@@ -17,6 +17,7 @@ import 'wrangler.dart';
 /// Prepares the payload data in a Rollbar-friendly format for the [Sender].
 @sealed
 @immutable
+@internal
 class DataWrangler implements Wrangler {
   @override
   final Transformer transformer;

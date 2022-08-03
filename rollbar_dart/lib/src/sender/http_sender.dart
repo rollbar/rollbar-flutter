@@ -9,11 +9,10 @@ import 'package:rollbar_common/rollbar_common.dart';
 import '../data/response.dart';
 import 'sender.dart';
 
-typedef HttpHeaders = Map<String, String>;
-
 /// HTTP [Sender] implementation.
 @sealed
 @immutable
+@internal
 class HttpSender implements Sender {
   final Uri _endpoint;
   final HttpHeaders _headers;

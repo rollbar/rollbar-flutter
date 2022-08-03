@@ -1,5 +1,3 @@
-import 'dart:core';
-
 /// This extension allows Duration to be created straight from the integer.
 ///
 /// ```dart

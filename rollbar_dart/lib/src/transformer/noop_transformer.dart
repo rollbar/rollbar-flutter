@@ -7,6 +7,7 @@ import 'transformer.dart';
 
 @sealed
 @immutable
+@internal
 class NoopTransformer implements Transformer {
   const NoopTransformer(Config _);
 

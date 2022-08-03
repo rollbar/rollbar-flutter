@@ -3,14 +3,20 @@ import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
-import 'package:rollbar_dart/rollbar_dart.dart';
 
+import '../data/payload/reading.dart';
+import '../sender/sender.dart';
+import '../wrangler/wrangler.dart';
+import '../config.dart';
+import '../occurrence.dart';
+import '../telemetry.dart';
 import 'async_notifier.dart';
 
 /// An asynchronous notifier that leverages Dart's Isolated execution contexts
 /// to achieve asynchrony via a separate thread.
 @sealed
 @immutable
+@internal
 class IsolatedNotifier extends AsyncNotifier {
   final SendPort _sendPort;
   final ReceivePort _receivePort;

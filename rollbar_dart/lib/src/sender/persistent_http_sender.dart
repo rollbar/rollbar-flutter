@@ -12,6 +12,7 @@ import 'http_sender.dart';
 /// client connectivity issues, temporary server errors, or interruptions.
 @sealed
 @immutable
+@internal
 class PersistentHttpSender
     with Persistence<PayloadRecord>
     implements Configurable, Sender {

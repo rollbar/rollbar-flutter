@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
-import 'package:rollbar_dart/src/notifier/notifier.dart';
 
+import 'data/payload/reading.dart';
+import 'notifier/notifier.dart';
 import 'config.dart';
 import 'occurrence.dart';
-import 'data/payload/reading.dart';
 
 @sealed
 class Rollbar {

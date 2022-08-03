@@ -1,10 +1,18 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:rollbar_dart/rollbar_dart.dart';
+
+import '../data/payload/reading.dart';
+import '../sender/sender.dart';
+import '../wrangler/wrangler.dart';
+import '../config.dart';
+import '../occurrence.dart';
+import '../telemetry.dart';
+import 'notifier.dart';
 
 @sealed
 @immutable
+@internal
 class AsyncNotifier implements Notifier {
   @override
   final Sender sender;

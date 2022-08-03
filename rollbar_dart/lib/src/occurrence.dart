@@ -6,7 +6,6 @@ import 'telemetry.dart';
 
 @sealed
 @immutable
-@internal
 class Occurrence {
   final Level level;
   final dynamic error;

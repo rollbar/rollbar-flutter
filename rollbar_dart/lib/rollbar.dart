@@ -6,7 +6,6 @@ export 'src/notifier/notifier.dart' show Notifier;
 export 'src/wrangler/wrangler.dart' show Wrangler;
 export 'src/transformer/transformer.dart' show Transformer;
 export 'src/sender/sender.dart' show Sender;
-export 'src/telemetry.dart' show Telemetry;
 
 export 'src/data/payload/client.dart' show Client;
 export 'src/data/payload/payload.dart' show Payload;
@@ -17,7 +16,6 @@ export 'src/data/payload/frame.dart' show Frame;
 export 'src/data/payload/exception_info.dart' show ExceptionInfo;
 
 export 'src/config.dart' show Config;
-export 'src/data/response.dart' show Response;
 export 'src/occurrence.dart' show Occurrence;
 
 export 'src/connectivity_monitor.dart';

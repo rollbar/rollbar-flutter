@@ -1,6 +1,9 @@
 import 'dart:async';
 
-import 'package:rollbar_dart/rollbar_dart.dart';
+import '../sender/sender.dart';
+import '../wrangler/wrangler.dart';
+import '../telemetry.dart';
+import '../occurrence.dart';
 
 abstract class Notifier {
   // notifier version to be updated with each new release: [todo] automate
