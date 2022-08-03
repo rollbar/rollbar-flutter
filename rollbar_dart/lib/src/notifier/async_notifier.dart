@@ -22,13 +22,12 @@ class AsyncNotifier implements Notifier {
 
   @override
   FutureOr<void> notify(Event event) async {
-    // [todo] this is awful.
     if (event.reading != null) {
-      telemetry.register(event.reading!); // [todo] this is awful.
+      telemetry.register(event.reading as Reading);
     } else {
-      // [todo] this is all awful.
-      final eventWithTelemetry = event.copyWith(telemetry: telemetry);
-      final payload = await wrangler.payload(event: eventWithTelemetry);
+      final payload = await wrangler.payload(
+        event: event.copyWith(telemetry: telemetry),
+      );
       await sender.send(payload.toMap());
     }
   }

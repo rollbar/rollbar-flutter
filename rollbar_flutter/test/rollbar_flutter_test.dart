@@ -55,7 +55,8 @@ void main() {
       expect(init.arguments['framework'], equals(config.framework));
       expect(init.arguments['codeVersion'], equals(config.codeVersion));
       expect(init.arguments['package'], equals(config.package));
-      expect(init.arguments['persistPayloads'], equals(config.persistPayloads));
+      expect(init.arguments['persistenceLifetime'],
+          equals(config.persistenceLifetime));
       expect(init.arguments['handleUncaughtErrors'],
           equals(config.handleUncaughtErrors));
       expect(init.arguments['includePlatformLogs'],

@@ -24,9 +24,9 @@ Future<void> main() async {
       expect(file.existsSync(), false);
 
       await Rollbar.run(Config(
-          accessToken: 'SomeAccessToken',
-          notifier: AsyncNotifier.new,
-          persistPayloads: true));
+        accessToken: 'SomeAccessToken',
+        notifier: AsyncNotifier.new,
+      ));
 
       expect(file.existsSync(), true);
       file.deleteSync();
@@ -43,7 +43,7 @@ Future<void> main() async {
       await Rollbar.run(Config(
           accessToken: 'SomeAccessToken',
           notifier: AsyncNotifier.new,
-          persistPayloads: false));
+          persistenceLifetime: Duration.zero));
 
       expect(file.existsSync(), false);
     });

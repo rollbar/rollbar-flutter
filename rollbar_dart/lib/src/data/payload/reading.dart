@@ -38,9 +38,15 @@ class Reading
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'log', level: level, source: source, body: {
-        'body': {'message': message, ...extra}
-      });
+      Reading._(
+        type: 'log',
+        level: level,
+        source: source,
+        body: {
+          'message': message,
+          ...extra,
+        },
+      );
 
   factory Reading.error(
     String message, {
@@ -48,9 +54,15 @@ class Reading
     Level level = Level.error,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'error', level: level, source: source, body: {
-        'body': {'message': message, ...extra}
-      });
+      Reading._(
+        type: 'error',
+        level: level,
+        source: source,
+        body: {
+          'message': message,
+          ...extra,
+        },
+      );
 
   factory Reading.network(
     Uri url, {
@@ -60,14 +72,17 @@ class Reading
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'network', level: level, source: source, body: {
-        'body': {
+      Reading._(
+        type: 'network',
+        level: level,
+        source: source,
+        body: {
           'url': url.toString(),
           'method': method.name,
           'status_code': statusCode,
-          ...extra
-        }
-      });
+          ...extra,
+        },
+      );
 
   factory Reading.connectivity({
     required String status,
@@ -75,9 +90,15 @@ class Reading
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'connectivity', level: level, source: source, body: {
-        'body': {'change': status, ...extra}
-      });
+      Reading._(
+        type: 'connectivity',
+        level: level,
+        source: source,
+        body: {
+          'change': status,
+          ...extra,
+        },
+      );
 
   factory Reading.navigation({
     required String from,
@@ -86,9 +107,16 @@ class Reading
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'navigation', level: level, source: source, body: {
-        'body': {'from': from, 'to': to, ...extra}
-      });
+      Reading._(
+        type: 'navigation',
+        level: level,
+        source: source,
+        body: {
+          'from': from,
+          'to': to,
+          ...extra,
+        },
+      );
 
   factory Reading.widget({
     required String element,
@@ -96,9 +124,15 @@ class Reading
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'dom', level: level, source: source, body: {
-        'body': {'element': element, ...extra}
-      });
+      Reading._(
+        type: 'dom',
+        level: level,
+        source: source,
+        body: {
+          'element': element,
+          ...extra,
+        },
+      );
 
   @override
   JsonMap toMap() => {

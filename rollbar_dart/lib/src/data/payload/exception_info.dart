@@ -17,10 +17,10 @@ class ExceptionInfo
     this.description,
   });
 
-  factory ExceptionInfo.fromMap(JsonMap attributes) => ExceptionInfo(
-      type: attributes.type,
-      message: attributes.message,
-      description: attributes.description);
+  factory ExceptionInfo.fromMap(JsonMap map) => ExceptionInfo(
+      type: map['class'],
+      message: map['message'],
+      description: map['description']);
 
   ExceptionInfo copyWith({
     String? type,
@@ -42,10 +42,4 @@ class ExceptionInfo
         'message': message,
         'description': description,
       }.compact();
-}
-
-extension _Attributes on JsonMap {
-  String get type => this['class'];
-  String get message => this['message'];
-  String? get description => this['description'];
 }

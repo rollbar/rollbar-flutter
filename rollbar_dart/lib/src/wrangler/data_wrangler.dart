@@ -22,7 +22,7 @@ class DataWrangler implements Wrangler {
   final Transformer transformer;
   final Config config;
 
-  DataWrangler(this.config) : transformer = config.transformer.call(config);
+  DataWrangler(this.config) : transformer = config.transformer(config);
 
   @override
   Future<Payload> payload({required Event event}) async {
@@ -36,21 +36,19 @@ extension _Data on Data {
   static Future<Data> from({
     required Event event,
     required Config config,
-  }) async {
-    return Data(
-      body: _Body.from(event: event),
-      client: _Client.fromPlatform(),
-      codeVersion: config.codeVersion,
-      environment: config.environment,
-      framework: config.framework,
-      language: 'dart',
-      level: event.level,
-      notifier: {'version': Notifier.version, 'name': Notifier.name},
-      platform: Platform.operatingSystem,
-      server: {'root': config.package},
-      timestamp: DateTime.now().toUtc(),
-    );
-  }
+  }) async =>
+      Data(
+          body: _Body.from(event: event),
+          client: _Client.fromPlatform(),
+          codeVersion: config.codeVersion,
+          environment: config.environment,
+          framework: config.framework,
+          language: 'dart',
+          level: event.level,
+          notifier: {'version': Notifier.version, 'name': Notifier.name},
+          platform: Platform.operatingSystem,
+          server: {'root': config.package},
+          timestamp: DateTime.now().toUtc());
 }
 
 extension _Body on Body {

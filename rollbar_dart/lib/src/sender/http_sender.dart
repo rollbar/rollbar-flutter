@@ -26,12 +26,11 @@ class HttpSender implements Sender {
           'X-Rollbar-Access-Token': accessToken,
         };
 
-  static Future<bool> sendRecord(PayloadRecord record) async {
-    return await HttpSender(
-      endpoint: record.endpoint,
-      accessToken: record.accessToken,
-    ).sendString(record.payload);
-  }
+  static Future<bool> sendRecord(PayloadRecord record) async =>
+      await HttpSender(
+        endpoint: record.endpoint,
+        accessToken: record.accessToken,
+      ).sendString(record.payload);
 
   /// Sends the provided payload as the body of POST request to the configured
   /// endpoint.

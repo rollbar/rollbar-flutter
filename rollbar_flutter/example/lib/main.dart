@@ -66,6 +66,8 @@ class MyHomePageState extends State<MyHomePage> {
       batteryLevel = 'Battery at $level%.';
     } on PlatformException catch (e, stackTrace) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
+      Rollbar.telemetry(Reading.error(
+          'Got a PlatformException while trying to get the battery level.'));
       Rollbar.warn(e, stackTrace);
     }
 
@@ -83,11 +85,16 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void incrementCounter() {
+    Rollbar.telemetry(Reading.widget(
+      element: 'incrementCounter',
+      extra: const {'action': 'tapped'},
+    ));
+
     setState(() {
       if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
       } else {
-        Rollbar.log('Counter incremented to $_counter');
+        Rollbar.telemetry(Reading.log('Counter incremented to $_counter'));
       }
     });
   }

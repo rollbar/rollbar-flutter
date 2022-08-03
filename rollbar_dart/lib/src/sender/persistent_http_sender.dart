@@ -33,8 +33,9 @@ class PersistentHttpSender
 
     for (final record in records) {
       final success = await HttpSender.sendRecord(record);
+      final expiration = DateTime.now().toUtc() - config.persistenceLifetime;
 
-      if (success || record.timestamp < DateTime.now().toUtc() - 1.days) {
+      if (success || record.timestamp < expiration) {
         records.remove(record);
       }
 

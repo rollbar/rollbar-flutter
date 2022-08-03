@@ -25,7 +25,7 @@ class Config implements Serializable {
   final String codeVersion;
   final String? package;
   final String persistencePath;
-  final bool persistPayloads;
+  final Duration persistenceLifetime;
   final bool handleUncaughtErrors;
   final bool includePlatformLogs;
 
@@ -42,10 +42,10 @@ class Config implements Serializable {
     this.codeVersion = 'main',
     this.package,
     this.persistencePath = './',
-    this.persistPayloads = true,
+    this.persistenceLifetime = const Duration(days: 1),
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
-    this.notifier = IsolatedNotifier.spawn, // AsyncNotifier.new,
+    this.notifier = IsolatedNotifier.spawn,
     this.wrangler = DataWrangler.new,
     this.transformer = NoopTransformer.new,
     this.sender = PersistentHttpSender.new,
@@ -59,7 +59,7 @@ class Config implements Serializable {
     String? codeVersion,
     String? package,
     String? persistencePath,
-    bool? persistPayloads,
+    Duration? persistenceLifetime,
     bool? handleUncaughtErrors,
     bool? includePlatformLogs,
     FutureOr<Notifier> Function(Config)? notifier,
@@ -75,7 +75,7 @@ class Config implements Serializable {
         codeVersion: codeVersion ?? this.codeVersion,
         package: package ?? this.package,
         persistencePath: persistencePath ?? this.persistencePath,
-        persistPayloads: persistPayloads ?? this.persistPayloads,
+        persistenceLifetime: persistenceLifetime ?? this.persistenceLifetime,
         handleUncaughtErrors: handleUncaughtErrors ?? this.handleUncaughtErrors,
         includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
         notifier: notifier ?? this.notifier,
@@ -93,7 +93,7 @@ class Config implements Serializable {
       codeVersion: map['codeVersion'],
       package: map['package'],
       persistencePath: map['persistencePath'],
-      persistPayloads: map['persistPayloads'],
+      persistenceLifetime: Duration(seconds: map['persistenceLifetime']),
       handleUncaughtErrors: map['handleUncaughtErrors'],
       includePlatformLogs: map['includePlatformLogs']);
 
@@ -106,7 +106,7 @@ class Config implements Serializable {
         'codeVersion': codeVersion,
         'package': package,
         'persistencePath': persistencePath,
-        'persistPayloads': persistPayloads,
+        'persistenceLifetime': persistenceLifetime.inSeconds,
         'handleUncaughtErrors': handleUncaughtErrors,
         'includePlatformLogs': includePlatformLogs,
       };

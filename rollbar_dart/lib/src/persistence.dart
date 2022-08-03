@@ -14,11 +14,11 @@ mixin Persistence<Record extends Persistable<UUID>> implements Configurable {
 
   late final TableSet<Record> records = TableSet(database: () {
     try {
-      _database ??= config.persistPayloads
+      _database ??= config.persistenceLifetime > Duration.zero
           ? sqlite3.open('${config.persistencePath}/rollbar.db')
           : sqlite3.openInMemory();
     } on SqliteException catch (error, stackTrace) {
-      log('Exception opening sqlite3 database',
+      log('Exception opening sqlite3 database to persist for ${config.persistenceLifetime}',
           time: DateTime.now(),
           level: Level.warning.value,
           name: runtimeType.toString(),
