@@ -48,15 +48,13 @@ void main() {
 
       final init = initCalls[0];
       // These are the arguments the our platform plugin expects:
-      expect(init.arguments.length, equals(9));
+      expect(init.arguments.length, equals(10));
       expect(init.arguments['accessToken'], equals(config.accessToken));
       expect(init.arguments['endpoint'], equals(config.endpoint));
       expect(init.arguments['environment'], equals(config.environment));
       expect(init.arguments['framework'], equals(config.framework));
       expect(init.arguments['codeVersion'], equals(config.codeVersion));
       expect(init.arguments['package'], equals(config.package));
-      expect(init.arguments['persistenceLifetime'],
-          equals(config.persistenceLifetime));
       expect(init.arguments['handleUncaughtErrors'],
           equals(config.handleUncaughtErrors));
       expect(init.arguments['includePlatformLogs'],
