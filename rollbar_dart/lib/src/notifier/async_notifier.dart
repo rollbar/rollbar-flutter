@@ -21,7 +21,7 @@ class AsyncNotifier implements Notifier {
         telemetry = Telemetry(config);
 
   @override
-  FutureOr<void> notify(Event event) async {
+  FutureOr<void> notify(Occurrence event) async {
     if (event.reading != null) {
       telemetry.register(event.reading as Reading);
     } else {

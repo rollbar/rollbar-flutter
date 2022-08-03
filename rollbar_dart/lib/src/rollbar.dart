@@ -5,7 +5,7 @@ import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/src/notifier/notifier.dart';
 
 import 'config.dart';
-import 'event.dart';
+import 'occurrence.dart';
 import 'data/payload/reading.dart';
 
 @sealed
@@ -32,14 +32,14 @@ class Rollbar {
   /// Rollbar.log('Some message');
   /// ```
   static FutureOr<void> log(String message, {Level level = Level.info}) =>
-      current._notifier.notify(Event(
+      current._notifier.notify(Occurrence(
         level: level,
         message: message,
       ));
 
   /// Sends an error as an occurrence, with [Level.debug] level.
   static FutureOr<void> debug(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
+      current._notifier.notify(Occurrence(
         level: Level.debug,
         error: error,
         stackTrace: stackTrace,
@@ -47,7 +47,7 @@ class Rollbar {
 
   /// Sends an error as an occurrence, with [Level.info] level.
   static FutureOr<void> info(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
+      current._notifier.notify(Occurrence(
         level: Level.info,
         error: error,
         stackTrace: stackTrace,
@@ -55,7 +55,7 @@ class Rollbar {
 
   /// Sends an error as an occurrence, with [Level.warning] level.
   static FutureOr<void> warn(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
+      current._notifier.notify(Occurrence(
         level: Level.warning,
         error: error,
         stackTrace: stackTrace,
@@ -63,7 +63,7 @@ class Rollbar {
 
   /// Sends an error as an occurrence, with [Level.error] level.
   static FutureOr<void> error(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
+      current._notifier.notify(Occurrence(
         level: Level.error,
         error: error,
         stackTrace: stackTrace,
@@ -71,14 +71,14 @@ class Rollbar {
 
   /// Sends an error as an occurrence, with [Level.critical] level.
   static FutureOr<void> critical(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
+      current._notifier.notify(Occurrence(
         level: Level.critical,
         error: error,
         stackTrace: stackTrace,
       ));
 
   static FutureOr<void> telemetry(Reading reading) {
-    current._notifier.notify(Event(
+    current._notifier.notify(Occurrence(
       reading: reading,
     ));
   }

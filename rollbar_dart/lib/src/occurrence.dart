@@ -6,7 +6,8 @@ import 'telemetry.dart';
 
 @sealed
 @immutable
-class Event {
+@internal
+class Occurrence {
   final Level level;
   final dynamic error;
   final StackTrace? stackTrace;
@@ -14,7 +15,7 @@ class Event {
   final Reading? reading;
   final Telemetry? telemetry;
 
-  const Event({
+  const Occurrence({
     this.level = Level.info,
     this.error,
     this.stackTrace,
@@ -23,7 +24,7 @@ class Event {
     this.telemetry,
   });
 
-  Event copyWith({
+  Occurrence copyWith({
     Level? level,
     dynamic error,
     StackTrace? stackTrace,
@@ -31,7 +32,7 @@ class Event {
     Reading? reading,
     Telemetry? telemetry,
   }) =>
-      Event(
+      Occurrence(
           level: level ?? this.level,
           error: error ?? this.error,
           stackTrace: stackTrace ?? this.stackTrace,
@@ -51,7 +52,7 @@ class Event {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Event &&
+      (other is Occurrence &&
           other.level == level &&
           other.error == error &&
           other.stackTrace == stackTrace &&

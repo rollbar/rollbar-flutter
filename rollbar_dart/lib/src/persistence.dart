@@ -9,6 +9,7 @@ import 'config.dart';
 /// A mixin that provides a ready-to-use lazily initialized [TableSet] that
 /// leverages a shared static sqlite3 [Database].
 @immutable
+@internal
 mixin Persistence<Record extends Persistable<UUID>> implements Configurable {
   static Database? _database;
 

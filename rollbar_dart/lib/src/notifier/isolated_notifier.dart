@@ -24,7 +24,7 @@ class IsolatedNotifier extends AsyncNotifier {
   );
 
   @override
-  void notify(Event event) {
+  void notify(Occurrence event) {
     _sendPort.send(event);
   }
 
@@ -62,7 +62,7 @@ extension _IsolatedNotifier$Isolate on IsolatedNotifier {
     wrangler = config.wrangler(config);
     telemetry = Telemetry(config);
 
-    await for (final Event event in receivePort) {
+    await for (final Occurrence event in receivePort) {
       if (event.reading != null) {
         telemetry.register(event.reading as Reading);
       } else {

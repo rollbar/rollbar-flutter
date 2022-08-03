@@ -19,7 +19,7 @@ class PlatformTransformer implements Transformer {
   PlatformTransformer({this.wrapped, this.append = false});
 
   @override
-  Future<Data> transform(Data data, {required Event event}) async {
+  Future<Data> transform(Data data, {required Occurrence event}) async {
     final error = event.error;
     if (defaultTargetPlatform.isAndroid &&
         error is PlatformException &&

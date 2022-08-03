@@ -106,7 +106,7 @@ class ExpandableTransformer implements Transformer {
   const ExpandableTransformer(Config _);
 
   @override
-  Future<Data> transform(Data data, {required Event event}) async {
+  Future<Data> transform(Data data, {required Occurrence event}) async {
     expect(event.error, TypeMatcher<ExpandableException>());
 
     final report = data.body.report;

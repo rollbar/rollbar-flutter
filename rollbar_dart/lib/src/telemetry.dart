@@ -9,6 +9,7 @@ import 'config.dart';
 
 @sealed
 @immutable
+@internal
 class Telemetry with Persistence<ReadingRecord> implements Configurable {
   @override
   final Config config;

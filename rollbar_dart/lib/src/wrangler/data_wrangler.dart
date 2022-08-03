@@ -8,7 +8,7 @@ import '../data/payload/client.dart';
 import '../data/payload/data.dart';
 import '../data/payload/exception_info.dart';
 import '../data/payload/payload.dart';
-import '../event.dart';
+import '../occurrence.dart';
 import '../config.dart';
 import '../transformer/transformer.dart';
 import '../notifier/notifier.dart';
@@ -25,7 +25,7 @@ class DataWrangler implements Wrangler {
   DataWrangler(this.config) : transformer = config.transformer(config);
 
   @override
-  Future<Payload> payload({required Event event}) async {
+  Future<Payload> payload({required Occurrence event}) async {
     final data = await _Data.from(event: event, config: config);
     final transformedData = await transformer.transform(data, event: event);
     return Payload(data: transformedData);
@@ -34,7 +34,7 @@ class DataWrangler implements Wrangler {
 
 extension _Data on Data {
   static Future<Data> from({
-    required Event event,
+    required Occurrence event,
     required Config config,
   }) async =>
       Data(
@@ -52,7 +52,7 @@ extension _Data on Data {
 }
 
 extension _Body on Body {
-  static Body from({required Event event}) {
+  static Body from({required Occurrence event}) {
     final error = event.error, message = event.message;
 
     if (error != null) {

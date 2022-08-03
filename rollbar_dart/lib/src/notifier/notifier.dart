@@ -11,6 +11,6 @@ abstract class Notifier {
   Wrangler get wrangler;
   Telemetry get telemetry;
 
-  FutureOr<void> notify(Event event);
+  FutureOr<void> notify(Occurrence event);
   FutureOr<void> dispose();
 }
