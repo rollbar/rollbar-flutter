@@ -4,19 +4,18 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import '../rollbar.dart';
-import 'notifier/async_notifier.dart';
 import 'notifier/isolated_notifier.dart';
 import 'wrangler/data_wrangler.dart';
 import 'transformer/noop_transformer.dart';
 import 'sender/persistent_http_sender.dart';
 
 /// The class of types that are [Configurable] through a [Config] instance.
-@immutable
 abstract class Configurable {
   Config get config;
 }
 
 /// Configuration for the [Rollbar] notifier.
+@sealed
 @immutable
 class Config implements Serializable {
   final String accessToken;
@@ -25,6 +24,7 @@ class Config implements Serializable {
   final String framework;
   final String codeVersion;
   final String? package;
+  final String persistencePath;
   final bool persistPayloads;
   final bool handleUncaughtErrors;
   final bool includePlatformLogs;
@@ -41,6 +41,7 @@ class Config implements Serializable {
     this.framework = 'dart',
     this.codeVersion = 'main',
     this.package,
+    this.persistencePath = './',
     this.persistPayloads = true,
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
@@ -57,6 +58,7 @@ class Config implements Serializable {
     String? framework,
     String? codeVersion,
     String? package,
+    String? persistencePath,
     bool? persistPayloads,
     bool? handleUncaughtErrors,
     bool? includePlatformLogs,
@@ -72,6 +74,7 @@ class Config implements Serializable {
         framework: framework ?? this.framework,
         codeVersion: codeVersion ?? this.codeVersion,
         package: package ?? this.package,
+        persistencePath: persistencePath ?? this.persistencePath,
         persistPayloads: persistPayloads ?? this.persistPayloads,
         handleUncaughtErrors: handleUncaughtErrors ?? this.handleUncaughtErrors,
         includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
@@ -89,6 +92,7 @@ class Config implements Serializable {
       framework: map['framework'],
       codeVersion: map['codeVersion'],
       package: map['package'],
+      persistencePath: map['persistencePath'],
       persistPayloads: map['persistPayloads'],
       handleUncaughtErrors: map['handleUncaughtErrors'],
       includePlatformLogs: map['includePlatformLogs']);
@@ -101,6 +105,7 @@ class Config implements Serializable {
         'framework': framework,
         'codeVersion': codeVersion,
         'package': package,
+        'persistencePath': persistencePath,
         'persistPayloads': persistPayloads,
         'handleUncaughtErrors': handleUncaughtErrors,
         'includePlatformLogs': includePlatformLogs,

@@ -13,7 +13,7 @@ Future<void> main() async {
       accessToken: '71ec6c76a22f46f0be567c633a3fb894',
       package: 'rollbar_flutter_example');
 
-  await RollbarFlutter.run(config, () async {
+  await RollbarFlutter.run(config, () {
     Rollbar.log('Rollbar initialized');
     runApp(const MyApp());
   });

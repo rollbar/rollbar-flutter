@@ -15,7 +15,7 @@ mixin Persistence<Record extends Persistable<UUID>> implements Configurable {
   late final TableSet<Record> records = TableSet(database: () {
     try {
       _database ??= config.persistPayloads
-          ? sqlite3.open('rollbar.db')
+          ? sqlite3.open('${config.persistencePath}/rollbar.db')
           : sqlite3.openInMemory();
     } on SqliteException catch (error, stackTrace) {
       log('Exception opening sqlite3 database',
