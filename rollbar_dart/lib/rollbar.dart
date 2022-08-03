@@ -1,6 +1,6 @@
 library rollbar;
 
-export 'src/rollbar.dart';
+export 'src/rollbar.dart' show Rollbar;
 
 export 'src/notifier/notifier.dart' show Notifier;
 export 'src/wrangler/wrangler.dart' show Wrangler;
