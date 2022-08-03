@@ -17,16 +17,17 @@ Future<void> main() async {
     tearDown(() {});
 
     test('Persistent database', () async {
-      const databaseFilename = 'rollbar.db';
+      const config = Config(
+        accessToken: 'SomeAccessToken',
+        notifier: AsyncNotifier.new,
+      );
 
-      final file = File(databaseFilename);
+      final file = File('${config.persistencePath}/rollbar.db');
       if (file.existsSync()) file.deleteSync();
       expect(file.existsSync(), false);
 
-      await Rollbar.run(Config(
-        accessToken: 'SomeAccessToken',
-        notifier: AsyncNotifier.new,
-      ));
+      await Rollbar.run(config);
+      Rollbar.telemetry(Reading.log('Triggered database creation.'));
 
       expect(file.existsSync(), true);
       file.deleteSync();
@@ -34,16 +35,17 @@ Future<void> main() async {
     });
 
     test('In-memory database', () async {
-      const databaseFilename = 'rollbar.db';
+      const config = Config(
+          accessToken: 'SomeAccessToken',
+          notifier: AsyncNotifier.new,
+          persistenceLifetime: Duration.zero);
 
-      final file = File(databaseFilename);
+      final file = File('${config.persistencePath}/rollbar.db');
       if (file.existsSync()) file.deleteSync();
       expect(file.existsSync(), false);
 
-      await Rollbar.run(Config(
-          accessToken: 'SomeAccessToken',
-          notifier: AsyncNotifier.new,
-          persistenceLifetime: Duration.zero));
+      await Rollbar.run(config);
+      Rollbar.telemetry(Reading.log('Triggered database creation.'));
 
       expect(file.existsSync(), false);
     });
