@@ -14,6 +14,7 @@ Future<void> main() async {
       package: 'rollbar_flutter_example');
 
   await RollbarFlutter.run(config, () {
+    Rollbar.telemetry(Reading.navigation(from: 'initialize', to: 'runApp'));
     Rollbar.log('Rollbar initialized');
     runApp(const MyApp());
   });
@@ -54,9 +55,14 @@ class MyHomePageState extends State<MyHomePage> {
   MyHomePageState();
 
   void batteryLevel() async {
+    Rollbar.telemetry(Reading.widget(
+      element: 'batteryLevel',
+      extra: const {'action': 'tapped'},
+    ));
+
     String batteryLevel;
     try {
-      final int level = await platform.invokeMethod('getBatteryLevel');
+      final int level = await platform.batteryLevel;
       batteryLevel = 'Battery at $level%.';
     } on PlatformException catch (e, stackTrace) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
@@ -69,8 +75,9 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void faultyMethod() {
+    Rollbar.telemetry(Reading.log('Tapped faultyMethod button'));
     platform
-        .invokeMethod('faultyMethod')
+        .faultyMethod()
         .then((message) => setState(() => _faultyMsg = message))
         .catchError((e) => log(e), test: (_) => false);
   }
@@ -86,11 +93,13 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void divideByZero() {
+    Rollbar.telemetry(Reading.log('Tapped divideByZero button'));
     1 ~/ 0;
   }
 
   void crash() {
-    platform.invokeMethod('crash');
+    Rollbar.telemetry(Reading.navigation(from: 'app', to: 'crash'));
+    platform.crash();
   }
 
   @override
@@ -141,4 +150,10 @@ class MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+extension _Methods on MethodChannel {
+  Future<int> get batteryLevel async => await invokeMethod('getBatteryLevel');
+  Future<String> faultyMethod() async => await invokeMethod('faultyMethod');
+  Future<Never> crash() async => await invokeMethod('crash');
 }

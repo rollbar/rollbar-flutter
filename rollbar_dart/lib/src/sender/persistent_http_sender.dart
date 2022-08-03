@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
@@ -26,28 +25,22 @@ class PersistentHttpSender
 
   @override
   Future<bool> sendString(String payload) async {
-    try {
-      final newRecord = PayloadRecord(
-          accessToken: config.accessToken,
-          endpoint: config.endpoint,
-          payload: payload);
+    records.add(PayloadRecord(
+      accessToken: config.accessToken,
+      endpoint: config.endpoint,
+      payload: payload,
+    ));
 
-      records.add(newRecord);
+    for (final record in records) {
+      final success = await HttpSender.sendRecord(record);
 
-      for (final record in records) {
-        final success = await HttpSender.sendRecord(record);
-
-        if (success || record.timestamp < DateTime.now().toUtc() - 1.days) {
-          records.remove(record);
-        }
-
-        if (!success) return false;
+      if (success || record.timestamp < DateTime.now().toUtc() - 1.days) {
+        records.remove(record);
       }
 
-      return true;
-    } catch (error, stackTrace) {
-      log('Error persisting payload: $error =>\n$stackTrace');
-      return false;
+      if (!success) return false;
     }
+
+    return true;
   }
 }

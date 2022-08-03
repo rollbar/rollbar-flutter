@@ -28,7 +28,7 @@ class Reading
       source: Source.values.firstWhere((src) => src.name == map['source']),
       body: map['body'],
       timestamp: DateTime.fromMicrosecondsSinceEpoch(
-        map['timestamp'],
+        map['timestamp_ms'],
         isUtc: true,
       ));
 
@@ -72,7 +72,7 @@ class Reading
   factory Reading.connectivity({
     required String status,
     JsonMap extra = const {},
-    Level level = Level.error,
+    Level level = Level.info,
     Source source = Source.client,
   }) =>
       Reading._(type: 'connectivity', level: level, source: source, body: {
@@ -83,7 +83,7 @@ class Reading
     required String from,
     required String to,
     JsonMap extra = const {},
-    Level level = Level.error,
+    Level level = Level.info,
     Source source = Source.client,
   }) =>
       Reading._(type: 'navigation', level: level, source: source, body: {
@@ -93,7 +93,7 @@ class Reading
   factory Reading.widget({
     required String element,
     JsonMap extra = const {},
-    Level level = Level.error,
+    Level level = Level.info,
     Source source = Source.client,
   }) =>
       Reading._(type: 'dom', level: level, source: source, body: {
@@ -105,7 +105,7 @@ class Reading
         'type': type,
         'level': level.name,
         'source': source.name,
-        'timestamp': timestamp.microsecondsSinceEpoch,
+        'timestamp_ms': timestamp.microsecondsSinceEpoch,
         'body': body,
       };
 
@@ -115,5 +115,5 @@ class Reading
       'level: $level, '
       'source: $source, '
       'body: $body, '
-      'timestamp: $timestamp)';
+      'timestamp_ms: $timestamp)';
 }

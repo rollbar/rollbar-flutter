@@ -78,6 +78,8 @@ class Rollbar {
       ));
 
   static FutureOr<void> telemetry(Reading reading) {
-    current._notifier.notify(Event(reading: reading));
+    current._notifier.notify(Event(
+      reading: reading,
+    ));
   }
 }

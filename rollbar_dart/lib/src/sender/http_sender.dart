@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -17,7 +18,7 @@ class HttpSender implements Sender {
   final Uri _endpoint;
   final HttpHeaders _headers;
 
-  HttpSender({required String endpoint, required String accessToken})
+  HttpSender({required String accessToken, required String endpoint})
       : _endpoint = Uri.parse(endpoint),
         _headers = {
           'User-Agent': 'rollbar-dart',
@@ -52,7 +53,14 @@ class HttpSender implements Sender {
       }
 
       return true;
-    } catch (error) {
+    } catch (error, stackTrace) {
+      log('Exception sending payload',
+          time: DateTime.now(),
+          level: Level.error.value,
+          name: runtimeType.toString(),
+          error: error,
+          stackTrace: stackTrace);
+
       return false;
     }
   }
