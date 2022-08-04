@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 
 import 'data/payload_record.dart';
-import 'data/reading_record.dart';
+import 'data/breadcrumb_record.dart';
 
 typedef JsonMap = Map<String, dynamic>;
 
@@ -10,7 +10,7 @@ abstract class Serializable {
   static const _map = <Type, SerializableFor>{
     Serializable: SerializableFor(),
     PayloadRecord: SerializablePayloadRecord(),
-    ReadingRecord: SerializableReadingRecord(),
+    BreadcrumbRecord: SerializableBreadcrumbRecord(),
   };
 
   static SerializableFor of<T extends Serializable>() => _map[T]!;

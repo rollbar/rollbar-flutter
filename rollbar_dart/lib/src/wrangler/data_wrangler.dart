@@ -8,7 +8,7 @@ import '../data/payload/client.dart';
 import '../data/payload/data.dart';
 import '../data/payload/exception_info.dart';
 import '../data/payload/payload.dart';
-import '../occurrence.dart';
+import '../event.dart';
 import '../config.dart';
 import '../transformer/transformer.dart';
 import '../notifier/notifier.dart';
@@ -26,7 +26,7 @@ class DataWrangler implements Wrangler {
   DataWrangler(this.config) : transformer = config.transformer(config);
 
   @override
-  Future<Payload> payload({required Occurrence event}) async {
+  Future<Payload> payload({required Event event}) async {
     final data = await _Data.from(event: event, config: config);
     final transformedData = await transformer.transform(data, event: event);
     return Payload(data: transformedData);
@@ -35,7 +35,7 @@ class DataWrangler implements Wrangler {
 
 extension _Data on Data {
   static Future<Data> from({
-    required Occurrence event,
+    required Event event,
     required Config config,
   }) async =>
       Data(
@@ -53,12 +53,12 @@ extension _Data on Data {
 }
 
 extension _Body on Body {
-  static Body from({required Occurrence event}) {
+  static Body from({required Event event}) {
     final error = event.error, message = event.message;
 
     if (error != null) {
       return Body(
-        telemetry: event.telemetry!.snapshot(), // [todo] this is awful
+        telemetry: event.telemetry!.breadcrumbs(), // [todo] this is awful
         report: Trace(
             exception: _ExceptionInfo.from(error: error, description: message),
             frames: event.stackTrace?.frames ?? [],
@@ -68,7 +68,7 @@ extension _Body on Body {
 
     if (message != null) {
       return Body(
-        telemetry: event.telemetry!.snapshot(), // [todo] this is awful
+        telemetry: event.telemetry!.breadcrumbs(), // [todo] this is awful
         report: Message(text: message),
       );
     }

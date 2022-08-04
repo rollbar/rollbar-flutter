@@ -1,42 +1,42 @@
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
-import 'data/payload/reading.dart';
+import 'data/payload/breadcrumb.dart';
 import 'telemetry.dart';
 
 @sealed
 @immutable
-class Occurrence {
+class Event {
   final Level level;
   final dynamic error;
   final StackTrace? stackTrace;
   final String? message;
-  final Reading? reading;
+  final Breadcrumb? breadcrumb;
   final Telemetry? telemetry;
 
-  const Occurrence({
+  const Event({
     this.level = Level.info,
     this.error,
     this.stackTrace,
     this.message,
-    this.reading,
+    this.breadcrumb,
     this.telemetry,
   });
 
-  Occurrence copyWith({
+  Event copyWith({
     Level? level,
     dynamic error,
     StackTrace? stackTrace,
     String? message,
-    Reading? reading,
+    Breadcrumb? breadcrumb,
     Telemetry? telemetry,
   }) =>
-      Occurrence(
+      Event(
           level: level ?? this.level,
           error: error ?? this.error,
           stackTrace: stackTrace ?? this.stackTrace,
           message: message ?? this.message,
-          reading: reading ?? this.reading,
+          breadcrumb: breadcrumb ?? this.breadcrumb,
           telemetry: telemetry ?? this.telemetry);
 
   @override
@@ -45,18 +45,18 @@ class Occurrence {
       'error: $error, '
       'stackTrace: $stackTrace, '
       'message: $message, '
-      'reading: $reading, '
+      'breadcrumb: $breadcrumb, '
       'telemetry: $telemetry)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Occurrence &&
+      (other is Event &&
           other.level == level &&
           other.error == error &&
           other.stackTrace == stackTrace &&
           other.message == message &&
-          other.reading == reading &&
+          other.breadcrumb == breadcrumb &&
           other.telemetry == telemetry);
 
   @override
@@ -65,7 +65,7 @@ class Occurrence {
         error,
         stackTrace,
         message,
-        reading,
+        breadcrumb,
         telemetry,
       );
 }

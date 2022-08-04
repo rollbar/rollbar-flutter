@@ -14,7 +14,7 @@ Future<void> main() async {
       package: 'rollbar_flutter_example');
 
   await RollbarFlutter.run(config, () {
-    Rollbar.telemetry(Reading.navigation(from: 'initialize', to: 'runApp'));
+    Rollbar.drop(Breadcrumb.navigation(from: 'initialize', to: 'runApp'));
     Rollbar.log('Rollbar initialized');
     runApp(const MyApp());
   });
@@ -55,10 +55,12 @@ class MyHomePageState extends State<MyHomePage> {
   MyHomePageState();
 
   void batteryLevel() async {
-    Rollbar.telemetry(Reading.widget(
-      element: 'batteryLevel',
-      extra: const {'action': 'tapped'},
-    ));
+    Rollbar.drop(
+      Breadcrumb.widget(
+        element: 'batteryLevel',
+        extra: const {'action': 'tapped'},
+      ),
+    );
 
     String batteryLevel;
     try {
@@ -66,8 +68,10 @@ class MyHomePageState extends State<MyHomePage> {
       batteryLevel = 'Battery at $level%.';
     } on PlatformException catch (e, stackTrace) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
-      Rollbar.telemetry(Reading.error(
-          'Got a PlatformException while trying to get the battery level.'));
+      Rollbar.drop(
+        Breadcrumb.error(
+            'Non-fatal PlatformException while getting battery level.'),
+      );
       Rollbar.warn(e, stackTrace);
     }
 
@@ -77,7 +81,7 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void faultyMethod() {
-    Rollbar.telemetry(Reading.log('Tapped faultyMethod button'));
+    Rollbar.drop(Breadcrumb.log('Tapped faultyMethod button'));
     platform
         .faultyMethod()
         .then((message) => setState(() => _faultyMsg = message))
@@ -85,7 +89,7 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void incrementCounter() {
-    Rollbar.telemetry(Reading.widget(
+    Rollbar.drop(Breadcrumb.widget(
       element: 'incrementCounter',
       extra: const {'action': 'tapped'},
     ));
@@ -94,18 +98,18 @@ class MyHomePageState extends State<MyHomePage> {
       if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
       } else {
-        Rollbar.telemetry(Reading.log('Counter incremented to $_counter'));
+        Rollbar.drop(Breadcrumb.log('Counter incremented to $_counter'));
       }
     });
   }
 
   void divideByZero() {
-    Rollbar.telemetry(Reading.log('Tapped divideByZero button'));
+    Rollbar.drop(Breadcrumb.log('Tapped divideByZero button'));
     1 ~/ 0;
   }
 
   void crash() {
-    Rollbar.telemetry(Reading.navigation(from: 'app', to: 'crash'));
+    Rollbar.drop(Breadcrumb.navigation(from: 'app', to: 'crash'));
     platform.crash();
   }
 

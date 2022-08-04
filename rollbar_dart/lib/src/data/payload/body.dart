@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import 'exception_info.dart';
-import 'reading.dart';
+import 'breadcrumb.dart';
 import 'frame.dart';
 
 @immutable
@@ -26,7 +26,7 @@ mixin Report implements Equatable, Serializable {
 @sealed
 @immutable
 class Body with EquatableSerializableMixin implements Equatable, Serializable {
-  final Iterable<Reading> telemetry;
+  final Iterable<Breadcrumb> telemetry;
   final Report report;
 
   const Body({required this.telemetry, required this.report});
@@ -37,7 +37,7 @@ class Body with EquatableSerializableMixin implements Equatable, Serializable {
       );
 
   Body copyWith({
-    Iterable<Reading>? telemetry,
+    Iterable<Breadcrumb>? telemetry,
     Report? report,
   }) =>
       Body(
@@ -46,7 +46,7 @@ class Body with EquatableSerializableMixin implements Equatable, Serializable {
 
   @override
   JsonMap toMap() => {
-        'telemetry': telemetry.map((reading) => reading.toMap()).toList(),
+        'telemetry': telemetry.map((breadcrumb) => breadcrumb.toMap()).toList(),
         ...report.toMap(),
       };
 }
@@ -132,9 +132,9 @@ extension _KeyValuePath on JsonMap {
   String? get rawTrace => this['raw'];
   JsonMap get trace => this['trace'];
 
-  Iterable<Reading> get telemetry => this['telemetry']
+  Iterable<Breadcrumb> get telemetry => this['telemetry']
       .whereType<JsonMap>()
-      .map<Reading>(Reading.fromMap)
+      .map<Breadcrumb>(Breadcrumb.fromMap)
       .toList();
   Iterable<Frame> get frames => this['frames'] //
       .whereType<JsonMap>()

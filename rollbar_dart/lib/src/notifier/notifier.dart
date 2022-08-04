@@ -3,7 +3,7 @@ import 'dart:async';
 import '../sender/sender.dart';
 import '../wrangler/wrangler.dart';
 import '../telemetry.dart';
-import '../occurrence.dart';
+import '../event.dart';
 
 abstract class Notifier {
   // notifier version to be updated with each new release: [todo] automate
@@ -14,6 +14,6 @@ abstract class Notifier {
   Wrangler get wrangler;
   Telemetry get telemetry;
 
-  FutureOr<void> notify(Occurrence event);
+  FutureOr<void> notify(Event event);
   FutureOr<void> dispose();
 }

@@ -4,11 +4,11 @@ import 'dart:isolate';
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
-import '../data/payload/reading.dart';
+import '../data/payload/breadcrumb.dart';
 import '../sender/sender.dart';
 import '../wrangler/wrangler.dart';
 import '../config.dart';
-import '../occurrence.dart';
+import '../event.dart';
 import '../telemetry.dart';
 import 'async_notifier.dart';
 
@@ -30,7 +30,7 @@ class IsolatedNotifier extends AsyncNotifier {
   );
 
   @override
-  void notify(Occurrence event) {
+  void notify(Event event) {
     _sendPort.send(event);
   }
 
@@ -68,10 +68,12 @@ extension _IsolatedNotifier$Isolate on IsolatedNotifier {
     wrangler = config.wrangler(config);
     telemetry = Telemetry(config);
 
-    await for (final Occurrence event in receivePort) {
-      if (event.reading != null) {
-        telemetry.register(event.reading as Reading);
+    await for (final Event event in receivePort) {
+      if (event.breadcrumb != null) {
+        telemetry.add(event.breadcrumb as Breadcrumb);
       } else {
+        telemetry.removeExpired();
+
         final payload = await wrangler.payload(
           event: event.copyWith(telemetry: telemetry),
         );

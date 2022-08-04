@@ -9,13 +9,13 @@ export 'src/sender/sender.dart' show Sender;
 
 export 'src/data/payload/client.dart' show Client;
 export 'src/data/payload/payload.dart' show Payload;
-export 'src/data/payload/reading.dart' show Reading, Source;
+export 'src/data/payload/breadcrumb.dart' show Breadcrumb, Source;
 export 'src/data/payload/data.dart' show Data;
 export 'src/data/payload/body.dart' show Body, Report, Trace, Traces, Message;
 export 'src/data/payload/frame.dart' show Frame;
 export 'src/data/payload/exception_info.dart' show ExceptionInfo;
 
 export 'src/config.dart' show Config;
-export 'src/occurrence.dart' show Occurrence;
+export 'src/event.dart' show Event;
 
 export 'src/connectivity_monitor.dart';

@@ -9,7 +9,7 @@ import 'package:rollbar_common/src/extension/collection.dart';
 import 'package:rollbar_common/src/persistable.dart';
 import 'package:rollbar_common/src/table_set.dart';
 import 'package:rollbar_common/src/data/payload_record.dart';
-import 'package:rollbar_common/src/data/reading_record.dart';
+import 'package:rollbar_common/src/data/breadcrumb_record.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -40,8 +40,8 @@ void main() {
         equals((PayloadRecord).toString().toSnakeCase()),
       );
       expect(
-        TableSet<ReadingRecord>().tableName,
-        equals((ReadingRecord).toString().toSnakeCase()),
+        TableSet<BreadcrumbRecord>().tableName,
+        equals((BreadcrumbRecord).toString().toSnakeCase()),
       );
     });
 
@@ -217,8 +217,9 @@ void main() {
   test('Bad sorting symbols throw appropriate errors', () async {
     final records = TableSet<PayloadRecord>();
     expect(() => records.sorted(by: #PayloadRecord.test), throwsArgumentError);
-    expect(() => records.sorted(by: #ReadingRecord.test), throwsArgumentError);
-    expect(() => records.sorted(by: #ReadingRecord.timestamp),
+    expect(
+        () => records.sorted(by: #BreadcrumbRecord.test), throwsArgumentError);
+    expect(() => records.sorted(by: #BreadcrumbRecord.timestamp),
         throwsArgumentError);
   });
 

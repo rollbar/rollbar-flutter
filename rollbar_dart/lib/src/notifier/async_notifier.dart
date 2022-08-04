@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../data/payload/reading.dart';
+import '../data/payload/breadcrumb.dart';
 import '../sender/sender.dart';
 import '../wrangler/wrangler.dart';
 import '../config.dart';
-import '../occurrence.dart';
+import '../event.dart';
 import '../telemetry.dart';
 import 'notifier.dart';
 
@@ -29,10 +29,12 @@ class AsyncNotifier implements Notifier {
         telemetry = Telemetry(config);
 
   @override
-  FutureOr<void> notify(Occurrence event) async {
-    if (event.reading != null) {
-      telemetry.register(event.reading as Reading);
+  FutureOr<void> notify(Event event) async {
+    if (event.breadcrumb != null) {
+      telemetry.add(event.breadcrumb as Breadcrumb);
     } else {
+      telemetry.removeExpired();
+
       final payload = await wrangler.payload(
         event: event.copyWith(telemetry: telemetry),
       );

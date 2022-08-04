@@ -5,7 +5,7 @@ enum Source { client, server }
 
 @sealed
 @immutable
-class Reading
+class Breadcrumb
     with EquatableSerializableMixin
     implements Equatable, Serializable {
   final String type;
@@ -14,7 +14,7 @@ class Reading
   final JsonMap body;
   final DateTime timestamp;
 
-  Reading._({
+  Breadcrumb._({
     DateTime? timestamp,
     required this.type,
     required this.level,
@@ -22,7 +22,7 @@ class Reading
     required this.body,
   }) : timestamp = timestamp ?? DateTime.now().toUtc();
 
-  factory Reading.fromMap(JsonMap map) => Reading._(
+  factory Breadcrumb.fromMap(JsonMap map) => Breadcrumb._(
       type: map['type'],
       level: Level.values.firstWhere((level) => level.name == map['level']),
       source: Source.values.firstWhere((src) => src.name == map['source']),
@@ -32,29 +32,29 @@ class Reading
         isUtc: true,
       ));
 
-  factory Reading.log(
+  factory Breadcrumb.log(
     String message, {
     JsonMap extra = const {},
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'log', level: level, source: source, body: {
+      Breadcrumb._(type: 'log', level: level, source: source, body: {
         'message': message,
         ...extra,
       });
 
-  factory Reading.error(
+  factory Breadcrumb.error(
     String message, {
     JsonMap extra = const {},
     Level level = Level.error,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'error', level: level, source: source, body: {
+      Breadcrumb._(type: 'error', level: level, source: source, body: {
         'message': message,
         ...extra,
       });
 
-  factory Reading.network(
+  factory Breadcrumb.network(
     Uri url, {
     required HttpMethod method,
     required int statusCode,
@@ -62,44 +62,44 @@ class Reading
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'network', level: level, source: source, body: {
+      Breadcrumb._(type: 'network', level: level, source: source, body: {
         'url': url.toString(),
         'method': method.name,
         'status_code': statusCode,
         ...extra,
       });
 
-  factory Reading.connectivity({
+  factory Breadcrumb.connectivity({
     required String status,
     JsonMap extra = const {},
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'connectivity', level: level, source: source, body: {
+      Breadcrumb._(type: 'connectivity', level: level, source: source, body: {
         'change': status,
         ...extra,
       });
 
-  factory Reading.navigation({
+  factory Breadcrumb.navigation({
     required String from,
     required String to,
     JsonMap extra = const {},
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'navigation', level: level, source: source, body: {
+      Breadcrumb._(type: 'navigation', level: level, source: source, body: {
         'from': from,
         'to': to,
         ...extra,
       });
 
-  factory Reading.widget({
+  factory Breadcrumb.widget({
     required String element,
     JsonMap extra = const {},
     Level level = Level.info,
     Source source = Source.client,
   }) =>
-      Reading._(type: 'dom', level: level, source: source, body: {
+      Breadcrumb._(type: 'dom', level: level, source: source, body: {
         'element': element,
         ...extra,
       });
@@ -114,7 +114,7 @@ class Reading
       };
 
   @override
-  String toString() => 'Reading('
+  String toString() => 'Breadcrumb('
       'type: $type, '
       'level: $level, '
       'source: $source, '

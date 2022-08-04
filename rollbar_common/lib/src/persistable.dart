@@ -2,7 +2,7 @@ import 'identifiable.dart';
 import 'serializable.dart';
 
 import 'data/payload_record.dart';
-import 'data/reading_record.dart';
+import 'data/breadcrumb_record.dart';
 
 /// A type identifier.
 enum Datatype { uuid, integer, real, text, blob }
@@ -28,7 +28,7 @@ abstract class Persistable<T extends Object>
   static const _map = <Type, PersistableFor>{
     Persistable: PersistableFor(),
     PayloadRecord: PersistablePayloadRecord(),
-    ReadingRecord: PersistableReadingRecord(),
+    BreadcrumbRecord: PersistableBreadcrumbRecord(),
   };
 
   static PersistableFor of<T extends Persistable>() => _map[T]!;

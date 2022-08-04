@@ -11,54 +11,54 @@ import '../../rollbar_common.dart'
 
 @sealed
 @immutable
-class ReadingRecord implements Persistable<UUID> {
+class BreadcrumbRecord implements Persistable<UUID> {
   @override
   final UUID id;
-  final String reading;
+  final String breadcrumb;
   final DateTime timestamp;
 
   static Map<String, Datatype> get persistingKeyTypes => {
         'id': Datatype.uuid,
-        'reading': Datatype.text,
+        'breadcrumb': Datatype.text,
         'timestamp': Datatype.integer,
       };
 
-  ReadingRecord({
+  BreadcrumbRecord({
     UUID? id,
-    required this.reading,
+    required this.breadcrumb,
     DateTime? timestamp,
   })  : id = id ?? uuidGen.v4obj(),
         timestamp = timestamp ?? DateTime.now().toUtc();
 
-  ReadingRecord copyWith({
+  BreadcrumbRecord copyWith({
     UUID? id,
-    String? reading,
+    String? breadcrumb,
     DateTime? timestamp,
   }) =>
-      ReadingRecord(
+      BreadcrumbRecord(
           id: id ?? this.id,
-          reading: reading ?? this.reading,
+          breadcrumb: breadcrumb ?? this.breadcrumb,
           timestamp: timestamp ?? this.timestamp);
 
   @override
-  factory ReadingRecord.fromMap(JsonMap map) => ReadingRecord(
+  factory BreadcrumbRecord.fromMap(JsonMap map) => BreadcrumbRecord(
         id: map.id,
-        reading: map.reading,
+        breadcrumb: map.breadcrumb,
         timestamp: map.timestamp,
       );
 
   @override
   JsonMap toMap() => {
         'id': id.toBytes(),
-        'reading': reading,
+        'breadcrumb': breadcrumb,
         'timestamp': timestamp.microsecondsSinceEpoch,
       };
 
-  /// Compares this [ReadingRecord] to another [ReadingRecord].
+  /// Compares this [BreadcrumbRecord] to another [BreadcrumbRecord].
   ///
   /// Comparison is timestamp-based.
   ///
-  /// If [other] is not a [ReadingRecord] instance, an [ArgumentError] is
+  /// If [other] is not a [BreadcrumbRecord] instance, an [ArgumentError] is
   /// thrown.
   ///
   /// Returns a value like a [Comparator] when comparing this to [other]. That
@@ -69,7 +69,7 @@ class ReadingRecord implements Persistable<UUID> {
   /// The [other] argument must be a value that is comparable to this object.
   @override
   int compareTo(other) {
-    if (other is! ReadingRecord) {
+    if (other is! BreadcrumbRecord) {
       throw ArgumentError('Cannot compare between different types.', other);
     }
 
@@ -79,41 +79,41 @@ class ReadingRecord implements Persistable<UUID> {
   @override
   String toString() => 'Record('
       'id: ${id.uuid}, '
-      'reading: $reading, '
+      'breadcrumb: $breadcrumb, '
       'timestamp: $timestamp)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ReadingRecord &&
+      (other is BreadcrumbRecord &&
           other.id == id &&
-          other.reading == reading &&
+          other.breadcrumb == breadcrumb &&
           other.timestamp == timestamp);
 
   @override
-  int get hashCode => Object.hash(id, reading, timestamp);
+  int get hashCode => Object.hash(id, breadcrumb, timestamp);
 }
 
 @sealed
-class SerializableReadingRecord implements SerializableFor {
-  const SerializableReadingRecord();
+class SerializableBreadcrumbRecord implements SerializableFor {
+  const SerializableBreadcrumbRecord();
 
   @override
-  ReadingRecord fromMap(JsonMap map) => ReadingRecord.fromMap(map);
+  BreadcrumbRecord fromMap(JsonMap map) => BreadcrumbRecord.fromMap(map);
 }
 
 @sealed
-class PersistableReadingRecord implements PersistableFor {
-  const PersistableReadingRecord();
+class PersistableBreadcrumbRecord implements PersistableFor {
+  const PersistableBreadcrumbRecord();
 
   @override
   Map<String, Datatype> get persistingKeyTypes =>
-      ReadingRecord.persistingKeyTypes;
+      BreadcrumbRecord.persistingKeyTypes;
 }
 
-extension ReadingRecordAttributes on JsonMap {
+extension BreadcrumbRecordAttributes on JsonMap {
   UUID get id => UUID.fromList(this['id'].whereType<int>().toList());
-  String get reading => this['reading'];
+  String get breadcrumb => this['breadcrumb'];
   DateTime get timestamp => DateTime.fromMicrosecondsSinceEpoch(
         this['timestamp'],
         isUtc: true,

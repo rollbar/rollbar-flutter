@@ -127,8 +127,8 @@ extension _Payload on Payload {
       );
 }
 
-extension _Reading on Reading {
-  static Reading gen() => Reading.log(
+extension _Breadcrumb on Breadcrumb {
+  static Breadcrumb gen() => Breadcrumb.log(
         _String.gen(),
         extra: {'custom': _String.gen()},
         level: Level.values[_int.gen(Level.values.length)],
@@ -154,7 +154,7 @@ extension _Data on Data {
 
 extension _Body on Body {
   static Body gen(Kind kind) => Body(
-        telemetry: _Iterable.gen(_Reading.gen),
+        telemetry: _Iterable.gen(_Breadcrumb.gen),
         report: kind == Kind.message
             ? _Message.gen()
             : kind == Kind.trace

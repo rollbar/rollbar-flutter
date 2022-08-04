@@ -67,11 +67,11 @@ class PayloadRecord implements Persistable<UUID> {
         'timestamp': timestamp.microsecondsSinceEpoch,
       };
 
-  /// Compares this [ReadingRecord] to another [ReadingRecord].
+  /// Compares this [PayloadRecord] to another [PayloadRecord].
   ///
   /// Comparison is timestamp-based.
   ///
-  /// If [other] is not a [ReadingRecord] instance, an [ArgumentError] is
+  /// If [other] is not a [PayloadRecord] instance, an [ArgumentError] is
   /// thrown.
   ///
   /// Returns a value like a [Comparator] when comparing this to [other]. That

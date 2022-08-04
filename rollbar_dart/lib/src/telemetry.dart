@@ -3,31 +3,31 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
-import 'data/payload/reading.dart';
+import 'data/payload/breadcrumb.dart';
 import 'persistence.dart';
 import 'config.dart';
 
 @sealed
 @immutable
 @internal
-class Telemetry with Persistence<ReadingRecord> implements Configurable {
+class Telemetry with Persistence<BreadcrumbRecord> implements Configurable {
   @override
   final Config config;
 
   Telemetry(this.config);
 
-  bool register(Reading reading) {
+  void removeExpired() {
     final expiration = DateTime.now().toUtc() - config.persistenceLifetime;
     records.removeWhere((record) => record.timestamp < expiration);
-
-    return records.add(
-      ReadingRecord(reading: jsonEncode(reading.toMap())),
-    );
   }
 
-  List<Reading> snapshot() => records
-      .sorted(by: #ReadingRecord.timestamp)
-      .map((record) => jsonDecode(record.reading) as JsonMap)
-      .map(Reading.fromMap)
+  bool add(Breadcrumb breadcrumb) => records.add(
+        BreadcrumbRecord(breadcrumb: jsonEncode(breadcrumb.toMap())),
+      );
+
+  List<Breadcrumb> breadcrumbs() => records
+      .sorted(by: #BreadcrumbRecord.timestamp)
+      .map((record) => jsonDecode(record.breadcrumb) as JsonMap)
+      .map(Breadcrumb.fromMap)
       .toList();
 }

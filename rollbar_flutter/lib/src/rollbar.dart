@@ -12,7 +12,7 @@ extension _Methods on MethodChannel {
   Future<void> initialize({required Config config}) async =>
       await invokeMethod('initialize', config.toMap());
 
-  /// The platform-specific path where we can persist our database if needed.
+  /// The platform-specific path where we can persist data if needed.
   Future<String> get persistencePath async =>
       await invokeMethod('persistencePath');
 }
