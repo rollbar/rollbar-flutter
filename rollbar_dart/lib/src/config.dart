@@ -1,23 +1,37 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
-import '../../rollbar.dart';
-import '../sender/persistent_sender.dart';
+import '../rollbar.dart';
+import 'notifier/isolated_notifier.dart';
+import 'wrangler/data_wrangler.dart';
+import 'transformer/noop_transformer.dart';
+import 'sender/persistent_http_sender.dart';
+
+/// The class of types that are [Configurable] through a [Config] instance.
+abstract class Configurable {
+  Config get config;
+}
 
 /// Configuration for the [Rollbar] notifier.
+@sealed
 @immutable
-class Config {
+class Config implements Serializable {
   final String accessToken;
   final String endpoint;
   final String environment;
   final String framework;
   final String codeVersion;
   final String? package;
-  final bool persistPayloads;
+  final String persistencePath;
+  final Duration persistenceLifetime;
   final bool handleUncaughtErrors;
   final bool includePlatformLogs;
 
-  final Transformer Function(Config)? transformer;
+  final FutureOr<Notifier> Function(Config) notifier;
+  final Wrangler Function(Config) wrangler;
+  final Transformer Function(Config) transformer;
   final Sender Function(Config) sender;
 
   const Config({
@@ -27,11 +41,14 @@ class Config {
     this.framework = 'dart',
     this.codeVersion = 'main',
     this.package,
-    this.persistPayloads = false,
+    this.persistencePath = './',
+    this.persistenceLifetime = const Duration(days: 1),
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
-    this.transformer,
-    this.sender = PersistentSender.new,
+    this.notifier = IsolatedNotifier.spawn,
+    this.wrangler = DataWrangler.new,
+    this.transformer = NoopTransformer.new,
+    this.sender = PersistentHttpSender.new,
   });
 
   Config copyWith({
@@ -41,9 +58,12 @@ class Config {
     String? framework,
     String? codeVersion,
     String? package,
-    bool? persistPayloads,
+    String? persistencePath,
+    Duration? persistenceLifetime,
     bool? handleUncaughtErrors,
     bool? includePlatformLogs,
+    FutureOr<Notifier> Function(Config)? notifier,
+    Wrangler Function(Config)? wrangler,
     Transformer Function(Config)? transformer,
     Sender Function(Config)? sender,
   }) =>
@@ -54,14 +74,17 @@ class Config {
         framework: framework ?? this.framework,
         codeVersion: codeVersion ?? this.codeVersion,
         package: package ?? this.package,
-        persistPayloads: persistPayloads ?? this.persistPayloads,
+        persistencePath: persistencePath ?? this.persistencePath,
+        persistenceLifetime: persistenceLifetime ?? this.persistenceLifetime,
         handleUncaughtErrors: handleUncaughtErrors ?? this.handleUncaughtErrors,
         includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
+        notifier: notifier ?? this.notifier,
+        wrangler: wrangler ?? this.wrangler,
         transformer: transformer ?? this.transformer,
         sender: sender ?? this.sender,
       );
 
-  /// Converts the [Map] instance into a [Config] object.
+  @override
   factory Config.fromMap(JsonMap map) => Config(
       accessToken: map['accessToken'],
       endpoint: map['endpoint'],
@@ -69,10 +92,12 @@ class Config {
       framework: map['framework'],
       codeVersion: map['codeVersion'],
       package: map['package'],
-      persistPayloads: map['persistPayloads'],
+      persistencePath: map['persistencePath'],
+      persistenceLifetime: Duration(seconds: map['persistenceLifetime']),
       handleUncaughtErrors: map['handleUncaughtErrors'],
       includePlatformLogs: map['includePlatformLogs']);
 
+  @override
   JsonMap toMap() => {
         'accessToken': accessToken,
         'endpoint': endpoint,
@@ -80,7 +105,8 @@ class Config {
         'framework': framework,
         'codeVersion': codeVersion,
         'package': package,
-        'persistPayloads': persistPayloads,
+        'persistencePath': persistencePath,
+        'persistenceLifetime': persistenceLifetime.inSeconds,
         'handleUncaughtErrors': handleUncaughtErrors,
         'includePlatformLogs': includePlatformLogs,
       };

@@ -8,14 +8,19 @@ import 'data.dart';
 /// when serialized as JSON.
 @sealed
 @immutable
-class Payload {
-  final String accessToken;
+class Payload
+    with EquatableSerializableMixin
+    implements Equatable, Serializable {
   final Data data;
 
-  const Payload(this.accessToken, this.data);
+  const Payload({required this.data});
 
+  factory Payload.fromMap(JsonMap map) => Payload(
+        data: Data.fromMap(map['data']),
+      );
+
+  @override
   JsonMap toMap() => {
-        'access_token': accessToken,
         'data': data.toMap(),
       };
 }

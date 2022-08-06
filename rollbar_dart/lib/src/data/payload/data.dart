@@ -3,12 +3,13 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 import 'body.dart' show Body;
 import 'client.dart' show Client;
-import 'level.dart';
 
 /// Contains the data for the occurrence to be sent to Rollbar.
 @sealed
 @immutable
-class Data {
+class Data with EquatableSerializableMixin implements Serializable, Equatable {
+  final Body body;
+  final Level level;
   final JsonMap notifier;
   final String environment;
   final Client client;
@@ -16,12 +17,10 @@ class Data {
   final String language;
   final String framework;
   final String codeVersion;
-  final Level level;
-  final int timestamp;
-  final Body body;
   final JsonMap? custom;
   final JsonMap? platformPayload;
   final JsonMap server;
+  final DateTime timestamp;
 
   const Data({
     required this.notifier,
@@ -48,7 +47,7 @@ class Data {
     String? framework,
     String? codeVersion,
     Level? level,
-    int? timestamp,
+    DateTime? timestamp,
     Body? body,
     JsonMap? custom,
     JsonMap? platformPayload,
@@ -86,19 +85,38 @@ class Data {
       platformPayload: other.platformPayload,
       server: other.server);
 
+  factory Data.fromMap(JsonMap map) => Data(
+      notifier: map['notifier'],
+      environment: map['environment'],
+      client: Client.fromMap(map['client']),
+      platform: map['platform'],
+      language: map['language'],
+      framework: map['framework'],
+      codeVersion: map['code_version'],
+      level: Level.values.firstWhere((level) => level.name == map['level']),
+      body: Body.fromMap(map['body']),
+      custom: map['custom'],
+      platformPayload: map['platform_payload'],
+      server: map['server'],
+      timestamp: DateTime.fromMicrosecondsSinceEpoch(
+        map['timestamp'],
+        isUtc: true,
+      ));
+
+  @override
   JsonMap toMap() => {
+        'body': body.toMap(),
         'notifier': notifier,
         'environment': environment,
         'client': client.toMap(),
         'platform': platform,
         'language': language,
         'level': level.name,
-        'timestamp': timestamp,
-        'body': body.toMap(),
+        'timestamp': timestamp.microsecondsSinceEpoch,
         'custom': custom,
         'server': server,
         'framework': framework,
         'code_version': codeVersion,
         'platform_payload': platformPayload,
-      }..removeWhere((key, value) => value == null);
+      }.compact();
 }

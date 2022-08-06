@@ -7,20 +7,17 @@ void main() async {
   Logger.root.onRecord.listen((record) =>
       print('${record.level.name}: ${record.time}: ${record.message}'));
 
-  // NOTE: Use your Rollbar Project access token:
-  final config = Config(
+  // NOTE: Use your Rollbar Project access token
+  await Rollbar.run(Config(
     accessToken: 'YOUR-ROLLBAR-ACCESSTOKEN',
     package: 'rollbar_dart_example',
-    persistPayloads: true,
-  );
-
-  await Rollbar.run(config);
+  ));
 
   for (var i = 10; i > 0; i--) {
     try {
       throw ArgumentError('$i: An error occurred in the dart example app');
     } catch (error, stackTrace) {
-      await Rollbar.error(error, stackTrace);
+      Rollbar.error(error, stackTrace);
     }
   }
 

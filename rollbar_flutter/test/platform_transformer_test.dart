@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rollbar_common/rollbar_common.dart' hide isNotNull;
 import 'package:rollbar_dart/rollbar.dart';
 import 'package:rollbar_flutter/src/platform_transformer.dart';
 
-import 'utils/payload_utils.dart';
 import 'utils/platform_exception_utils.dart';
 
 void main() {
@@ -24,7 +28,7 @@ void main() {
       late PlatformTransformer transformer;
 
       setUp(() {
-        transformer = PlatformTransformer(appendToChain: true);
+        transformer = PlatformTransformer(append: true);
       });
 
       test('Enrich trace chain on PlatformException', () async {
@@ -38,21 +42,21 @@ void main() {
           Frame(filename: filename, method: 'what'),
         ];
 
-        final body = platformTraceInfo(exception, frames);
-        final original = data(body: body);
+        final body =
+            Body(telemetry: const [], report: _Trace.from(exception, frames));
+        final original = _Data.from(body: body);
         final transformed = await transformer.transform(
-          exception,
-          StackTrace.empty,
           original,
+          event: Event(error: exception, stackTrace: StackTrace.empty),
         );
 
-        final traces = transformed.body.traces;
+        final traces = transformed.body.report.traces;
         expect(traces, hasLength(2));
 
-        final dartTrace = traces[1];
+        final dartTrace = traces.elementAt(1);
         expect(dartTrace.frames, hasLength(2));
-        expect(dartTrace.frames[0].method, equals('testThis'));
-        expect(dartTrace.frames[1].method, equals('what'));
+        expect(dartTrace.frames.elementAt(0).method, equals('testThis'));
+        expect(dartTrace.frames.elementAt(1).method, equals('what'));
 
         // The message was temporarily hijacked to transfer the platform
         // payload, let's make sure it's been restored
@@ -70,24 +74,29 @@ void main() {
           Frame(filename: filename, method: 'onTheDartSide', line: 3)
         ];
 
-        final body = platformTraceInfo(exception, frames);
-        final original = data(body: body);
-        final transformed =
-            await transformer.transform(exception, StackTrace.empty, original);
+        final trace = _Trace.from(exception, frames);
+        final original =
+            _Data.from(body: Body(telemetry: const [], report: trace));
+        final transformed = await transformer.transform(
+          original,
+          event: Event(error: exception, stackTrace: StackTrace.empty),
+        );
 
-        final traces = transformed.body.traces;
+        final traces = transformed.body.report.traces;
         expect(traces, hasLength(3));
 
         final rootCause = traces.first;
         expect(rootCause.frames.length, greaterThan(1));
         expect(rootCause.frames.first.method, equals('thisWillBeRethrown'));
 
-        final rethrownTrace = traces[1];
+        final rethrownTrace = traces.elementAt(1);
         expect(rethrownTrace.frames, hasLength(2));
-        expect(rethrownTrace.frames[0].method, equals('processError'));
-        expect(rethrownTrace.frames[1].method, equals('catchAndThrow'));
+        expect(
+            rethrownTrace.frames.elementAt(0).method, equals('processError'));
+        expect(
+            rethrownTrace.frames.elementAt(1).method, equals('catchAndThrow'));
 
-        final dartTrace = traces[2];
+        final dartTrace = traces.elementAt(2);
         expect(dartTrace.frames, hasLength(1));
         expect(dartTrace.frames.first.method, equals('onTheDartSide'));
 
@@ -99,7 +108,7 @@ void main() {
       late PlatformTransformer transformer;
 
       setUp(() {
-        transformer = PlatformTransformer(appendToChain: false);
+        transformer = PlatformTransformer(append: false);
       });
 
       test('Attach platform payload on PlatformException with chain', () async {
@@ -110,12 +119,15 @@ void main() {
 
         const frames = [Frame(filename: filename, method: 'thisFails')];
 
-        final body = platformTraceInfo(exception, frames);
-        final original = data(body: body);
-        final transformed =
-            await transformer.transform(exception, StackTrace.empty, original);
+        final platformTrace = _Trace.from(exception, frames);
+        final original =
+            _Data.from(body: Body(telemetry: const [], report: platformTrace));
+        final transformed = await transformer.transform(
+          original,
+          event: Event(error: exception, stackTrace: StackTrace.empty),
+        );
 
-        final traces = transformed.body.traces;
+        final traces = transformed.body.report.traces;
         expect(traces, hasLength(1));
 
         final dartTrace = traces.first;
@@ -144,12 +156,15 @@ void main() {
           Frame(filename: filename, method: 'attachedFailureChain', line: 3)
         ];
 
-        final body = platformTraceInfo(exception, frames);
-        final original = data(body: body);
-        final transformed =
-            await transformer.transform(exception, StackTrace.empty, original);
+        final trace = _Trace.from(exception, frames);
+        final original =
+            _Data.from(body: Body(telemetry: const [], report: trace));
+        final transformed = await transformer.transform(
+          original,
+          event: Event(error: exception, stackTrace: StackTrace.empty),
+        );
 
-        final traces = transformed.body.traces;
+        final traces = transformed.body.report.traces;
         expect(traces, hasLength(1));
 
         final dartTrace = traces.first;
@@ -171,4 +186,37 @@ void main() {
       });
     });
   });
+}
+
+final rnd = Random(0x5f3759df);
+
+extension _Data on Data {
+  static Data from({required Body body}) => Data(
+      body: body,
+      timestamp: DateTime.now().toUtc(),
+      language: 'dart',
+      level: Level.error,
+      platform: Platform.operatingSystem,
+      framework: 'flutter',
+      codeVersion: 'someCodeVersion',
+      client: Client(
+          locale: Platform.localeName,
+          hostname: Platform.localHostname,
+          os: Platform.operatingSystem,
+          osVersion: Platform.operatingSystemVersion,
+          dartVersion: Platform.version,
+          numberOfProcessors: Platform.numberOfProcessors),
+      environment: 'unitTesting',
+      notifier: const {'version': 'someVersion', 'name': 'someName'},
+      server: const {'root': 'com.some.package'});
+}
+
+extension _Trace on Trace {
+  static Trace from(PlatformException exception, List<Frame> frames) => Trace(
+        exception: ExceptionInfo(
+          type: exception.runtimeType.toString(),
+          message: exception.toString(),
+        ),
+        frames: frames,
+      );
 }

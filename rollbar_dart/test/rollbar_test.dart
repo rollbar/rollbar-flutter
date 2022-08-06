@@ -1,3 +1,4 @@
+import 'package:rollbar_dart/src/notifier/async_notifier.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -6,12 +7,11 @@ import 'package:rollbar_dart/rollbar.dart';
 Future<void> main() async {
   late MockSender sender;
 
+  /// https://stackoverflow.com/questions/73145803/dart-unit-testing-code-that-runs-in-an-isolate
   group('Rollbar notifier tests', () {
     setUp(() async {
       sender = MockSender();
       when(sender.send(any)).thenAnswer((_) async => true);
-
-      //await rollbar.ensureInitialized();
     });
 
     tearDown(() {});
@@ -22,8 +22,7 @@ Future<void> main() async {
           environment: 'production',
           codeVersion: '0.23.2',
           package: 'some_package_name',
-          handleUncaughtErrors: true,
-          persistPayloads: true,
+          notifier: AsyncNotifier.new,
           sender: (_) => sender);
 
       await Rollbar.run(config);
@@ -37,8 +36,6 @@ Future<void> main() async {
         expect(payload['data']['code_version'], equals('0.23.2'));
         expect(payload['data']['level'], equals('error'));
 
-        // Project root detection currently uses the `server` element of the payload,
-        // so that's where we include it.
         final root = payload['data']['server']['root'];
         expect(root, equals('some_package_name'));
 
@@ -53,6 +50,7 @@ Future<void> main() async {
       final config = Config(
           accessToken: 'BlaBlaAccessToken',
           package: 'some_package_name',
+          notifier: AsyncNotifier.new,
           sender: (_) => sender);
 
       await Rollbar.run(config);
@@ -61,7 +59,7 @@ Future<void> main() async {
         failingFunction();
       } catch (error, stackTrace) {
         await Rollbar.error(error, stackTrace);
-        var payload = verify(await sender.send(captureAny)).captured.single;
+        final payload = verify(sender.send(captureAny)).captured.single;
 
         Map data = payload['data'];
         expect(data['code_version'], equals('main'));
@@ -78,7 +76,8 @@ Future<void> main() async {
           codeVersion: '1.0.0',
           package: 'some_package_name',
           handleUncaughtErrors: true,
-          transformer: ((_) => ExpandableTransformer()),
+          notifier: AsyncNotifier.new,
+          transformer: ExpandableTransformer.new,
           sender: ((_) => sender));
 
       await Rollbar.run(config);
@@ -104,25 +103,34 @@ void failingFunction() {
 }
 
 class ExpandableTransformer implements Transformer {
+  const ExpandableTransformer(Config _);
+
   @override
-  Future<Data> transform(dynamic error, StackTrace? trace, Data data) async {
-    expect(error, TypeMatcher<ExpandableException>());
+  Future<Data> transform(Data data, {required Event event}) async {
+    expect(event.error, TypeMatcher<ExpandableException>());
 
-    final traceChain = (error.messages as List<String>)
-        .map((message) => TraceInfo(
-            frames: [],
-            exception: ExceptionInfo(type: 'testing', message: message)))
-        .toList()
-      ..addAll(data.body.traces);
+    final report = data.body.report;
+    final messages = event.error.messages as List<String>;
+    final traces = [
+      ...messages.map(
+        (m) => Trace(exception: ExceptionInfo(type: 'test', message: m)),
+      ),
+      if (report is Trace) report,
+      if (report is Traces) ...report.traces,
+    ];
 
-    return data.copyWith(body: TraceChain(traceChain));
+    return data.copyWith(
+      body: data.body.copyWith(
+        report: Traces(traces),
+      ),
+    );
   }
 }
 
 class ExpandableException implements Exception {
-  List<String> messages;
+  final List<String> messages;
 
-  ExpandableException(this.messages);
+  const ExpandableException(this.messages);
 
   @override
   String toString() => 'ExpandableException with ${messages.length} messages';

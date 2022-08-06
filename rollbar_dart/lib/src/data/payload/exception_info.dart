@@ -3,32 +3,24 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 /// Contains all the error details except the stack trace.
 @sealed
-class ExceptionInfo {
+@immutable
+class ExceptionInfo
+    with EquatableSerializableMixin
+    implements Equatable, Serializable {
   final String type;
-  String message;
+  final String message;
   final String? description;
 
-  ExceptionInfo({
+  const ExceptionInfo({
     required this.type,
     required this.message,
     this.description,
   });
 
-  factory ExceptionInfo.fromMap(JsonMap attributes) => ExceptionInfo(
-      type: attributes.type,
-      message: attributes.message,
-      description: attributes.description);
-
-  factory ExceptionInfo.from(dynamic error, String? description) {
-    if (error is ExceptionInfo) {
-      return error.copyWith(description: error.description ?? description);
-    }
-
-    return ExceptionInfo(
-        type: error.runtimeType.toString(),
-        message: error.toString(),
-        description: description);
-  }
+  factory ExceptionInfo.fromMap(JsonMap map) => ExceptionInfo(
+      type: map['class'],
+      message: map['message'],
+      description: map['description']);
 
   ExceptionInfo copyWith({
     String? type,
@@ -44,23 +36,10 @@ class ExceptionInfo {
   String toString() =>
       'ExceptionInfo(type: $type, message: $message, description: $description)';
 
+  @override
   JsonMap toMap() => {
         'class': type,
         'message': message,
         'description': description,
-      }..compact();
-}
-
-extension _Attributes on JsonMap {
-  String get type {
-    assert(containsKey('class'));
-    return this['class'];
-  }
-
-  String get message {
-    assert(containsKey('message'));
-    return this['message'];
-  }
-
-  String? get description => this['description'];
+      }.compact();
 }

@@ -1,72 +1,81 @@
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
-import '../../ext/trace.dart';
+
 import 'exception_info.dart';
+import 'breadcrumb.dart';
 import 'frame.dart';
 
-typedef Traces = List<TraceInfo>;
+@immutable
+mixin Report implements Equatable, Serializable {
+  bool get isTrace => this is Trace || this is Traces;
 
-/// Container class with the error or message to be sent to Rollbar.
-abstract class Body {
-  JsonMap toMap();
-  Traces get traces;
-
-  static Body get empty => Message();
-
-  static Body fromMap(JsonMap attributes) {
-    if (attributes.containsKey('trace')) {
-      return TraceInfo.fromMap(attributes);
-    } else if (attributes.containsKey('message')) {
-      return Message.fromMap(attributes);
-    } else {
-      return TraceChain.fromMap(attributes);
-    }
+  static Report fromMap(JsonMap map) {
+    if (map.containsKey('message')) return Message.fromMap(map);
+    if (map.containsKey('trace')) return Trace.fromMap(map);
+    if (map.containsKey('trace_chain')) return Traces.fromMap(map);
+    throw StateError('Map needs a message, trace or trace_chain, found none.');
   }
 
-  factory Body.from(String? message, {dynamic error, StackTrace? stackTrace}) {
-    if (error == null && message == null) {
-      throw ArgumentError(
-          'Either an error or a message must be provided.', 'error');
-    }
-
-    if (error != null) {
-      return TraceInfo(
-          frames: stackTrace?.frames ?? [],
-          exception: ExceptionInfo.from(error, message),
-          rawTrace: stackTrace?.rawTrace);
-    }
-
-    return Message(message!);
+  Iterable<Trace> get traces {
+    if (this is Trace) return [this as Trace];
+    if (this is Traces) return (this as Traces).traces;
+    throw StateError('$runtimeType is neither Trace nor Traces.');
   }
 }
 
-/// An individual error with its corresponding stack trace if available.
+@sealed
 @immutable
-class TraceInfo implements Body {
-  final ExceptionInfo exception;
-  final List<Frame> frames;
-  final String? rawTrace;
+class Body with EquatableSerializableMixin implements Equatable, Serializable {
+  final Iterable<Breadcrumb> telemetry;
+  final Report report;
+
+  const Body({required this.telemetry, required this.report});
+
+  factory Body.fromMap(JsonMap map) => Body(
+        telemetry: map.telemetry,
+        report: Report.fromMap(map),
+      );
+
+  Body copyWith({
+    Iterable<Breadcrumb>? telemetry,
+    Report? report,
+  }) =>
+      Body(
+          telemetry: telemetry ?? this.telemetry,
+          report: report ?? this.report);
 
   @override
-  Traces get traces => [this];
+  JsonMap toMap() => {
+        'telemetry': telemetry.map((breadcrumb) => breadcrumb.toMap()).toList(),
+        ...report.toMap(),
+      };
+}
 
-  const TraceInfo({
+/// An individual error with its corresponding stack trace if available.
+@sealed
+@immutable
+class Trace with Report, EquatableSerializableMixin {
+  final ExceptionInfo exception;
+  final Iterable<Frame> frames;
+  final String? rawTrace;
+
+  const Trace({
     required this.exception,
-    required this.frames,
+    this.frames = const [],
     this.rawTrace,
   });
 
-  factory TraceInfo.fromMap(JsonMap attributes) => TraceInfo(
-      frames: attributes.trace.frames,
-      exception: attributes.trace.exceptionInfo,
-      rawTrace: attributes.trace.rawTrace);
+  factory Trace.fromMap(JsonMap map) => Trace(
+      exception: map.trace.exception,
+      frames: map.trace.frames,
+      rawTrace: map.trace.rawTrace);
 
-  TraceInfo copyWith({
+  Trace copyWith({
     ExceptionInfo? exception,
     List<Frame>? frames,
     String? rawTrace,
   }) =>
-      TraceInfo(
+      Trace(
           exception: exception ?? this.exception,
           frames: frames ?? this.frames,
           rawTrace: rawTrace ?? this.rawTrace);
@@ -74,7 +83,7 @@ class TraceInfo implements Body {
   @override
   JsonMap toMap() => {
         'trace': {
-          'frames': frames.map((f) => f.toMap()).toList(),
+          'frames': frames.map((frame) => frame.toMap()).toList(),
           'exception': exception.toMap(),
           'raw': rawTrace,
         }.compact()
@@ -85,58 +94,51 @@ class TraceInfo implements Body {
 /// root cause of the error.
 @sealed
 @immutable
-class TraceChain implements Body {
+class Traces with Report, EquatableSerializableMixin {
   @override
-  final Traces traces;
+  final Iterable<Trace> traces;
 
-  const TraceChain(this.traces);
+  const Traces(this.traces);
+
+  factory Traces.fromMap(JsonMap map) => Traces(
+        map.traces.map((trace) => Trace.fromMap({'trace': trace})).toList(),
+      );
 
   @override
   JsonMap toMap() => {
-        'trace_chain': traces.map((trace) => trace.toMap()['trace']).toList(),
+        'trace_chain': traces.map((t) => t.toMap().trace).toList(),
       };
-
-  factory TraceChain.fromMap(JsonMap attributes) => TraceChain(
-        attributes.traceChain
-            .map((trace) => TraceInfo.fromMap({'trace': trace}))
-            .toList(),
-      );
 }
 
 /// A text message to be sent to Rollbar.
 @sealed
 @immutable
-class Message implements Body {
+class Message with Report, EquatableSerializableMixin {
   final String text;
 
-  const Message([this.text = '']);
+  const Message({required this.text});
 
-  factory Message.fromMap(JsonMap attributes) => Message(attributes.message);
-
-  @override
-  Traces get traces => [];
+  factory Message.fromMap(JsonMap map) => Message(text: map.message);
 
   @override
   JsonMap toMap() => {
-        'message': {
-          'body': text,
-        }
+        'message': {'body': text}
       };
 }
 
-extension _Attributes on JsonMap {
-  ExceptionInfo get exceptionInfo {
-    assert(containsKey('exception'));
-    return ExceptionInfo.fromMap(this['exception'] as JsonMap);
-  }
+extension _KeyValuePath on JsonMap {
+  ExceptionInfo get exception => ExceptionInfo.fromMap(this['exception']);
+  String get message => this['message']['body'];
+  String? get rawTrace => this['raw'];
+  JsonMap get trace => this['trace'];
 
-  String get message => this['message']['body'] ?? '';
-  String? get rawTrace => this['raw'] as String?;
-  JsonMap get trace => this['trace'] ?? {};
-
-  List<JsonMap> get traceChain =>
-      (this['trace_chain'] as List? ?? []).whereType<JsonMap>().toList();
-
-  List<Frame> get frames =>
-      (this['frames'] as List? ?? []).map((f) => Frame.fromMap(f)).toList();
+  Iterable<Breadcrumb> get telemetry => this['telemetry']
+      .whereType<JsonMap>()
+      .map<Breadcrumb>(Breadcrumb.fromMap)
+      .toList();
+  Iterable<Frame> get frames => this['frames'] //
+      .whereType<JsonMap>()
+      .map<Frame>(Frame.fromMap)
+      .toList();
+  Iterable<JsonMap> get traces => this['trace_chain'].whereType<JsonMap>();
 }

@@ -1,3 +1,7 @@
+import 'package:meta/meta.dart';
+
+@sealed
+@immutable
 class Tuple2<T1, T2> {
   final T1 first;
   final T2 second;

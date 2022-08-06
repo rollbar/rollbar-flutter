@@ -32,6 +32,9 @@
                  includePlatformLogs:includePlatformLogs];
 
         result(nil);
+    } else if ([@"persistencePath" isEqualToString:call.method]) {
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        result(paths.firstObject);
     } else if ([@"close" isEqualToString:call.method]) {
         // No closing necessary
         result(nil);

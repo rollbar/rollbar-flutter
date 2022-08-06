@@ -23,7 +23,7 @@ void main() {
       expect(rollbarResponse.error, equals(0));
       expect(rollbarResponse.result, isNotNull);
       expect(rollbarResponse.result!.uuid,
-          equals('67ce3d7bfab14fd99218ae5c985071e7'));
+          equals('67ce3d7b-fab1-4fd9-9218-ae5c985071e7'));
     });
 
     test('Can convert error API response', () async {

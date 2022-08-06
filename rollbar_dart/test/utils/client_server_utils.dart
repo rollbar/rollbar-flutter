@@ -6,7 +6,6 @@ import 'dart:developer';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_dart/rollbar.dart';
-import 'package:rollbar_dart/src/data/response.dart';
 
 const endpointPrefix = 'http://raw:';
 
@@ -115,6 +114,6 @@ class RawTextSender implements Sender {
       socket.destroy();
     }
 
-    return !Response(error: 0, result: Result(uuid: '1234')).isError;
+    return true;
   }
 }

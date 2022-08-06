@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -6,25 +7,29 @@ import 'package:http/http.dart' as http;
 import 'package:rollbar_common/rollbar_common.dart';
 
 import '../data/response.dart';
-import '../logging.dart';
 import 'sender.dart';
-
-typedef HttpHeaders = Map<String, String>;
 
 /// HTTP [Sender] implementation.
 @sealed
 @immutable
+@internal
 class HttpSender implements Sender {
-  final Uri endpoint;
-  final HttpHeaders headers;
+  final Uri _endpoint;
+  final HttpHeaders _headers;
 
-  HttpSender({required String endpoint, required String accessToken})
-      : endpoint = Uri.parse(endpoint),
-        headers = {
+  HttpSender({required String accessToken, required String endpoint})
+      : _endpoint = Uri.parse(endpoint),
+        _headers = {
           'User-Agent': 'rollbar-dart',
           'Content-Type': 'application/json',
           'X-Rollbar-Access-Token': accessToken,
         };
+
+  static Future<bool> sendRecord(PayloadRecord record) async =>
+      await HttpSender(
+        endpoint: record.endpoint,
+        accessToken: record.accessToken,
+      ).sendString(record.payload);
 
   /// Sends the provided payload as the body of POST request to the configured
   /// endpoint.
@@ -35,19 +40,25 @@ class HttpSender implements Sender {
   Future<bool> sendString(String payload) async {
     try {
       final response = await http
-          .post(endpoint, headers: headers, body: payload)
+          .post(_endpoint, headers: _headers, body: payload)
           .then(Response.from);
 
       if (response.isError) {
         throw HttpException(
           '${response.error}: ${response.message}',
-          uri: endpoint,
+          uri: _endpoint,
         );
       }
 
       return true;
     } catch (error, stackTrace) {
-      err('Error posting payload', error, stackTrace);
+      log('Exception sending payload',
+          time: DateTime.now(),
+          level: Level.error.value,
+          name: runtimeType.toString(),
+          error: error,
+          stackTrace: stackTrace);
+
       return false;
     }
   }

@@ -2,12 +2,12 @@ import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart' as trace;
 import 'package:rollbar_common/rollbar_common.dart';
 
-import '../../ext/trace.dart';
+import '../../stacktrace.dart';
 
 /// Contains the information of a single frame in a stack trace.
 @sealed
 @immutable
-class Frame {
+class Frame with EquatableSerializableMixin implements Equatable, Serializable {
   final String filename;
   final String? type;
   final String? method;
@@ -29,7 +29,6 @@ class Frame {
       line: frame.line,
       column: frame.column);
 
-  @override
   factory Frame.fromMap(JsonMap map) => Frame(
       filename: map['filename'],
       method: map['method'],
@@ -55,6 +54,7 @@ class Frame {
         '($location)',
       ].join();
 
+  @override
   JsonMap toMap() => {
         'filename': filename,
         'class_name': type,

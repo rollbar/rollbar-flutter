@@ -1,65 +1,94 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
-import 'data/config.dart';
-import 'infrastructure.dart';
-import 'core_notifier.dart';
-import 'data/payload_record.dart';
-import 'data/payload/level.dart';
+import 'data/payload/breadcrumb.dart';
+import 'notifier/notifier.dart';
+import 'config.dart';
+import 'event.dart';
 
 @sealed
 class Rollbar {
   static Rollbar? _current;
-  static Rollbar get current {
-    if (_current == null) {
-      throw StateError('Rollbar has not been initialized, call [Rollbar.run].');
-    }
-    return _current!;
-  }
+  static Rollbar get current => _current.orElse(() =>
+      throw StateError('Rollbar has not been initialized, call Rollbar.run.'));
 
-  final Infrastructure _infrastructure;
-  final CoreNotifier _notifier;
+  final Notifier _notifier;
 
-  Rollbar._(this._infrastructure, this._notifier);
+  Rollbar._(this._notifier);
 
   static Future<void> run(Config config) async {
-    if (_current != null) {
-      await current._infrastructure.dispose();
-    }
-
+    _current?._notifier.dispose();
     _current = Rollbar._(
-      await InfrastructureIsolate.spawn(config: config),
-      CoreNotifier(config: config),
+      await config.notifier(config),
     );
   }
 
-  @internal
-  static void process({required PayloadRecord record}) {
-    current._infrastructure.process(record: record);
-  }
-
   /// Logs a message as an occurrence.
-  static Future<void> message(String message, {Level level = Level.info}) =>
-      current._notifier.notify(level, null, null, message);
+  ///
+  /// Examples:
+  /// ```dart
+  /// Rollbar.log('Some message');
+  /// ```
+  static FutureOr<void> log(String message, {Level level = Level.info}) =>
+      current._notifier.notify(Event(
+        level: level,
+        message: message,
+      ));
 
   /// Sends an error as an occurrence, with [Level.debug] level.
-  static Future<void> debug(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Level.debug, error, stackTrace);
+  static FutureOr<void> debug(dynamic error, StackTrace stackTrace) =>
+      current._notifier.notify(Event(
+        level: Level.debug,
+        error: error,
+        stackTrace: stackTrace,
+      ));
 
   /// Sends an error as an occurrence, with [Level.info] level.
-  static Future<void> info(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Level.info, error, stackTrace);
+  static FutureOr<void> info(dynamic error, StackTrace stackTrace) =>
+      current._notifier.notify(Event(
+        level: Level.info,
+        error: error,
+        stackTrace: stackTrace,
+      ));
 
   /// Sends an error as an occurrence, with [Level.warning] level.
-  static Future<void> warn(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Level.warning, error, stackTrace);
+  static FutureOr<void> warn(dynamic error, StackTrace stackTrace) =>
+      current._notifier.notify(Event(
+        level: Level.warning,
+        error: error,
+        stackTrace: stackTrace,
+      ));
 
   /// Sends an error as an occurrence, with [Level.error] level.
-  static Future<void> error(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Level.error, error, stackTrace);
+  static FutureOr<void> error(dynamic error, StackTrace stackTrace) =>
+      current._notifier.notify(Event(
+        level: Level.error,
+        error: error,
+        stackTrace: stackTrace,
+      ));
 
   /// Sends an error as an occurrence, with [Level.critical] level.
-  static Future<void> critical(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Level.critical, error, stackTrace);
+  static FutureOr<void> critical(dynamic error, StackTrace stackTrace) =>
+      current._notifier.notify(Event(
+        level: Level.critical,
+        error: error,
+        stackTrace: stackTrace,
+      ));
+
+  /// Drops a breadcrumb with information about state, a change of state, an
+  /// event such as the user interacting with a widget, or navigating from one
+  /// place to another or any custom data.
+  ///
+  /// Breadcrumbs are events gathered by Rollbar's Telemetry which can help you
+  /// understand the events leading up to an occurrence such as an error,
+  /// exception or crash.
+  ///
+  /// - See also: [Breadcrumb].
+  static FutureOr<void> drop(Breadcrumb breadcrumb) {
+    current._notifier.notify(Event(
+      breadcrumb: breadcrumb,
+    ));
+  }
 }

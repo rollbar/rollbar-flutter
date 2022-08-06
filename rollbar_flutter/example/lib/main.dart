@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -9,11 +10,14 @@ import 'package:rollbar_flutter/rollbar.dart';
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
   const config = Config(
-    accessToken: 'YOUR-ROLLBAR-ACCESSTOKEN',
-    package: 'rollbar_flutter_example',
-  );
+      accessToken: '71ec6c76a22f46f0be567c633a3fb894',
+      package: 'rollbar_flutter_example');
 
-  await RollbarFlutter.run(config, () => runApp(const MyApp()));
+  await RollbarFlutter.run(config, () {
+    Rollbar.drop(Breadcrumb.navigation(from: 'initialize', to: 'runApp'));
+    Rollbar.log('Rollbar initialized');
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -38,26 +42,37 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.rollbar.flutter.example/activity');
 
   var _batteryLevel = 'Unknown battery level.';
   var _faultyMsg = 'No successful invocations yet.';
   var _counter = 0;
 
-  _MyHomePageState();
+  MyHomePageState();
 
   void batteryLevel() async {
+    Rollbar.drop(
+      Breadcrumb.widget(
+        element: 'batteryLevel',
+        extra: const {'action': 'tapped'},
+      ),
+    );
+
     String batteryLevel;
     try {
-      final int level = await platform.invokeMethod('getBatteryLevel');
+      final int level = await platform.batteryLevel;
       batteryLevel = 'Battery at $level%.';
     } on PlatformException catch (e, stackTrace) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
-      await Rollbar.warn(e, stackTrace);
+      Rollbar.drop(
+        Breadcrumb.error(
+            'Non-fatal PlatformException while getting battery level.'),
+      );
+      Rollbar.warn(e, stackTrace);
     }
 
     setState(() {
@@ -66,28 +81,36 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void faultyMethod() {
+    Rollbar.drop(Breadcrumb.log('Tapped faultyMethod button'));
     platform
-        .invokeMethod('faultyMethod')
+        .faultyMethod()
         .then((message) => setState(() => _faultyMsg = message))
         .catchError((e) => log(e), test: (_) => false);
   }
 
   void incrementCounter() {
+    Rollbar.drop(Breadcrumb.widget(
+      element: 'incrementCounter',
+      extra: const {'action': 'tapped'},
+    ));
+
     setState(() {
       if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
       } else {
-        Rollbar.message('Counter incremented to $_counter');
+        Rollbar.drop(Breadcrumb.log('Counter incremented to $_counter'));
       }
     });
   }
 
   void divideByZero() {
+    Rollbar.drop(Breadcrumb.log('Tapped divideByZero button'));
     1 ~/ 0;
   }
 
   void crash() {
-    platform.invokeMethod('crash');
+    Rollbar.drop(Breadcrumb.navigation(from: 'app', to: 'crash'));
+    platform.crash();
   }
 
   @override
@@ -138,4 +161,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+extension _Methods on MethodChannel {
+  Future<int> get batteryLevel async => await invokeMethod('getBatteryLevel');
+  Future<String> faultyMethod() async => await invokeMethod('faultyMethod');
+  Future<Never> crash() async => await invokeMethod('crash');
 }

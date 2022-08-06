@@ -11,6 +11,10 @@ import 'platform_transformer.dart';
 extension _Methods on MethodChannel {
   Future<void> initialize({required Config config}) async =>
       await invokeMethod('initialize', config.toMap());
+
+  /// The platform-specific path where we can persist data if needed.
+  Future<String> get persistencePath async =>
+      await invokeMethod('persistencePath');
 }
 
 typedef RollbarClosure = FutureOr<void> Function();
@@ -25,13 +29,15 @@ class RollbarFlutter {
     Config config,
     RollbarClosure appRunner,
   ) async {
+    WidgetsFlutterBinding.ensureInitialized();
+
     await Rollbar.run(config.copyWith(
       framework: 'flutter',
+      persistencePath: await _platform.persistencePath,
       transformer: (_) => PlatformTransformer(),
     ));
 
     if (!config.handleUncaughtErrors) {
-      WidgetsFlutterBinding.ensureInitialized();
       await _platform.initialize(config: config);
       await appRunner();
       return;
@@ -42,7 +48,7 @@ class RollbarFlutter {
 
       FlutterError.onError = (error) async {
         FlutterError.presentError(error);
-        await Rollbar.error(error.exception, error.stack ?? StackTrace.empty);
+        Rollbar.error(error.exception, error.stack ?? StackTrace.empty);
       };
 
       await _platform.initialize(config: config);

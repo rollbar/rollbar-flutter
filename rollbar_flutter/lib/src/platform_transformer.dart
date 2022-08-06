@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show PlatformException;
-import 'package:rollbar_dart/rollbar.dart'
-    show Body, Data, TraceChain, Traces, Transformer;
+import 'package:rollbar_common/rollbar_common.dart';
+import 'package:rollbar_dart/rollbar.dart';
+import 'extension/foundation.dart';
 
-typedef JsonMap = Map<String, dynamic>;
+const String _prefix = 'com.rollbar.flutter.RollbarTracePayload:';
 
 /// This trasformer inspects some platform specific exception types, which
 /// carry additional occurrence details in their exception messages.
@@ -13,73 +14,61 @@ typedef JsonMap = Map<String, dynamic>;
 /// both platform specific and Dart frames.
 class PlatformTransformer implements Transformer {
   final Transformer? wrapped;
-  final bool appendToChain;
+  final bool append;
 
-  PlatformTransformer({this.wrapped, this.appendToChain = false});
+  PlatformTransformer({this.wrapped, this.append = false});
 
   @override
-  Future<Data> transform(dynamic error, StackTrace? trace, Data data) async {
-    if (defaultTargetPlatform == TargetPlatform.android &&
-        error is PlatformException) {
-      data = _enrichAndroidTrace(error.message, data);
+  Future<Data> transform(Data data, {required Event event}) async {
+    final error = event.error;
+    if (defaultTargetPlatform.isAndroid &&
+        error is PlatformException &&
+        data.body.report.isTrace) {
+      data = error.traces
+          .map((extraTraces) =>
+              data.body.report.traces.attach(extraTraces, append))
+          .map((allTraces) => data.copyWith(
+              body: data.body.copyWith(report: Traces(allTraces)),
+              platformPayload: error.payload))
+          .or(data);
     }
 
-    return await wrapped?.transform(error, trace, data) ?? data;
+    return await wrapped?.transform(data, event: event) ?? data;
   }
 }
 
-extension _AndroidPlatform on PlatformTransformer {
-  static const String tracePayloadPrefix =
-      'com.rollbar.flutter.RollbarTracePayload:';
+extension _PlatformException on PlatformException {
+  /// Retrieves the traces in the json payload inside PlatformException
+  ///
+  /// ¹On Android, [PlatformException.message] contains the entire exception
+  /// payload in a json string.
+  Iterable<Trace>? get traces =>
+      (payload?['data']['body'] as JsonMap?).map(Report.fromMap)?.traces;
 
-  Data _enrichAndroidTrace(String? rawPayload, Data data) {
-    // We cannot use error.stackTrace here, it will contain
-    // 'com.rollbar.flutter.RollbarTracePayload:' only in debug mode,
-    // but not in release.
-    if (rawPayload?.startsWith(tracePayloadPrefix) == true) {
-      final payload = rawPayload!.substring(tracePayloadPrefix.length);
-      return _attachPlatformPayload(jsonDecode(payload), data);
-    }
+  JsonMap? get payload => message.mapIf(
+      (rawPayload) => rawPayload.startsWith(_prefix),
+      (rawPayload) => jsonDecode(rawPayload.substring(_prefix.length)));
+}
 
-    return data;
-  }
+extension _Message on Iterable<Trace> {
+  /// Propagates the exception message from [extraTraces] to all traces and
+  /// attaches the given [extraTraces] to this collection of traces.
+  Iterable<Trace> attach(Iterable<Trace> extraTraces, bool append) =>
+      (extraTraces.tryFirst?.exception.message)
+          .map((message) => 'PlatformException(error, "$message")')
+          .map(replaceExceptionMessages)
+          .map(append ? extraTraces.followedBy : identity)
+          .or(this);
 
-  Data _attachPlatformPayload(JsonMap payload, Data data) {
-    final embeddedBody = payload['data']['body'] as JsonMap;
+  /// Propagates the given [message] as the new exception message, replacing
+  /// only instances where the exception message is a json payload¹.
+  Iterable<Trace> replaceExceptionMessages(String message) => mapWhere(
+      (trace) => trace.exception.message.containsJsonPayload,
+      (trace) => trace.copyWith(
+          exception: trace.exception.copyWith(message: message)));
+}
 
-    if (appendToChain) {
-      final body = _appendPlatformTraceToChain(data.body, embeddedBody);
-      return data.copyWith(body: body);
-    } else {
-      _restoreDartChainMessage(
-        data.body.traces,
-        Body.fromMap(embeddedBody).traces,
-      );
-      return data.copyWith(platformPayload: payload);
-    }
-  }
-
-  Body _appendPlatformTraceToChain(Body dartBody, JsonMap embeddedBody) {
-    final embeddedChain = Body.fromMap(embeddedBody).traces;
-    final dartChain = dartBody.traces;
-
-    _restoreDartChainMessage(dartChain, embeddedChain);
-
-    embeddedChain.addAll(dartChain);
-    return TraceChain(embeddedChain);
-  }
-
-  // Fix message, we hijacked it on the platform side to carry the payload
-  void _restoreDartChainMessage(Traces dartChain, Traces embeddedChain) {
-    if (embeddedChain.isEmpty) return;
-    final originalMessage = embeddedChain.first.exception.message;
-    final message = 'PlatformException(error, "$originalMessage")';
-
-    for (final element in dartChain) {
-      if (element.exception.message.startsWith('PlatformException') &&
-          element.exception.message.contains(tracePayloadPrefix)) {
-        element.exception.message = message;
-      }
-    }
-  }
+extension _String on String {
+  bool get containsJsonPayload =>
+      startsWith('PlatformException') && contains(_prefix);
 }
