@@ -22,7 +22,7 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
-        *) 
+        *)
             TASKS+=("$1")
             shift
             ;;
@@ -64,7 +64,7 @@ function exec_task {
                 popd
             else
                 echo "Skipping Android example build, no Flutter example in ${PWD} package" >&2
-            fi  
+            fi
             ;;
         "example-ios")
             if [ -e "example/lib/main.dart" ]; then
@@ -76,7 +76,7 @@ function exec_task {
                 echo "Skipping iOS example build, no Flutter example in ${PWD} package" >&2
             fi
             ;;
-        *) 
+        *)
             echo "Unknown task $task" >&2
             return 1
             ;;

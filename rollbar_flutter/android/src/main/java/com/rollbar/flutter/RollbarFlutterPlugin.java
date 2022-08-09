@@ -1,13 +1,12 @@
 package com.rollbar.flutter;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import android.content.Context;
 import androidx.annotation.NonNull;
+
+import com.rollbar.android.Rollbar;
+import com.rollbar.notifier.config.Config;
+import com.rollbar.notifier.config.ConfigBuilder;
+import com.rollbar.notifier.config.ConfigProvider;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
@@ -15,10 +14,11 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
-import com.rollbar.android.Rollbar;
-import com.rollbar.notifier.config.Config;
-import com.rollbar.notifier.config.ConfigBuilder;
-import com.rollbar.notifier.config.ConfigProvider;
+import java.io.File;
+import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * RollbarFlutterPlugin.
