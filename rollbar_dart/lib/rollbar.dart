@@ -17,5 +17,3 @@ export 'src/data/payload/exception_info.dart' show ExceptionInfo;
 
 export 'src/config.dart' show Config;
 export 'src/event.dart' show Event;
-
-export 'src/connectivity_monitor.dart';
