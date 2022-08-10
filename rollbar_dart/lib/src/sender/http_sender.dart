@@ -59,7 +59,7 @@ class HttpSender implements Sender {
 
       return true;
     } catch (error, stackTrace) {
-      _State.suspend(30.seconds);
+      if (!_State.suspended) _State.suspend(30.seconds);
 
       log('Exception sending payload',
           time: DateTime.now(),
