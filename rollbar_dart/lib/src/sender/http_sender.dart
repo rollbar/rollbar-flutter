@@ -39,6 +39,13 @@ class HttpSender implements Sender {
   @override
   Future<bool> sendString(String payload) async {
     try {
+      if (_State.suspended) {
+        throw HttpException(
+          'HTTP transactions are currently suspended.',
+          uri: _endpoint,
+        );
+      }
+
       final response = await http
           .post(_endpoint, headers: _headers, body: payload)
           .then(Response.from);
@@ -52,6 +59,8 @@ class HttpSender implements Sender {
 
       return true;
     } catch (error, stackTrace) {
+      _State.suspend(30.seconds);
+
       log('Exception sending payload',
           time: DateTime.now(),
           level: Level.error.value,
@@ -61,5 +70,18 @@ class HttpSender implements Sender {
 
       return false;
     }
+  }
+}
+
+extension _State on HttpSender {
+  static bool _suspended = false;
+
+  static bool get suspended => _suspended;
+
+  static void suspend(Duration duration) async {
+    if (_suspended) return;
+    _suspended = true;
+    await Future.delayed(duration);
+    _suspended = false;
   }
 }
