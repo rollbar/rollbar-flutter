@@ -18,12 +18,6 @@ dependencies:
   rollbar_common: ^0.4.0-beta
   rollbar_dart: ^0.4.0-beta
 
-dependency_overrides:
-  rollbar_common:
-    path: ../rollbar_common
-  rollbar_dart:
-    path: ../rollbar_dart
-
 dev_dependencies:
   lints: ^2.0.0
   flutter_lints: ^2.0.1
