@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0-beta
+
+- New feature: Telemetry.
+  - See all the breadcrumbs leading up to an error on Rollbar.
+  - Gather extra data silently by "dropping breadcrumbs" with information about UI navigation, app events, connectivity events, and more.
+  - Telemetry is only sent to Rollbar at the on-set of an occurrence (eg. an exception)
+- Big improvements to multithreading correctness, performance and security: Now the _entire_ Rollbar process flow is performed in a memory-isolated thread guaranteeing the library will never take control of your main-thread where your UX/app logic and UI rendering takes place.
+- We've set Dart 2.17.0 as the minimum required Dart version, we decided that the new features introduced to the language were too good to pass, including features that will allow us to provide not only the best possible library, but a modern API for developers.
+- Internals have been restructured with Modularity over ORM in mind. This architecture strategy that comes from the Functional world, allows us to build a highly composable internal architecture with minimal inter-depdendence.
+  - Building parts for our library becomes more like building Legos rather than intertwined object relationships.
+
 ## 0.3.0-beta
 
 - Simplified API.

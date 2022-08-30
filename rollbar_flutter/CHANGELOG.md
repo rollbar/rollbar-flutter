@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0-beta
+- Updated Example to showcase the new Telemetry feature.
+- Fixed an issue where occurrences weren't being persisted by sqlite3, therefore Rollbar reports could be lost after a crash.
+
 ## 0.3.0-beta
 
 - Simplified API.
