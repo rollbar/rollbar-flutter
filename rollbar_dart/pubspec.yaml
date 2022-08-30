@@ -1,6 +1,6 @@
 name: rollbar_dart
 description: Connect your Dart applications to Rollbar for error reporting.
-version: 0.3.0-beta
+version: 0.4.0-beta
 homepage: https://www.rollbar.com
 documentation: https://docs.rollbar.com/docs/flutter#dart
 repository: https://github.com/rollbar/rollbar-flutter
@@ -14,11 +14,7 @@ dependencies:
   sqlite3: ^1.7.0
   collection: ^1.16.0
   stack_trace: ^1.10.0
-  rollbar_common: ^0.3.1-beta
-
-dependency_overrides:
-  rollbar_common:
-    path: ../rollbar_common
+  rollbar_common: ^0.4.0-beta
 
 dev_dependencies:
   lints: ^2.0.0
