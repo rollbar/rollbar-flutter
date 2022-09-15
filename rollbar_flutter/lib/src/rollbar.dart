@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:rollbar_dart/rollbar.dart';
 
+import 'flutter_error.dart';
 import 'platform_transformer.dart';
 
 extension _Methods on MethodChannel {
@@ -46,10 +47,7 @@ class RollbarFlutter {
     await runZonedGuarded(() async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      FlutterError.onError = (error) async {
-        FlutterError.presentError(error);
-        Rollbar.error(error.exception, error.stack ?? StackTrace.empty);
-      };
+      FlutterError.onError = RollbarFlutterError.onError;
 
       await _platform.initialize(config: config);
       await appRunner();

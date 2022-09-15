@@ -22,6 +22,9 @@ class Tuple2<T1, T2> {
     }
   }
 
+  Tuple2<U, T2> mapFirst<U>(U Function(T1) f) => Tuple2(f(first), second);
+  Tuple2<T1, U> mapSecond<U>(U Function(T2) f) => Tuple2(first, f(second));
+
   @override
   String toString() => '($first, $second)';
 

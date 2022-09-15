@@ -47,9 +47,25 @@ extension IterableExtensions<E> on Iterable<E> {
   }
 }
 
-extension CompactList<E> on Iterable<E?> {
+extension CompactIterable<E> on Iterable<E?> {
   /// Returns a new non-null List by filtering out null values in the this List.
   Iterable<E> compact() => whereType<E>();
+}
+
+extension CompactMap<K, V> on Map<K, V?> {
+  /// Returns a new non-null Map by filtering out null values in the this Map.
+  Map<K, V> compact() {
+    Map<K, V> map = {};
+
+    for (final entry in entries) {
+      final value = entry.value;
+      if (value != null) {
+        map[entry.key] = value;
+      }
+    }
+
+    return map;
+  }
 }
 
 extension MapExtensions<K, V> on Map<K, V> {
@@ -133,17 +149,6 @@ extension MapExtensions<K, V> on Map<K, V> {
     }
 
     return false;
-  }
-
-  /// Returns a new non-null Map by filtering out null values in the this Map.
-  Map<K, V> compact() {
-    Map<K, V> map = {};
-
-    forEach((k, v) {
-      if (v != null) map[k] = v;
-    });
-
-    return map;
   }
 
   /// Reduces the [Map] to a single key/value pair [MapEntry] by iteratively
