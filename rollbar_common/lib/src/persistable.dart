@@ -24,7 +24,7 @@ extension DatatypeSqlType on Datatype {
 /// [Persistable] types leverage serialization to store and recover
 /// `(key, value)` pairs through [Serializable.fromMap] and [toMap].
 abstract class Persistable<T extends Object>
-    implements Serializable, Comparable, Identifiable<T> {
+    implements Serializable, Comparable<Persistable<T>>, Identifiable<T> {
   static const _map = <Type, PersistableFor>{
     Persistable: PersistableFor(),
     PayloadRecord: PersistablePayloadRecord(),
@@ -35,13 +35,15 @@ abstract class Persistable<T extends Object>
 
   /// A List of all persistable keys and their associated [Datatype]s in
   /// this [Persistable].
+  ///
+  /// Issue: https://github.com/dart-lang/language/issues/356
   // static Map<String, Datatype> get persistingKeyTypes;
 }
 
 /// Dart's type system is too rudimentary and still doesn't support
 /// abstract static interfaces.
 ///
-/// This is a workaround that allows us to express generic [Serializable]
+/// This is a workaround that allows us to express generic [Persistable]
 /// types.
 ///
 /// More info: https://github.com/dart-lang/language/issues/356

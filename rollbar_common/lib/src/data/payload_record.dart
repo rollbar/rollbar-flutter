@@ -81,9 +81,9 @@ class PayloadRecord implements Persistable<UUID> {
   ///
   /// The [other] argument must be a value that is comparable to this object.
   @override
-  int compareTo(other) {
+  int compareTo(Persistable<UUID> other) {
     if (other is! PayloadRecord) {
-      throw ArgumentError('Cannot compare between different types.', other);
+      throw ArgumentError('Cannot compare between different types.', 'other');
     }
 
     return timestamp.compareTo(other.timestamp);
