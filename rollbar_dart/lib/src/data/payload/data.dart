@@ -3,6 +3,7 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 import 'body.dart' show Body;
 import 'client.dart' show Client;
+import 'user.dart' show User;
 
 /// Contains the data for the occurrence to be sent to Rollbar.
 @sealed
@@ -17,6 +18,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
   final String language;
   final String framework;
   final String codeVersion;
+  final User? user;
   final JsonMap? custom;
   final JsonMap? platformPayload;
   final JsonMap server;
@@ -33,6 +35,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
     required this.level,
     required this.timestamp,
     required this.body,
+    this.user,
     this.custom,
     this.platformPayload,
     required this.server,
@@ -49,6 +52,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
     Level? level,
     DateTime? timestamp,
     Body? body,
+    User? user,
     JsonMap? custom,
     JsonMap? platformPayload,
     JsonMap? server,
@@ -64,6 +68,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
         level: level ?? this.level,
         timestamp: timestamp ?? this.timestamp,
         body: body ?? this.body,
+        user: user ?? this.user,
         custom: custom ?? this.custom,
         platformPayload: platformPayload ?? this.platformPayload,
         server: server ?? this.server,
@@ -81,6 +86,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
       level: other.level,
       timestamp: other.timestamp,
       body: other.body,
+      user: other.user,
       custom: other.custom,
       platformPayload: other.platformPayload,
       server: other.server);
@@ -95,6 +101,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
       codeVersion: map['code_version'],
       level: Level.values.firstWhere((level) => level.name == map['level']),
       body: Body.fromMap(map['body']),
+      user: User.fromMap(map['person']),
       custom: map['custom'],
       platformPayload: map['platform_payload'],
       server: map['server'],
@@ -113,6 +120,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
         'language': language,
         'level': level.name,
         'timestamp': timestamp.microsecondsSinceEpoch,
+        'person': user,
         'custom': custom,
         'server': server,
         'framework': framework,
