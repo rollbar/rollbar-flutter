@@ -5,13 +5,13 @@ import 'package:rollbar_common/rollbar_common.dart';
 @immutable
 class User with EquatableSerializableMixin implements Equatable, Serializable {
   final String id;
-  final String username;
-  final String email;
+  final String? username;
+  final String? email;
 
   const User({
     required this.id,
-    required this.username,
-    required this.email,
+    this.username,
+    this.email,
   });
 
   factory User.fromMap(JsonMap map) => User(
@@ -26,5 +26,5 @@ class User with EquatableSerializableMixin implements Equatable, Serializable {
         'id': id,
         'username': username,
         'email': email,
-      };
+      }.compact();
 }

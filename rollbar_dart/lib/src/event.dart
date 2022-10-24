@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import 'data/payload/breadcrumb.dart';
+import 'data/payload/user.dart';
 import 'telemetry.dart';
 
 @sealed
@@ -11,6 +12,7 @@ class Event {
   final dynamic error;
   final StackTrace? stackTrace;
   final String? message;
+  final User? user;
   final Breadcrumb? breadcrumb;
   final Telemetry? telemetry;
 
@@ -19,6 +21,7 @@ class Event {
     this.error,
     this.stackTrace,
     this.message,
+    this.user,
     this.breadcrumb,
     this.telemetry,
   });
@@ -28,6 +31,7 @@ class Event {
     dynamic error,
     StackTrace? stackTrace,
     String? message,
+    User? user,
     Breadcrumb? breadcrumb,
     Telemetry? telemetry,
   }) =>
@@ -36,6 +40,7 @@ class Event {
           error: error ?? this.error,
           stackTrace: stackTrace ?? this.stackTrace,
           message: message ?? this.message,
+          user: user ?? this.user,
           breadcrumb: breadcrumb ?? this.breadcrumb,
           telemetry: telemetry ?? this.telemetry);
 
@@ -45,6 +50,7 @@ class Event {
       'error: $error, '
       'stackTrace: $stackTrace, '
       'message: $message, '
+      'user: $user, '
       'breadcrumb: $breadcrumb, '
       'telemetry: $telemetry)';
 
@@ -56,6 +62,7 @@ class Event {
           other.error == error &&
           other.stackTrace == stackTrace &&
           other.message == message &&
+          other.user == user &&
           other.breadcrumb == breadcrumb &&
           other.telemetry == telemetry);
 
@@ -65,6 +72,7 @@ class Event {
         error,
         stackTrace,
         message,
+        user,
         breadcrumb,
         telemetry,
       );

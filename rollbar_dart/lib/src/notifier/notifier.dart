@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../sender/sender.dart';
 import '../wrangler/wrangler.dart';
+import '../context.dart';
 import '../telemetry.dart';
 import '../event.dart';
 
@@ -12,6 +13,7 @@ abstract class Notifier {
 
   Sender get sender;
   Wrangler get wrangler;
+  Context get context;
   Telemetry get telemetry;
 
   FutureOr<void> notify(Event event);

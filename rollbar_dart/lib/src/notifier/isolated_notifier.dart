@@ -8,6 +8,7 @@ import '../data/payload/breadcrumb.dart';
 import '../sender/sender.dart';
 import '../wrangler/wrangler.dart';
 import '../config.dart';
+import '../context.dart';
 import '../event.dart';
 import '../telemetry.dart';
 import 'async_notifier.dart';
@@ -57,6 +58,7 @@ extension _IsolatedNotifier$Isolate on IsolatedNotifier {
   static late final Wrangler wrangler;
   static late final Sender sender;
   static late final Telemetry telemetry;
+  static late final Context context;
 
   static Future<void> run(Tuple2<SendPort, Config> tuple) async {
     final sendPort = tuple.first;
@@ -67,9 +69,12 @@ extension _IsolatedNotifier$Isolate on IsolatedNotifier {
     sender = config.sender(config);
     wrangler = config.wrangler(config);
     telemetry = Telemetry(config);
+    context = Context();
 
     await for (final Event event in receivePort) {
-      if (event.breadcrumb != null) {
+      if (event.user != null) {
+        context.user = event.user;
+      } else if (event.breadcrumb != null) {
         telemetry.add(event.breadcrumb as Breadcrumb);
       } else {
         telemetry.removeExpired();

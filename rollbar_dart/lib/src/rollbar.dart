@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
+import 'package:rollbar_dart/src/data/payload/user.dart';
 
 import 'data/payload/breadcrumb.dart';
 import 'notifier/notifier.dart';
@@ -76,6 +77,16 @@ class Rollbar {
         error: error,
         stackTrace: stackTrace,
       ));
+
+  static FutureOr<void> setUser({
+    required String id,
+    String? username,
+    String? email,
+  }) {
+    current._notifier.notify(Event(
+      user: User(id: id, username: username, email: email),
+    ));
+  }
 
   /// Drops a breadcrumb with information about state, a change of state, an
   /// event such as the user interacting with a widget, or navigating from one
