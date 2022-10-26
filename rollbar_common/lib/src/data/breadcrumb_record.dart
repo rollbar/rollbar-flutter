@@ -70,7 +70,7 @@ class BreadcrumbRecord implements Persistable<UUID> {
   @override
   int compareTo(other) {
     if (other is! BreadcrumbRecord) {
-      throw ArgumentError('Cannot compare between different types.', other);
+      throw ArgumentError('Cannot compare between different types.', 'other');
     }
 
     return timestamp.compareTo(other.timestamp);
