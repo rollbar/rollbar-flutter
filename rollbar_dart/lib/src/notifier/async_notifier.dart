@@ -43,7 +43,7 @@ class AsyncNotifier implements Notifier {
       telemetry.removeExpired();
 
       final payload = await wrangler.payload(
-        event: event.copyWith(telemetry: telemetry),
+        event: event.copyWith(context: context, telemetry: telemetry),
       );
       await sender.send(payload.toMap());
     }

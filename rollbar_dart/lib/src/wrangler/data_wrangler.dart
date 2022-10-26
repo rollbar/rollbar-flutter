@@ -41,6 +41,7 @@ extension _Data on Data {
       Data(
           body: _Body.from(event: event),
           client: _Client.fromPlatform(),
+          user: event.context?.user,
           codeVersion: config.codeVersion,
           environment: config.environment,
           framework: config.framework,

@@ -80,7 +80,7 @@ extension _IsolatedNotifier$Isolate on IsolatedNotifier {
         telemetry.removeExpired();
 
         final payload = await wrangler.payload(
-          event: event.copyWith(telemetry: telemetry),
+          event: event.copyWith(context: context, telemetry: telemetry),
         );
         await sender.send(payload.toMap());
       }

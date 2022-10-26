@@ -3,6 +3,7 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 import 'data/payload/breadcrumb.dart';
 import 'data/payload/user.dart';
+import 'context.dart';
 import 'telemetry.dart';
 
 @sealed
@@ -14,6 +15,7 @@ class Event {
   final String? message;
   final User? user;
   final Breadcrumb? breadcrumb;
+  final Context? context;
   final Telemetry? telemetry;
 
   const Event({
@@ -23,6 +25,7 @@ class Event {
     this.message,
     this.user,
     this.breadcrumb,
+    this.context,
     this.telemetry,
   });
 
@@ -33,6 +36,7 @@ class Event {
     String? message,
     User? user,
     Breadcrumb? breadcrumb,
+    Context? context,
     Telemetry? telemetry,
   }) =>
       Event(
@@ -42,6 +46,7 @@ class Event {
           message: message ?? this.message,
           user: user ?? this.user,
           breadcrumb: breadcrumb ?? this.breadcrumb,
+          context: context ?? this.context,
           telemetry: telemetry ?? this.telemetry);
 
   @override
@@ -52,6 +57,7 @@ class Event {
       'message: $message, '
       'user: $user, '
       'breadcrumb: $breadcrumb, '
+      'context: $context, '
       'telemetry: $telemetry)';
 
   @override
@@ -64,6 +70,7 @@ class Event {
           other.message == message &&
           other.user == user &&
           other.breadcrumb == breadcrumb &&
+          other.context == context &&
           other.telemetry == telemetry);
 
   @override
@@ -74,6 +81,7 @@ class Event {
         message,
         user,
         breadcrumb,
+        context,
         telemetry,
       );
 }

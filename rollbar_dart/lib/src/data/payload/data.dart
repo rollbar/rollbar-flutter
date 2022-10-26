@@ -120,7 +120,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
         'language': language,
         'level': level.name,
         'timestamp': timestamp.microsecondsSinceEpoch,
-        'person': user,
+        'person': user?.toMap(),
         'custom': custom,
         'server': server,
         'framework': framework,
