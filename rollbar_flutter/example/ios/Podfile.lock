@@ -8,22 +8,19 @@ PODS:
   - rollbar_flutter (0.0.1):
     - Flutter
     - Rollbar (~> 1.12.14)
-  - sqlite3 (3.39.2):
-    - sqlite3/common (= 3.39.2)
-  - sqlite3/common (3.39.2)
-  - sqlite3/fts5 (3.39.2):
+  - sqlite3 (3.39.3):
+    - sqlite3/common (= 3.39.3)
+  - sqlite3/common (3.39.3)
+  - sqlite3/fts5 (3.39.3):
     - sqlite3/common
-  - sqlite3/json1 (3.39.2):
+  - sqlite3/perf-threadsafe (3.39.3):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.39.2):
-    - sqlite3/common
-  - sqlite3/rtree (3.39.2):
+  - sqlite3/rtree (3.39.3):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - sqlite3 (~> 3.39.2)
+    - sqlite3 (~> 3.39.3)
     - sqlite3/fts5
-    - sqlite3/json1
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
 
@@ -55,8 +52,8 @@ SPEC CHECKSUMS:
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   Rollbar: 58f315609433558a82af5a54d7888bb020bec561
   rollbar_flutter: b7542ba065cdece3cef1b316c748d24d129ead51
-  sqlite3: d115522c740c457b805c018b0296b5ba003da280
-  sqlite3_flutter_libs: 1641350489d5c2bcb9d0773ade9693624111b24c
+  sqlite3: 50117e9e063a9ef2b865f7bdf2f2601e5d368e9a
+  sqlite3_flutter_libs: c6ab7f23670a98fef45a137159452004bc552168
 
 PODFILE CHECKSUM: 7082f7373328dcaf922fcf9299ad4a23eff9cc37
 
