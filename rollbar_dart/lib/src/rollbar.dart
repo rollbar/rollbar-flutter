@@ -78,14 +78,8 @@ class Rollbar {
         stackTrace: stackTrace,
       ));
 
-  static FutureOr<void> setUser({
-    required String id,
-    String? username,
-    String? email,
-  }) {
-    current._notifier.notify(Event(
-      user: User(id: id, username: username, email: email),
-    ));
+  static FutureOr<void> setUser(User? user) {
+    current._notifier.notify(Event(user: user));
   }
 
   /// Drops a breadcrumb with information about state, a change of state, an
@@ -98,8 +92,6 @@ class Rollbar {
   ///
   /// - See also: [Breadcrumb].
   static FutureOr<void> drop(Breadcrumb breadcrumb) {
-    current._notifier.notify(Event(
-      breadcrumb: breadcrumb,
-    ));
+    current._notifier.notify(Event(breadcrumb: breadcrumb));
   }
 }

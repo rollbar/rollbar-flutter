@@ -48,6 +48,9 @@ class MyHomePage extends StatefulWidget {
 class MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.rollbar.flutter.example/activity');
 
+  var _userIsLoggedIn = false;
+  var _setUserText = 'Set User';
+
   var _batteryLevel = 'Unknown battery level.';
   var _faultyMsg = 'No successful invocations yet.';
   var _counter = 0;
@@ -103,6 +106,24 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void setUser() {
+    if (_userIsLoggedIn) {
+      Rollbar.setUser(null);
+      _userIsLoggedIn = false;
+    } else {
+      Rollbar.setUser(const rollbar.User(
+        id: '123456',
+        username: 'TheUser',
+        email: 'user@email.co',
+      ));
+      _userIsLoggedIn = true;
+    }
+
+    setState(() {
+      _setUserText = _userIsLoggedIn ? 'Unset User' : 'Set User';
+    });
+  }
+
   void divideByZero() {
     Rollbar.drop(Breadcrumb.log('Tapped divideByZero button'));
     1 ~/ 0;
@@ -135,6 +156,11 @@ class MyHomePageState extends State<MyHomePage> {
           onPressed: crash,
           child: const Text('Crash application'),
         ),
+      const Divider(),
+      ElevatedButton(
+        onPressed: setUser,
+        child: Text(_setUserText),
+      ),
       const Divider(),
       const Text('Times you have pushed the plus button:'),
       Text(
