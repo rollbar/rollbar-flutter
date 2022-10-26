@@ -91,24 +91,21 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
       platformPayload: other.platformPayload,
       server: other.server);
 
-  factory Data.fromMap(JsonMap map) => Data(
-      notifier: map['notifier'],
-      environment: map['environment'],
-      client: Client.fromMap(map['client']),
-      platform: map['platform'],
-      language: map['language'],
-      framework: map['framework'],
-      codeVersion: map['code_version'],
-      level: Level.values.firstWhere((level) => level.name == map['level']),
-      body: Body.fromMap(map['body']),
-      user: (map['person'] as JsonMap?).map(User.fromMap),
-      custom: map['custom'],
-      platformPayload: map['platform_payload'],
-      server: map['server'],
-      timestamp: DateTime.fromMicrosecondsSinceEpoch(
-        map['timestamp'],
-        isUtc: true,
-      ));
+  factory Data.fromMap(JsonMap json) => Data(
+      notifier: json.notifier,
+      environment: json.environment,
+      client: json.client,
+      platform: json.platform,
+      language: json.language,
+      framework: json.framework,
+      codeVersion: json.codeVersion,
+      level: json.level,
+      body: json.body,
+      user: json.user,
+      custom: json.custom,
+      platformPayload: json.platformPayload,
+      server: json.server,
+      timestamp: json.timestamp);
 
   @override
   JsonMap toMap() => {
@@ -127,4 +124,23 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
         'code_version': codeVersion,
         'platform_payload': platformPayload,
       }.compact();
+}
+
+extension _KeyValuePaths on JsonMap {
+  JsonMap get notifier => this['notifier'];
+  String get environment => this['environment'];
+  Client get client => Client.fromMap(this['client']);
+  JsonMap get server => this['server'];
+  String get platform => this['platform'];
+  String get language => this['language'];
+  String get framework => this['framework'];
+  String get codeVersion => this['code_version'];
+  Level get level =>
+      Level.values.firstWhere((level) => level.name == this['level']);
+  Body get body => Body.fromMap(this['body']);
+  User? get user => (this['person'] as JsonMap?).map(User.fromMap);
+  JsonMap? get custom => this['custom'];
+  JsonMap? get platformPayload => this['platform_payload'];
+  DateTime get timestamp =>
+      DateTime.fromMicrosecondsSinceEpoch(this['timestamp'], isUtc: true);
 }
