@@ -101,7 +101,7 @@ class Data with EquatableSerializableMixin implements Serializable, Equatable {
       codeVersion: map['code_version'],
       level: Level.values.firstWhere((level) => level.name == map['level']),
       body: Body.fromMap(map['body']),
-      user: User.fromMap(map['person']),
+      user: (map['person'] as JsonMap?).map(User.fromMap),
       custom: map['custom'],
       platformPayload: map['platform_payload'],
       server: map['server'],
