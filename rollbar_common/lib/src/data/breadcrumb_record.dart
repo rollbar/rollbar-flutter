@@ -111,7 +111,7 @@ class PersistableBreadcrumbRecord implements PersistableFor {
       BreadcrumbRecord.persistingKeyTypes;
 }
 
-extension BreadcrumbRecordAttributes on JsonMap {
+extension _KeyValuePaths on JsonMap {
   UUID get id => UUID.fromList(this['id'].whereType<int>().toList());
   String get breadcrumb => this['breadcrumb'];
   DateTime get timestamp => DateTime.fromMicrosecondsSinceEpoch(

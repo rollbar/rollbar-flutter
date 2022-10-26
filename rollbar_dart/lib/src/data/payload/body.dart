@@ -126,7 +126,7 @@ class Message with Report, EquatableSerializableMixin {
       };
 }
 
-extension _KeyValuePath on JsonMap {
+extension _KeyValuePaths on JsonMap {
   ExceptionInfo get exception => ExceptionInfo.fromMap(this['exception']);
   String get message => this['message']['body'];
   String? get rawTrace => this['raw'];

@@ -129,7 +129,7 @@ class PersistablePayloadRecord implements PersistableFor {
       PayloadRecord.persistingKeyTypes;
 }
 
-extension PayloadRecordAttributes on JsonMap {
+extension _KeyValuePaths on JsonMap {
   UUID get id => UUID.fromList(this['id'].whereType<int>().toList());
   String get accessToken => this['accessToken'];
   String get endpoint => this['endpoint'];
