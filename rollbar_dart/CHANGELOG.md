@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0
+
+- New feature: Person tracking
+  - Associate reports to your currently logged in User.
+  - Users may be set freely, but don't persist in-between application runs.
+  - Occurrences and items reported on Rollbar will have a User associated with them, allowing to organize and track issues pertaining to specific users.
+- Various bug fixes and performance improvements.
+
 ## 0.4.0-beta
 
 - New feature: Telemetry.
