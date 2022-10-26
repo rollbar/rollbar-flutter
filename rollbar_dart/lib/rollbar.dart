@@ -10,6 +10,7 @@ export 'src/sender/sender.dart' show Sender;
 export 'src/data/payload/client.dart' show Client;
 export 'src/data/payload/payload.dart' show Payload;
 export 'src/data/payload/breadcrumb.dart' show Breadcrumb, Source;
+export 'src/data/payload/user.dart' show User;
 export 'src/data/payload/data.dart' show Data;
 export 'src/data/payload/body.dart' show Body, Report, Trace, Traces, Message;
 export 'src/data/payload/frame.dart' show Frame;

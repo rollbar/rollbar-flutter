@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
+import 'package:rollbar_dart/src/data/payload/user.dart';
 
 import 'data/payload/breadcrumb.dart';
 import 'notifier/notifier.dart';
@@ -77,6 +78,10 @@ class Rollbar {
         stackTrace: stackTrace,
       ));
 
+  static FutureOr<void> setUser(User? user) {
+    current._notifier.notify(Event(user: user));
+  }
+
   /// Drops a breadcrumb with information about state, a change of state, an
   /// event such as the user interacting with a widget, or navigating from one
   /// place to another or any custom data.
@@ -87,8 +92,6 @@ class Rollbar {
   ///
   /// - See also: [Breadcrumb].
   static FutureOr<void> drop(Breadcrumb breadcrumb) {
-    current._notifier.notify(Event(
-      breadcrumb: breadcrumb,
-    ));
+    current._notifier.notify(Event(breadcrumb: breadcrumb));
   }
 }

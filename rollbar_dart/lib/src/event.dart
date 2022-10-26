@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 
 import 'data/payload/breadcrumb.dart';
+import 'data/payload/user.dart';
+import 'context.dart';
 import 'telemetry.dart';
 
 @sealed
@@ -11,7 +13,9 @@ class Event {
   final dynamic error;
   final StackTrace? stackTrace;
   final String? message;
+  final User? user;
   final Breadcrumb? breadcrumb;
+  final Context? context;
   final Telemetry? telemetry;
 
   const Event({
@@ -19,7 +23,9 @@ class Event {
     this.error,
     this.stackTrace,
     this.message,
+    this.user,
     this.breadcrumb,
+    this.context,
     this.telemetry,
   });
 
@@ -28,7 +34,9 @@ class Event {
     dynamic error,
     StackTrace? stackTrace,
     String? message,
+    User? user,
     Breadcrumb? breadcrumb,
+    Context? context,
     Telemetry? telemetry,
   }) =>
       Event(
@@ -36,7 +44,9 @@ class Event {
           error: error ?? this.error,
           stackTrace: stackTrace ?? this.stackTrace,
           message: message ?? this.message,
+          user: user ?? this.user,
           breadcrumb: breadcrumb ?? this.breadcrumb,
+          context: context ?? this.context,
           telemetry: telemetry ?? this.telemetry);
 
   @override
@@ -45,7 +55,9 @@ class Event {
       'error: $error, '
       'stackTrace: $stackTrace, '
       'message: $message, '
+      'user: $user, '
       'breadcrumb: $breadcrumb, '
+      'context: $context, '
       'telemetry: $telemetry)';
 
   @override
@@ -56,7 +68,9 @@ class Event {
           other.error == error &&
           other.stackTrace == stackTrace &&
           other.message == message &&
+          other.user == user &&
           other.breadcrumb == breadcrumb &&
+          other.context == context &&
           other.telemetry == telemetry);
 
   @override
@@ -65,7 +79,9 @@ class Event {
         error,
         stackTrace,
         message,
+        user,
         breadcrumb,
+        context,
         telemetry,
       );
 }

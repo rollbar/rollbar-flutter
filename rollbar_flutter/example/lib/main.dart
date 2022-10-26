@@ -5,16 +5,20 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:rollbar_flutter/rollbar.dart';
+import 'package:rollbar_flutter/rollbar.dart' show Rollbar, RollbarFlutter;
+import 'package:rollbar_flutter/rollbar.dart' as rollbar;
 
 /// Example Flutter application using rollbar-flutter.
 Future<void> main() async {
-  const config = Config(
+  const config = rollbar.Config(
       accessToken: 'YOUR-ROLLBAR-ACCESSTOKEN',
       package: 'rollbar_flutter_example');
 
   await RollbarFlutter.run(config, () {
-    Rollbar.drop(Breadcrumb.navigation(from: 'initialize', to: 'runApp'));
+    Rollbar.drop(rollbar.Breadcrumb.navigation(
+      from: 'initialize',
+      to: 'runApp',
+    ));
     Rollbar.log('Rollbar initialized');
     runApp(const MyApp());
   });
@@ -48,6 +52,9 @@ class MyHomePage extends StatefulWidget {
 class MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.rollbar.flutter.example/activity');
 
+  var _userIsLoggedIn = false;
+  var _setUserText = 'Set User';
+
   var _batteryLevel = 'Unknown battery level.';
   var _faultyMsg = 'No successful invocations yet.';
   var _counter = 0;
@@ -56,7 +63,7 @@ class MyHomePageState extends State<MyHomePage> {
 
   void batteryLevel() async {
     Rollbar.drop(
-      Breadcrumb.widget(
+      rollbar.Breadcrumb.widget(
         element: 'batteryLevel',
         extra: const {'action': 'tapped'},
       ),
@@ -69,7 +76,7 @@ class MyHomePageState extends State<MyHomePage> {
     } on PlatformException catch (e, stackTrace) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
       Rollbar.drop(
-        Breadcrumb.error(
+        rollbar.Breadcrumb.error(
             'Non-fatal PlatformException while getting battery level.'),
       );
       Rollbar.warn(e, stackTrace);
@@ -81,7 +88,7 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void faultyMethod() {
-    Rollbar.drop(Breadcrumb.log('Tapped faultyMethod button'));
+    Rollbar.drop(rollbar.Breadcrumb.log('Tapped faultyMethod button'));
     platform
         .faultyMethod()
         .then((message) => setState(() => _faultyMsg = message))
@@ -89,7 +96,7 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void incrementCounter() {
-    Rollbar.drop(Breadcrumb.widget(
+    Rollbar.drop(rollbar.Breadcrumb.widget(
       element: 'incrementCounter',
       extra: const {'action': 'tapped'},
     ));
@@ -98,18 +105,38 @@ class MyHomePageState extends State<MyHomePage> {
       if (++_counter % 2 == 0) {
         throw ArgumentError('Unavoidable failure');
       } else {
-        Rollbar.drop(Breadcrumb.log('Counter incremented to $_counter'));
+        Rollbar.drop(
+          rollbar.Breadcrumb.log('Counter incremented to $_counter'),
+        );
       }
     });
   }
 
+  void setUser() {
+    if (_userIsLoggedIn) {
+      Rollbar.setUser(null);
+      _userIsLoggedIn = false;
+    } else {
+      Rollbar.setUser(const rollbar.User(
+        id: '123456',
+        username: 'TheUser',
+        email: 'user@email.co',
+      ));
+      _userIsLoggedIn = true;
+    }
+
+    setState(() {
+      _setUserText = _userIsLoggedIn ? 'Unset User' : 'Set User';
+    });
+  }
+
   void divideByZero() {
-    Rollbar.drop(Breadcrumb.log('Tapped divideByZero button'));
+    Rollbar.drop(rollbar.Breadcrumb.log('Tapped divideByZero button'));
     1 ~/ 0;
   }
 
   void crash() {
-    Rollbar.drop(Breadcrumb.navigation(from: 'app', to: 'crash'));
+    Rollbar.drop(rollbar.Breadcrumb.navigation(from: 'app', to: 'crash'));
     platform.crash();
   }
 
@@ -135,6 +162,11 @@ class MyHomePageState extends State<MyHomePage> {
           onPressed: crash,
           child: const Text('Crash application'),
         ),
+      const Divider(),
+      ElevatedButton(
+        onPressed: setUser,
+        child: Text(_setUserText),
+      ),
       const Divider(),
       const Text('Times you have pushed the plus button:'),
       Text(

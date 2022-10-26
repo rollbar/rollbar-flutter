@@ -53,6 +53,8 @@ void main() {
         expect(a.data.framework, equals(b.data.framework));
         expect(a.data.language, equals(b.data.language));
         expect(a.data.level, equals(b.data.level));
+        expect(
+            DeepCollectionEquality().equals(a.data.user, b.data.user), isTrue);
         expect(a.data.notifier, equals(b.data.notifier));
         expect(
             DeepCollectionEquality().equals(a.data.notifier, b.data.notifier),
@@ -136,6 +138,14 @@ extension _Breadcrumb on Breadcrumb {
       );
 }
 
+extension _User on User {
+  static User gen() => User(
+        id: '12345',
+        username: 'TheUser',
+        email: 'the@user.com',
+      );
+}
+
 extension _Data on Data {
   static Data gen(Kind kind) => Data(
         body: _Body.gen(kind),
@@ -146,6 +156,7 @@ extension _Data on Data {
         framework: _String.gen(),
         codeVersion: _String.gen(),
         client: _Client.gen(),
+        user: _User.gen(),
         environment: _String.gen(),
         notifier: {'version': _String.gen(), 'name': _String.gen()},
         server: {'root': _String.gen()},
