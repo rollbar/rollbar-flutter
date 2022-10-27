@@ -1,6 +1,15 @@
 # Changelog
 
+## 1.0.0
+- New feature: Person tracking
+  - Associate reports to your currently logged in User.
+  - Users may be set freely, but don't persist in-between application runs.
+  - Occurrences and items reported on Rollbar will have a User associated with them, allowing to organize and track issues pertaining to specific users.
+- We now capture extended Flutter exception and error details which contain extra data and breadcrumbs about UI-related issues.
+- Various bug fixes and performance improvements.
+
 ## 0.4.0-beta
+
 - Updated Example to showcase the new Telemetry feature.
 - Fixed an issue where occurrences weren't being persisted by sqlite3, therefore Rollbar reports could be lost after a crash.
 

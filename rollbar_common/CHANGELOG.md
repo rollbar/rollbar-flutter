@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0
+- Added `mapFirst` and `mapSecond` to `Tuple2` to map over a pair's values.
+- `Persistable` now defines the `Comparable` instead of using `dynamic`.
+- Hid `*Record` type-safe key value paths.
+
 ## 0.4.0-beta
 
 - New generic, functional `TableSet` collection that abstracts SQL declarations by allowing the management of sqlite3 tables as standard Dart `Set` collections over `Serializable` sealed immutable classes.
