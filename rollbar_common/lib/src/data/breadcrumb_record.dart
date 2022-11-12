@@ -14,8 +14,10 @@ import '../../rollbar_common.dart'
 class BreadcrumbRecord implements Persistable<UUID> {
   @override
   final UUID id;
-  final String breadcrumb;
+  @override
   final DateTime timestamp;
+
+  final String breadcrumb;
 
   static Map<String, Datatype> get persistingKeyTypes => {
         'id': Datatype.uuid,
