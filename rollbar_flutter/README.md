@@ -2,8 +2,6 @@
 
 [Flutter](https://flutter.dev/) notifier for reporting exceptions, errors and log messages to [Rollbar](https://rollbar.com).
 
-## `rollbar-flutter` is currently in Beta. We are looking for beta-testers and feedback
-
 ## Usage
 
 A simple usage example:
