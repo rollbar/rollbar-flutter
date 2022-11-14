@@ -14,10 +14,12 @@ import '../../rollbar_common.dart'
 class PayloadRecord implements Persistable<UUID> {
   @override
   final UUID id;
+  @override
+  final DateTime timestamp;
+
   final String accessToken;
   final String endpoint;
   final String payload;
-  final DateTime timestamp;
 
   static Map<String, Datatype> get persistingKeyTypes => {
         'id': Datatype.uuid,

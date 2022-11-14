@@ -21,3 +21,4 @@ export 'src/data/breadcrumb_record.dart';
 export 'src/http.dart';
 export 'src/level.dart';
 export 'src/tuple.dart';
+export 'src/result.dart';

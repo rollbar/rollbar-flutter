@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:http/http.dart' as http;
 import 'package:rollbar_common/rollbar_common.dart';
 
 import '../rollbar.dart';
@@ -33,6 +34,7 @@ class Config implements Serializable {
   final Wrangler Function(Config) wrangler;
   final Transformer Function(Config) transformer;
   final Sender Function(Config) sender;
+  final http.Client Function() httpClient;
 
   const Config({
     required this.accessToken,
@@ -49,6 +51,7 @@ class Config implements Serializable {
     this.wrangler = DataWrangler.new,
     this.transformer = NoopTransformer.new,
     this.sender = PersistentHttpSender.new,
+    this.httpClient = http.Client.new,
   });
 
   Config copyWith({

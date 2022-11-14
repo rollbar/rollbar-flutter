@@ -31,4 +31,7 @@ mixin Persistence<Record extends Persistable<UUID>> implements Configurable {
 
     return _database as Database;
   }());
+
+  bool didExpire(Record record) =>
+      record.timestamp < DateTime.now().toUtc() - config.persistenceLifetime;
 }

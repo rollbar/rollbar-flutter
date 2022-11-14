@@ -25,6 +25,8 @@ extension DatatypeSqlType on Datatype {
 /// `(key, value)` pairs through [Serializable.fromMap] and [toMap].
 abstract class Persistable<T extends Object>
     implements Serializable, Comparable<Persistable<T>>, Identifiable<T> {
+  DateTime get timestamp;
+
   static const _map = <Type, PersistableFor>{
     Persistable: PersistableFor(),
     PayloadRecord: PersistablePayloadRecord(),
