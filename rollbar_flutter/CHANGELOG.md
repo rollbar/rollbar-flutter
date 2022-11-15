@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+- A more robust Persistent HTTP Sender error handling strategy allows for better outcomes and recovery in case of server and client errors.
+- The Rollbar SDK will now produce more informative logs when dealing with network, HTTP client and/or server errors.
+- HTTP client has been modularized in order to support mocking and noop clients.
+- Fixed a bug where persisted payloads that couldn't be sent due to an incorrect endpoint or access token in the Config, would never be sent again when corrected.
+
 ## 1.0.0
 - New feature: Person tracking
   - Associate reports to your currently logged in User.

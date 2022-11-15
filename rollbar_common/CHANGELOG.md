@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0
+- Added Result<T, E>, a class that represents either a `Success` value _or_ a `Failure` with an `Error`.
+- Timestamps are now defined by the `Persistable` class.
+- Added more extensions.
+
 ## 1.0.0
 - Added `mapFirst` and `mapSecond` to `Tuple2` to map over a pair's values.
 - `Persistable` now defines the `Comparable` instead of using `dynamic`.
