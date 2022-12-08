@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+- Updated internal Rollbar Apple SDK from 1.x to 2.3.4.
+- Using the newest version of the Rollbar Apple SDK will improve the ability for users to catch _native_ errors and fix them while using the Flutter SDK.
+- Fixed compilation issue when running on iOS Simulator with Apple Silicon `arm64`.
+
 ## 1.1.0
 - A more robust Persistent HTTP Sender error handling strategy allows for better outcomes and recovery in case of server and client errors.
 - The Rollbar SDK will now produce more informative logs when dealing with network, HTTP client and/or server errors.

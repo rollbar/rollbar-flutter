@@ -11,111 +11,111 @@ jobs:
     name: Flutter version ${{ matrix.flutter_version }} (Android)
     strategy:
       matrix:
-        flutter_version: ['3.0.0']
+        flutter_version: ["3.3.0"]
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '11.x'
-    - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
-      with:
-        flutter-version: ${{ matrix.flutter_version }}
-    - name: Cache Dart and Gradle packages
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-          ${{ env.PUB_CACHE }}
-        key: ${{ runner.os }}-deps-${{ matrix.flutter_version }}-${{ hashFiles('**/pubspec.yaml', '**/pubspec.lock', '**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-deps-${{ matrix.flutter_version }}-
-    - name: Enable pana
-      run: flutter pub global activate pana
-    - name: Show Flutter environment
-      run: |
-        which flutter
-        flutter doctor -v
-    - name: Build rollbar_dart
-      working-directory: ./rollbar_dart
-      run: |
-        flutter pub get &&
-        ../build_tools/run-flutter-analyze ${{ matrix.flutter_version }} &&
-        flutter pub run test
-    - name: Run rollbar_dart Pana checks
-      working-directory: ./rollbar_dart
-      run: ../build_tools/run-pana ${{ matrix.flutter_version }}
-    - name: Analyze rollbar_dart example
-      working-directory: ./rollbar_dart/example
-      run: |
-        flutter pub get &&
-        ../../build_tools/run-flutter-analyze ${{ matrix.flutter_version }}
-    - name: Build rollbar_flutter
-      working-directory: ./rollbar_flutter
-      run: |
-        flutter pub get &&
-        ../build_tools/run-flutter-analyze ${{ matrix.flutter_version }} &&
-        flutter test
-    - name: Run rollbar_flutter Pana checks
-      working-directory: ./rollbar_flutter
-      run: ../build_tools/run-pana ${{ matrix.flutter_version }}
-    - name: Test rollbar_flutter Android plugin
-      working-directory: ./rollbar_flutter/android
-      run: |
-        export FLUTTER_SDK=$(../../build_tools/find-flutter-sdk)
-        echo $FLUTTER_SDK
-        ./gradlew check
-    - name: Build rollbar_flutter Android example
-      working-directory: ./rollbar_flutter/example/
-      run: flutter build apk
-    - uses: actions/upload-artifact@v2
-      if: ${{ always() }}
-      # We are not supposed to lock our dependencies in packages or plugins, so we'll
-      # at least keep track of which ones were used in the build, in case a test fails
-      # and we need to reproduce it locally with the same dependencies.
-      with:
-        name: dependencies_used_${{ matrix.flutter_version }}
-        path: |
-          rollbar_dart/pubspec.lock
-          rollbar_dart/example/pubspec.lock
-          rollbar_flutter/pubspec.lock
-          rollbar_flutter/example/pubspec.lock
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "11.x"
+      - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
+        with:
+          flutter-version: ${{ matrix.flutter_version }}
+      - name: Cache Dart and Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ${{ env.PUB_CACHE }}
+          key: ${{ runner.os }}-deps-${{ matrix.flutter_version }}-${{ hashFiles('**/pubspec.yaml', '**/pubspec.lock', '**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-${{ matrix.flutter_version }}-
+      - name: Enable pana
+        run: flutter pub global activate pana
+      - name: Show Flutter environment
+        run: |
+          which flutter
+          flutter doctor -v
+      - name: Build rollbar_dart
+        working-directory: ./rollbar_dart
+        run: |
+          flutter pub get &&
+          ../build_tools/run-flutter-analyze ${{ matrix.flutter_version }} &&
+          flutter pub run test
+      - name: Run rollbar_dart Pana checks
+        working-directory: ./rollbar_dart
+        run: ../build_tools/run-pana ${{ matrix.flutter_version }}
+      - name: Analyze rollbar_dart example
+        working-directory: ./rollbar_dart/example
+        run: |
+          flutter pub get &&
+          ../../build_tools/run-flutter-analyze ${{ matrix.flutter_version }}
+      - name: Build rollbar_flutter
+        working-directory: ./rollbar_flutter
+        run: |
+          flutter pub get &&
+          ../build_tools/run-flutter-analyze ${{ matrix.flutter_version }} &&
+          flutter test
+      - name: Run rollbar_flutter Pana checks
+        working-directory: ./rollbar_flutter
+        run: ../build_tools/run-pana ${{ matrix.flutter_version }}
+      - name: Test rollbar_flutter Android plugin
+        working-directory: ./rollbar_flutter/android
+        run: |
+          export FLUTTER_SDK=$(../../build_tools/find-flutter-sdk)
+          echo $FLUTTER_SDK
+          ./gradlew check
+      - name: Build rollbar_flutter Android example
+        working-directory: ./rollbar_flutter/example/
+        run: flutter build apk
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        # We are not supposed to lock our dependencies in packages or plugins, so we'll
+        # at least keep track of which ones were used in the build, in case a test fails
+        # and we need to reproduce it locally with the same dependencies.
+        with:
+          name: dependencies_used_${{ matrix.flutter_version }}
+          path: |
+            rollbar_dart/pubspec.lock
+            rollbar_dart/example/pubspec.lock
+            rollbar_flutter/pubspec.lock
+            rollbar_flutter/example/pubspec.lock
 
   build_ios:
     runs-on: macos-latest
     name: Flutter version ${{ matrix.flutter_version }} (iOS)
     strategy:
       matrix:
-        flutter_version: ['3.0.0']
+        flutter_version: ["3.3.0"]
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
-      with:
-        flutter-version: ${{ matrix.flutter_version }}
-    - name: Cache pub packages
-      uses: actions/cache@v2
-      with:
-        path: |
-          ${{ env.PUB_CACHE }}
-        key: ${{ runner.os }}-pub-${{ matrix.flutter_version }}-${{ hashFiles('**/pubspec.yaml*') }}
-        restore-keys: |
-          ${{ runner.os }}-pub-${{ matrix.flutter_version }}-
-    - name: Show Flutter environment
-      run: |
-        which flutter
-        flutter doctor -v
-    - name: Build rollbar_flutter iOS example
-      working-directory: ./rollbar_flutter/example/
-      run: flutter build ios --no-codesign
-    - uses: actions/upload-artifact@v2
-      if: ${{ always() }}
-      # Save dependencies used
-      with:
-        name: dependencies_used_${{ matrix.flutter_version }}
-        path: |
-          rollbar_dart/pubspec.lock
-          rollbar_dart/example/pubspec.lock
-          rollbar_flutter/pubspec.lock
-          rollbar_flutter/example/pubspec.lock
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
+        with:
+          flutter-version: ${{ matrix.flutter_version }}
+      - name: Cache pub packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+          key: ${{ runner.os }}-pub-${{ matrix.flutter_version }}-${{ hashFiles('**/pubspec.yaml*') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-${{ matrix.flutter_version }}-
+      - name: Show Flutter environment
+        run: |
+          which flutter
+          flutter doctor -v
+      - name: Build rollbar_flutter iOS example
+        working-directory: ./rollbar_flutter/example/
+        run: flutter build ios --no-codesign
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        # Save dependencies used
+        with:
+          name: dependencies_used_${{ matrix.flutter_version }}
+          path: |
+            rollbar_dart/pubspec.lock
+            rollbar_dart/example/pubspec.lock
+            rollbar_flutter/pubspec.lock
+            rollbar_flutter/example/pubspec.lock
