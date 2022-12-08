@@ -20,14 +20,17 @@ PODS:
   - sqlite3/common (3.39.3)
   - sqlite3/fts5 (3.39.3):
     - sqlite3/common
+  - sqlite3/json1 (3.39.3):
+    - sqlite3/common
   - sqlite3/perf-threadsafe (3.39.3):
     - sqlite3/common
   - sqlite3/rtree (3.39.3):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - sqlite3 (~> 3.39.3)
+    - sqlite3 (~> 3.39.2)
     - sqlite3/fts5
+    - sqlite3/json1
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
 
@@ -66,7 +69,7 @@ SPEC CHECKSUMS:
   RollbarNotifier: 97b177c3493571f74cef5f793801c4a191f4d918
   RollbarPLCrashReporter: bf0e742bd2d799d4c79a83108e4e7bfd6107db87
   sqlite3: 50117e9e063a9ef2b865f7bdf2f2601e5d368e9a
-  sqlite3_flutter_libs: c6ab7f23670a98fef45a137159452004bc552168
+  sqlite3_flutter_libs: 1641350489d5c2bcb9d0773ade9693624111b24c
 
 PODFILE CHECKSUM: d2243213672c3c48aae53c36642ba411a6be7309
 
