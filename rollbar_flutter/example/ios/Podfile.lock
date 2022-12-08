@@ -3,11 +3,18 @@ PODS:
     - Flutter
     - ReachabilitySwift
   - Flutter (1.0.0)
+  - PLCrashReporter (1.10.2)
   - ReachabilitySwift (5.0.0)
-  - Rollbar (1.12.14)
-  - rollbar_flutter (0.0.1):
+  - rollbar_flutter (1.2.0):
     - Flutter
-    - Rollbar (~> 1.12.14)
+    - RollbarNotifier (~> 2.3.4)
+    - RollbarPLCrashReporter (~> 2.3.4)
+  - RollbarCommon (2.3.4)
+  - RollbarNotifier (2.3.4):
+    - RollbarCommon (~> 2.3.4)
+  - RollbarPLCrashReporter (2.3.4):
+    - PLCrashReporter (~> 1.10.1)
+    - RollbarCommon (~> 2.3.4)
   - sqlite3 (3.39.3):
     - sqlite3/common (= 3.39.3)
   - sqlite3/common (3.39.3)
@@ -32,8 +39,11 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - PLCrashReporter
     - ReachabilitySwift
-    - Rollbar
+    - RollbarCommon
+    - RollbarNotifier
+    - RollbarPLCrashReporter
     - sqlite3
 
 EXTERNAL SOURCES:
@@ -49,12 +59,15 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  PLCrashReporter: 2a08001f8e6a30abe405ee8f13d2753cfb5d682a
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
-  Rollbar: 58f315609433558a82af5a54d7888bb020bec561
-  rollbar_flutter: b7542ba065cdece3cef1b316c748d24d129ead51
+  rollbar_flutter: 9f339bf9f7dbc80265690846bd6b1cbb6e2e8c8b
+  RollbarCommon: 9a8198f5141aba65441c63e76b2ec4bc1a05cd2f
+  RollbarNotifier: 97b177c3493571f74cef5f793801c4a191f4d918
+  RollbarPLCrashReporter: bf0e742bd2d799d4c79a83108e4e7bfd6107db87
   sqlite3: 50117e9e063a9ef2b865f7bdf2f2601e5d368e9a
   sqlite3_flutter_libs: c6ab7f23670a98fef45a137159452004bc552168
 
-PODFILE CHECKSUM: f70cbe32e71f16c77469a29c52f47705f5041b7c
+PODFILE CHECKSUM: d2243213672c3c48aae53c36642ba411a6be7309
 
 COCOAPODS: 1.11.3

@@ -1,14 +1,16 @@
 @import SystemConfiguration;
+@import RollbarNotifier;
+@import RollbarPLCrashReporter;
+
 #import "RollbarFlutterPlugin.h"
-#import <Rollbar/Rollbar.h>
 
 @implementation RollbarFlutterPlugin
 
-+ (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-    FlutterMethodChannel* channel = [FlutterMethodChannel
-                                     methodChannelWithName:@"com.rollbar.flutter"
-                                     binaryMessenger:[registrar messenger]];
-    RollbarFlutterPlugin* instance = [[RollbarFlutterPlugin alloc] init];
++ (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
+    FlutterMethodChannel *channel = [
+        FlutterMethodChannel methodChannelWithName:@"com.rollbar.flutter"
+                                   binaryMessenger:[registrar messenger]];
+    RollbarFlutterPlugin *instance = [[RollbarFlutterPlugin alloc] init];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -16,24 +18,19 @@
                   result:(FlutterResult)result
 {
     if ([@"initialize" isEqualToString:call.method]) {
-        NSDictionary* arguments = call.arguments;
-        NSString* endpoint = (NSString*)arguments[@"endpoint"];
-        NSString* accessToken = (NSString*)arguments[@"accessToken"];
-        NSString* environment = (NSString*)arguments[@"environment"];
-        NSString* codeVersion = (NSString*)arguments[@"codeVersion"];
-        BOOL handleUncaughtErrors = ((NSNumber*)arguments[@"handleUncaughtErrors"]).boolValue;
-        BOOL includePlatformLogs = ((NSNumber*)arguments[@"includePlatformLogs"]).boolValue;
+        NSDictionary *arguments = call.arguments;
+        RollbarConfig *config = [[RollbarConfig alloc] init];
+        config.destination.accessToken = (NSString *)arguments[@"accessToken"];
+        config.destination.environment = (NSString *)arguments[@"environment"];
+        config.loggingOptions.codeVersion = (NSString *)arguments[@"codeVersion"];
 
-        [self initializeWithEndpoint:endpoint
-                         accessToken:accessToken
-                         environment:environment
-                         codeVersion:codeVersion
-                handleUncaughtErrors:handleUncaughtErrors
-                 includePlatformLogs:includePlatformLogs];
+        id<RollbarCrashCollector> collector = [[RollbarPLCrashCollector alloc] init];
+        [Rollbar initWithConfiguration:config crashCollector:collector];
 
         result(nil);
     } else if ([@"persistencePath" isEqualToString:call.method]) {
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(
+            NSDocumentDirectory, NSUserDomainMask, YES);
         result(paths.firstObject);
     } else if ([@"close" isEqualToString:call.method]) {
         // No closing necessary
@@ -41,23 +38,6 @@
     } else {
         result(FlutterMethodNotImplemented);
     }
-}
-
-- (void)initializeWithEndpoint:(NSString*)endpoint
-                   accessToken:(NSString*)accessToken
-                   environment:(NSString*)environment
-                   codeVersion:(NSString*)codeVersion
-          handleUncaughtErrors:(BOOL)handleUncaughtErrors
-           includePlatformLogs:(BOOL)includePlatformLogs
-{
-    RollbarConfiguration* config = [RollbarConfiguration configuration];
-    config.endpoint = endpoint;
-    config.environment = environment;
-    config.codeVersion = codeVersion;
-    [Rollbar initWithAccessToken:accessToken
-                   configuration:config
-             enableCrashReporter:handleUncaughtErrors];
-    [Rollbar.currentConfiguration setCaptureLogAsTelemetryData:includePlatformLogs];
 }
 
 @end
