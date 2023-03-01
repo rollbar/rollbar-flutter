@@ -1,4 +1,14 @@
-# rollbar-dart and rollbar-flutter
+<p align="center">
+  <img alt="rollbar-logo" src="https://user-images.githubusercontent.com/3300063/207964480-54eda665-d6fe-4527-ba51-b0ab3f41f10b.png" />
+</p>
+
+<h1 align="center">Rollbar Dart Monorepo</h1>
+
+<p align="center">
+  <strong>Proactively discover, predict, and resolve errors in real-time with <a href="https://rollbar.com">Rollbar’s</a> error monitoring platform. <a href="https://rollbar.com/signup/">Start tracking errors today</a>!</strong>
+</p>
+
+---
 
 This repository contains the `rollbar_dart` package and the `rollbar_flutter` plugin.
 
@@ -7,6 +17,12 @@ For `rollbar-dart`, see its [README](rollbar_dart/README.md).
 For `rollbar-flutter`, see its [README](rollbar_flutter/README.md).
 
 ## `rollbar-dart` `rollbar-flutter` are currently in Beta. We are looking for beta-testers and feedback
+
+## Key benefits of using Rollbar for Dart are:
+- **Automatic error grouping:** Rollbar aggregates Occurrences caused by the same error into Items that represent application issues. <a href="https://docs.rollbar.com/docs/grouping-occurrences">Learn more about reducing log noise</a>.
+- **Advanced search:** Filter items by many different properties. <a href="https://docs.rollbar.com/docs/search-items">Learn more about search</a>.
+- **Customizable notifications:** Rollbar supports several messaging and incident management tools where your team can get notified about errors and important events by real-time alerts. <a href="https://docs.rollbar.com/docs/notifications">Learn more about Rollbar notifications</a>.
+
 
 ## Documentation
 
