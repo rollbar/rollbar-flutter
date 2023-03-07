@@ -5,7 +5,7 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 import 'data/payload/breadcrumb.dart';
 import 'persistence.dart';
-import 'config.dart';
+import 'data/config.dart';
 
 @sealed
 @immutable

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:rollbar_dart/src/notifier/async_notifier.dart';
+import 'package:rollbar_dart/src/sandbox/async_sandbox.dart';
 import 'package:rollbar_flutter/rollbar.dart';
 
 import 'utils/platform_exception_utils.dart';
@@ -37,7 +37,7 @@ void main() {
         package: 'some_package_name',
         includePlatformLogs: true,
         handleUncaughtErrors: true,
-        notifier: AsyncNotifier.new,
+        sandbox: AsyncSandbox.new,
         sender: (_) => sender);
 
     await RollbarFlutter.run(config, () {
@@ -68,7 +68,7 @@ void main() {
         package: 'some_package_name',
         includePlatformLogs: true,
         handleUncaughtErrors: true,
-        notifier: AsyncNotifier.new,
+        sandbox: AsyncSandbox.new,
         sender: (_) => sender);
 
     await RollbarFlutter.run(config, () async {

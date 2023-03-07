@@ -1,5 +1,5 @@
 import 'package:rollbar_common/src/http.dart';
-import 'package:rollbar_dart/src/config.dart';
+import 'package:rollbar_dart/src/data/config.dart';
 
 class Expected {
   static String uuidString = '67ce3d7bfab14fd99218ae5c985071e7';

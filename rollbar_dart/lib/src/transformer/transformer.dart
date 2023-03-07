@@ -1,6 +1,6 @@
 import 'dart:async';
-import '../data/payload/data.dart';
-import '../event.dart';
+
+import 'package:rollbar_dart/rollbar_dart.dart';
 
 /// Represents a transformation operation on a Rollbar [Data] object.
 abstract class Transformer {

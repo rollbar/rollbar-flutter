@@ -47,7 +47,7 @@ void main() {
         final original = _Data.from(body: body);
         final transformed = await transformer.transform(
           original,
-          event: Event(error: exception, stackTrace: StackTrace.empty),
+          event: ErrorEvent(exception, StackTrace.empty),
         );
 
         final traces = transformed.body.report.traces;
@@ -79,7 +79,7 @@ void main() {
             _Data.from(body: Body(telemetry: const [], report: trace));
         final transformed = await transformer.transform(
           original,
-          event: Event(error: exception, stackTrace: StackTrace.empty),
+          event: ErrorEvent(exception, StackTrace.empty),
         );
 
         final traces = transformed.body.report.traces;
@@ -124,7 +124,7 @@ void main() {
             _Data.from(body: Body(telemetry: const [], report: platformTrace));
         final transformed = await transformer.transform(
           original,
-          event: Event(error: exception, stackTrace: StackTrace.empty),
+          event: ErrorEvent(exception, StackTrace.empty),
         );
 
         final traces = transformed.body.report.traces;
@@ -161,7 +161,7 @@ void main() {
             _Data.from(body: Body(telemetry: const [], report: trace));
         final transformed = await transformer.transform(
           original,
-          event: Event(error: exception, stackTrace: StackTrace.empty),
+          event: ErrorEvent(exception, StackTrace.empty),
         );
 
         final traces = transformed.body.report.traces;

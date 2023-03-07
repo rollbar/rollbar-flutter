@@ -20,6 +20,10 @@ class PlatformTransformer implements Transformer {
 
   @override
   Future<Data> transform(Data data, {required Event event}) async {
+    if (event is! ErrorEvent) {
+      return await wrapped?.transform(data, event: event) ?? data;
+    }
+
     final error = event.error;
     if (defaultTargetPlatform.isAndroid &&
         error is PlatformException &&

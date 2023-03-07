@@ -1,9 +1,5 @@
 import 'package:meta/meta.dart';
-
-import '../data/payload/data.dart';
-import '../config.dart';
-import '../event.dart';
-import 'transformer.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
 
 @sealed
 @immutable
