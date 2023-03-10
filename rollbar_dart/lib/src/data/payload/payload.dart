@@ -9,7 +9,7 @@ import 'data.dart';
 @sealed
 @immutable
 class Payload
-    with EquatableSerializableMixin
+    with EquatableSerializableMixin, DebugStringRepresentation
     implements Equatable, Serializable {
   final Data data;
 

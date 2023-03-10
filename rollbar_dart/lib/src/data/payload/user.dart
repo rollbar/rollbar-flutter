@@ -3,7 +3,9 @@ import 'package:rollbar_common/rollbar_common.dart';
 
 @sealed
 @immutable
-class User with EquatableSerializableMixin implements Equatable, Serializable {
+class User
+    with EquatableSerializableMixin, DebugStringRepresentation
+    implements Equatable, Serializable {
   final String id;
   final String? username;
   final String? email;

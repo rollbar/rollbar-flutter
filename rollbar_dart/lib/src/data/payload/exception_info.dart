@@ -5,7 +5,7 @@ import 'package:rollbar_common/rollbar_common.dart';
 @sealed
 @immutable
 class ExceptionInfo
-    with EquatableSerializableMixin
+    with EquatableSerializableMixin, DebugStringRepresentation
     implements Equatable, Serializable {
   final String type;
   final String message;
@@ -31,10 +31,6 @@ class ExceptionInfo
           type: type ?? this.type,
           message: message ?? this.message,
           description: description ?? this.description);
-
-  @override
-  String toString() =>
-      'ExceptionInfo(type: $type, message: $message, description: $description)';
 
   @override
   JsonMap toMap() => {

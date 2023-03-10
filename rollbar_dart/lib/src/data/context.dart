@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:rollbar_common/rollbar_common.dart';
 
 import 'payload/user.dart';
 import '../notifier/core_notifier.dart';
@@ -15,7 +16,7 @@ import '../persistence.dart';
 /// manipulation ought to occur in an encapsulated and controlled manner.
 /// See [CoreNotifier].
 @sealed
-class Context implements Configurable {
+class Context with DebugStringRepresentation implements Configurable {
   @override
   final Config config;
   final Telemetry telemetry;

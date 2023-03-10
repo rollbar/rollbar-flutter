@@ -19,7 +19,7 @@ abstract class Configurable {
 /// Configuration for the [Rollbar] notifier.
 @sealed
 @immutable
-class Config implements Serializable {
+class Config with DebugStringRepresentation implements Serializable {
   final String accessToken;
   final String endpoint;
   final String environment;

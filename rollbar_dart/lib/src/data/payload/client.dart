@@ -4,7 +4,7 @@ import 'package:rollbar_common/rollbar_common.dart';
 @sealed
 @immutable
 class Client
-    with EquatableSerializableMixin
+    with EquatableSerializableMixin, DebugStringRepresentation
     implements Equatable, Serializable {
   final String locale;
   final String hostname;

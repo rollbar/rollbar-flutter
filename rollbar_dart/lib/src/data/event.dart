@@ -20,42 +20,32 @@ abstract class Notification implements Event {
 }
 
 @sealed
-class TelemetryEvent implements Event {
+class TelemetryEvent with DebugStringRepresentation implements Event {
   final Breadcrumb breadcrumb;
 
   const TelemetryEvent(this.breadcrumb);
-
-  @override
-  String toString() => 'TelemetryEvent(breadcrumb: $breadcrumb)';
 }
 
 @sealed
-class UserEvent implements Event {
+class UserEvent with DebugStringRepresentation implements Event {
   final User? user;
 
   const UserEvent(this.user);
-
-  @override
-  String toString() => 'UserEvent(user: $user)';
 }
 
 @sealed
-class MessageEvent implements Notification, Event {
+class MessageEvent
+    with DebugStringRepresentation
+    implements Notification, Event {
   @override
   final Level level;
   final String message;
 
-  const MessageEvent(
-    this.message, {
-    this.level = Level.info,
-  });
-
-  @override
-  String toString() => 'MessageEvent(level: $level, message: $message)';
+  const MessageEvent(this.message, {this.level = Level.info});
 }
 
 @sealed
-class ErrorEvent implements Notification, Event {
+class ErrorEvent with DebugStringRepresentation implements Notification, Event {
   @override
   final Level level;
   final dynamic error;
@@ -68,13 +58,6 @@ class ErrorEvent implements Notification, Event {
     this.description,
     this.level = Level.error,
   });
-
-  @override
-  String toString() => 'ErrorEvent('
-      'level: $level, '
-      'error: $error, '
-      'description: $description, '
-      'stackTrace: $stackTrace)';
 }
 
 @sealed

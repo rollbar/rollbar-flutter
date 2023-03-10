@@ -6,7 +6,7 @@ enum Source { client, server }
 @sealed
 @immutable
 class Breadcrumb
-    with EquatableSerializableMixin
+    with EquatableSerializableMixin, DebugStringRepresentation
     implements Equatable, Serializable {
   final String type;
   final Level level;
@@ -112,12 +112,4 @@ class Breadcrumb
         'timestamp_ms': timestamp.microsecondsSinceEpoch,
         'body': body,
       };
-
-  @override
-  String toString() => 'Breadcrumb('
-      'type: $type, '
-      'level: $level, '
-      'source: $source, '
-      'body: $body, '
-      'timestamp_ms: $timestamp)';
 }

@@ -8,7 +8,9 @@ import 'user.dart' show User;
 /// Contains the data for the occurrence to be sent to Rollbar.
 @sealed
 @immutable
-class Data with EquatableSerializableMixin implements Serializable, Equatable {
+class Data
+    with EquatableSerializableMixin, DebugStringRepresentation
+    implements Serializable, Equatable {
   final Body body;
   final Level level;
   final JsonMap notifier;
