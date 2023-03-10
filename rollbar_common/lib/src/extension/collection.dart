@@ -118,6 +118,17 @@ extension MapExtensions<K, V> on Map<K, V> {
     return map;
   }
 
+  /// Returns a new Map by filtering its values that match the given type.
+  Map<K, U> whereValueType<U>() {
+    Map<K, U> map = {};
+
+    forEach((k, v) {
+      if (v is U) map[k] = v;
+    });
+
+    return map;
+  }
+
   bool any(KeyValuePredicate<K, V> p) {
     final it = entries.iterator;
     while (it.moveNext()) {

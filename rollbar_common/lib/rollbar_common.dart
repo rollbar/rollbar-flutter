@@ -18,6 +18,7 @@ export 'src/table_set.dart';
 export 'src/data/payload_record.dart';
 export 'src/data/breadcrumb_record.dart';
 
+export 'src/debug.dart';
 export 'src/http.dart';
 export 'src/level.dart';
 export 'src/tuple.dart';
