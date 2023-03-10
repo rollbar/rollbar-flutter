@@ -5,7 +5,8 @@
   },
   // Remove from file watching
   "files.watcherExclude": {
-    "**/.fvm": true
+    "**/.fvm": true,
+    "**/target": true
   },
   "java.configuration.updateBuildConfiguration": "automatic",
 }
