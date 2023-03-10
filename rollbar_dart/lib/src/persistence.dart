@@ -4,10 +4,10 @@ import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'config.dart';
+import 'data/config.dart';
 
-/// A mixin that provides a ready-to-use lazily initialized [TableSet] that
-/// leverages a shared static sqlite3 [Database].
+/// Provides a ready-to-use lazily initialized [TableSet] over a statically
+/// shared sqlite3 [Database].
 @immutable
 @internal
 mixin Persistence<Record extends Persistable<UUID>> implements Configurable {

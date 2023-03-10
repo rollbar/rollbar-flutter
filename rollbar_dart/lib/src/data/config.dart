@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 import 'package:rollbar_common/rollbar_common.dart';
+import 'package:rollbar_dart/src/sandbox/isolated_sandbox.dart';
 
-import '../rollbar.dart';
-import 'notifier/isolated_notifier.dart';
-import 'wrangler/data_wrangler.dart';
-import 'transformer/noop_transformer.dart';
-import 'sender/persistent_http_sender.dart';
+import '../../rollbar.dart';
+import '../notifier/core_notifier.dart';
+import '../marshaller/data_marshaller.dart';
+import '../transformer/noop_transformer.dart';
+import '../sender/persistent_http_sender.dart';
 
 /// The class of types that are [Configurable] through a [Config] instance.
 abstract class Configurable {
@@ -30,8 +31,9 @@ class Config implements Serializable {
   final bool handleUncaughtErrors;
   final bool includePlatformLogs;
 
-  final FutureOr<Notifier> Function(Config) notifier;
-  final Wrangler Function(Config) wrangler;
+  final FutureOr<Sandbox> Function(Config) sandbox;
+  final Notifier Function(Config) notifier;
+  final Marshaller Function(Config) marshaller;
   final Transformer Function(Config) transformer;
   final Sender Function(Config) sender;
   final http.Client Function() httpClient;
@@ -47,8 +49,9 @@ class Config implements Serializable {
     this.persistenceLifetime = const Duration(days: 1),
     this.handleUncaughtErrors = true,
     this.includePlatformLogs = false,
-    this.notifier = IsolatedNotifier.spawn,
-    this.wrangler = DataWrangler.new,
+    this.sandbox = IsolatedSandbox.spawn,
+    this.notifier = CoreNotifier.new,
+    this.marshaller = DataMarshaller.new,
     this.transformer = NoopTransformer.new,
     this.sender = PersistentHttpSender.new,
     this.httpClient = http.Client.new,
@@ -65,27 +68,29 @@ class Config implements Serializable {
     Duration? persistenceLifetime,
     bool? handleUncaughtErrors,
     bool? includePlatformLogs,
-    FutureOr<Notifier> Function(Config)? notifier,
-    Wrangler Function(Config)? wrangler,
+    FutureOr<Sandbox> Function(Config)? sandbox,
+    Notifier Function(Config)? notifier,
+    Marshaller Function(Config)? marshaller,
     Transformer Function(Config)? transformer,
     Sender Function(Config)? sender,
   }) =>
       Config(
-        accessToken: accessToken ?? this.accessToken,
-        endpoint: endpoint ?? this.endpoint,
-        environment: environment ?? this.environment,
-        framework: framework ?? this.framework,
-        codeVersion: codeVersion ?? this.codeVersion,
-        package: package ?? this.package,
-        persistencePath: persistencePath ?? this.persistencePath,
-        persistenceLifetime: persistenceLifetime ?? this.persistenceLifetime,
-        handleUncaughtErrors: handleUncaughtErrors ?? this.handleUncaughtErrors,
-        includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
-        notifier: notifier ?? this.notifier,
-        wrangler: wrangler ?? this.wrangler,
-        transformer: transformer ?? this.transformer,
-        sender: sender ?? this.sender,
-      );
+          accessToken: accessToken ?? this.accessToken,
+          endpoint: endpoint ?? this.endpoint,
+          environment: environment ?? this.environment,
+          framework: framework ?? this.framework,
+          codeVersion: codeVersion ?? this.codeVersion,
+          package: package ?? this.package,
+          persistencePath: persistencePath ?? this.persistencePath,
+          persistenceLifetime: persistenceLifetime ?? this.persistenceLifetime,
+          handleUncaughtErrors:
+              handleUncaughtErrors ?? this.handleUncaughtErrors,
+          includePlatformLogs: includePlatformLogs ?? this.includePlatformLogs,
+          sandbox: sandbox ?? this.sandbox,
+          notifier: notifier ?? this.notifier,
+          marshaller: marshaller ?? this.marshaller,
+          transformer: transformer ?? this.transformer,
+          sender: sender ?? this.sender);
 
   @override
   factory Config.fromMap(JsonMap map) => Config(

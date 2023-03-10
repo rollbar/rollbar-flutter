@@ -3,10 +3,10 @@ import 'dart:developer' as developer;
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 import 'package:rollbar_common/rollbar_common.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
 
 import '../data/response.dart';
 import '../persistence.dart';
-import 'sender.dart';
 import 'http_sender.dart';
 
 /// A [Sender] that persists payloads and defers its transport in case of
@@ -18,7 +18,7 @@ class PersistentHttpSender extends HttpSender with Persistence<PayloadRecord> {
   PersistentHttpSender(super.config);
 
   @override
-  Future<bool> sendString(String payload) async {
+  Future<bool> sendString(final String payload) async {
     final newRecord = PayloadRecord(
       accessToken: config.accessToken,
       endpoint: config.endpoint,
@@ -71,7 +71,7 @@ class PersistentHttpSender extends HttpSender with Persistence<PayloadRecord> {
     }
   }
 
-  void log(Object o, [StackTrace? stackTrace]) {
+  void log(final Object o, [final StackTrace? stackTrace]) {
     if (o is http.Response) {
       developer.log(
           '\'${o.statusCode} ${o.reasonPhrase}\' sending payload to \'$uri\'',
@@ -96,7 +96,7 @@ extension _State on HttpSender {
 
   static bool get suspended => _suspended;
 
-  static void suspend(Duration duration) async {
+  static void suspend(final Duration duration) async {
     if (_suspended) return;
     _suspended = true;
     _suspended = await Future.delayed(duration).then((_) => false);

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
-import 'package:rollbar_dart/src/config.dart';
+import 'package:rollbar_dart/src/data/config.dart';
 import 'package:rollbar_dart/src/sender/http_sender.dart';
 import 'package:rollbar_dart/src/sender/persistent_http_sender.dart';
 

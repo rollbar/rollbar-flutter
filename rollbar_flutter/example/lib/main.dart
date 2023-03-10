@@ -19,7 +19,7 @@ Future<void> main() async {
       from: 'initialize',
       to: 'runApp',
     ));
-    Rollbar.log('Rollbar initialized');
+    Rollbar.info('Rollbar initialized');
     runApp(const MyApp());
   });
 }
@@ -89,6 +89,7 @@ class MyHomePageState extends State<MyHomePage> {
 
   void faultyMethod() {
     Rollbar.drop(rollbar.Breadcrumb.log('Tapped faultyMethod button'));
+    Rollbar.warn('This method is about to fail');
     platform
         .faultyMethod()
         .then((message) => setState(() => _faultyMsg = message))
@@ -116,6 +117,7 @@ class MyHomePageState extends State<MyHomePage> {
     if (_userIsLoggedIn) {
       Rollbar.setUser(null);
       _userIsLoggedIn = false;
+      Rollbar.debug('User logged out');
     } else {
       Rollbar.setUser(const rollbar.User(
         id: '123456',
@@ -123,6 +125,7 @@ class MyHomePageState extends State<MyHomePage> {
         email: 'user@email.co',
       ));
       _userIsLoggedIn = true;
+      Rollbar.debug('User logged in');
     }
 
     setState(() {
@@ -132,6 +135,7 @@ class MyHomePageState extends State<MyHomePage> {
 
   void divideByZero() {
     Rollbar.drop(rollbar.Breadcrumb.log('Tapped divideByZero button'));
+    Rollbar.critical('About to divide by zero, this won\'t work!');
     1 ~/ 0;
   }
 
@@ -171,7 +175,7 @@ class MyHomePageState extends State<MyHomePage> {
       const Text('Times you have pushed the plus button:'),
       Text(
         '$_counter',
-        style: Theme.of(context).textTheme.headline4,
+        style: Theme.of(context).textTheme.headlineMedium,
       ),
       const Divider(height: 10),
     ];

@@ -5,10 +5,10 @@ abstract class Sender {
   /// Sends the specified payload.
   ///
   /// Returns `true` if sent successfully.
-  Future<bool> send(JsonMap payload);
+  Future<bool> send(final JsonMap payload);
 
   /// Sends the specified payload.
   ///
   /// Returns `true` if sent successfully.
-  Future<bool> sendString(String payload);
+  Future<bool> sendString(final String payload);
 }

@@ -4,9 +4,9 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
+import 'package:rollbar_dart/rollbar_dart.dart';
 
-import '../config.dart';
-import 'sender.dart';
+import '../data/config.dart';
 
 /// HTTP [Sender] implementation.
 @sealed
@@ -29,10 +29,11 @@ class HttpSender implements Configurable, Sender {
   /// Sends the provided payload as the body of POST request to the configured
   /// endpoint.
   @override
-  Future<bool> send(JsonMap payload) async => sendString(jsonEncode(payload));
+  Future<bool> send(final JsonMap payload) async =>
+      sendString(jsonEncode(payload));
 
   @override
-  Future<bool> sendString(String payload) async {
+  Future<bool> sendString(final String payload) async {
     final client = config.httpClient();
 
     try {

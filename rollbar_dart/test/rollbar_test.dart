@@ -1,8 +1,7 @@
-import 'package:rollbar_dart/src/notifier/async_notifier.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
-
 import 'package:rollbar_dart/rollbar.dart';
+import 'package:rollbar_dart/src/sandbox/async_sandbox.dart';
 
 Future<void> main() async {
   late MockSender sender;
@@ -22,7 +21,7 @@ Future<void> main() async {
           environment: 'production',
           codeVersion: '0.23.2',
           package: 'some_package_name',
-          notifier: AsyncNotifier.new,
+          sandbox: AsyncSandbox.new,
           sender: (_) => sender);
 
       await Rollbar.run(config);
@@ -50,7 +49,7 @@ Future<void> main() async {
       final config = Config(
           accessToken: 'BlaBlaAccessToken',
           package: 'some_package_name',
-          notifier: AsyncNotifier.new,
+          sandbox: AsyncSandbox.new,
           sender: (_) => sender);
 
       await Rollbar.run(config);
@@ -76,7 +75,7 @@ Future<void> main() async {
           codeVersion: '1.0.0',
           package: 'some_package_name',
           handleUncaughtErrors: true,
-          notifier: AsyncNotifier.new,
+          sandbox: AsyncSandbox.new,
           transformer: ExpandableTransformer.new,
           sender: ((_) => sender));
 
@@ -107,10 +106,13 @@ class ExpandableTransformer implements Transformer {
 
   @override
   Future<Data> transform(Data data, {required Event event}) async {
-    expect(event.error, TypeMatcher<ExpandableException>());
+    expect(event, TypeMatcher<ErrorEvent>());
+    final errorlog = event as ErrorEvent;
+
+    expect(errorlog.error, TypeMatcher<ExpandableException>());
 
     final report = data.body.report;
-    final messages = event.error.messages as List<String>;
+    final messages = errorlog.error.messages as List<String>;
     final traces = [
       ...messages.map(
         (m) => Trace(exception: ExceptionInfo(type: 'test', message: m)),

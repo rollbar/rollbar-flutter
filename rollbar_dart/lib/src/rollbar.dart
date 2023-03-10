@@ -2,12 +2,8 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:rollbar_common/rollbar_common.dart';
-import 'package:rollbar_dart/src/data/payload/user.dart';
-
-import 'data/payload/breadcrumb.dart';
-import 'notifier/notifier.dart';
-import 'config.dart';
-import 'event.dart';
+import 'package:rollbar_dart/rollbar.dart';
+import 'package:rollbar_dart/src/data/event.dart';
 
 @sealed
 class Rollbar {
@@ -15,71 +11,76 @@ class Rollbar {
   static Rollbar get current => _current.orElse(() =>
       throw StateError('Rollbar has not been initialized, call Rollbar.run.'));
 
-  final Notifier _notifier;
+  final Sandbox _sandbox;
 
-  Rollbar._(this._notifier);
+  Rollbar._(this._sandbox);
 
   static Future<void> run(Config config) async {
-    _current?._notifier.dispose();
+    _current?._sandbox.dispose();
     _current = Rollbar._(
-      await config.notifier(config),
+      await config.sandbox(config),
     );
   }
 
-  /// Logs a message as an occurrence.
-  ///
-  /// Examples:
-  /// ```dart
-  /// Rollbar.log('Some message');
-  /// ```
-  static FutureOr<void> log(String message, {Level level = Level.info}) =>
-      current._notifier.notify(Event(
-        level: level,
-        message: message,
-      ));
+  static FutureOr<void> log(
+    dynamic errorOrMessage, {
+    StackTrace stackTrace = StackTrace.empty,
+    Level level = Level.info,
+  }) async {
+    final Event event;
+    if (errorOrMessage is Error || errorOrMessage is Exception) {
+      event = ErrorEvent(errorOrMessage, stackTrace, level: level);
+    } else if (errorOrMessage is Object) {
+      event = MessageEvent(errorOrMessage.toString(), level: level);
+    } else {
+      throw ArgumentError.value(
+        errorOrMessage,
+        'errorOrMessage',
+        'Rollbar can only log Error, Exception or Dart Object types.',
+      );
+    }
+
+    await current._sandbox.dispatch(event);
+  }
 
   /// Sends an error as an occurrence, with [Level.debug] level.
-  static FutureOr<void> debug(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
-        level: Level.debug,
-        error: error,
-        stackTrace: stackTrace,
-      ));
+  static FutureOr<void> debug(
+    dynamic errorOrMessage, [
+    StackTrace stackTrace = StackTrace.empty,
+  ]) async =>
+      await log(errorOrMessage, stackTrace: stackTrace, level: Level.debug);
 
   /// Sends an error as an occurrence, with [Level.info] level.
-  static FutureOr<void> info(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
-        level: Level.info,
-        error: error,
-        stackTrace: stackTrace,
-      ));
+  static FutureOr<void> info(
+    dynamic errorOrMessage, [
+    StackTrace stackTrace = StackTrace.empty,
+  ]) async =>
+      await log(errorOrMessage, stackTrace: stackTrace, level: Level.info);
 
   /// Sends an error as an occurrence, with [Level.warning] level.
-  static FutureOr<void> warn(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
-        level: Level.warning,
-        error: error,
-        stackTrace: stackTrace,
-      ));
+  static FutureOr<void> warn(
+    dynamic errorOrMessage, [
+    StackTrace stackTrace = StackTrace.empty,
+  ]) async =>
+      await log(errorOrMessage, stackTrace: stackTrace, level: Level.warning);
 
   /// Sends an error as an occurrence, with [Level.error] level.
-  static FutureOr<void> error(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
-        level: Level.error,
-        error: error,
-        stackTrace: stackTrace,
-      ));
+  static FutureOr<void> error(
+    dynamic errorOrMessage, [
+    StackTrace stackTrace = StackTrace.empty,
+  ]) async =>
+      await log(errorOrMessage, stackTrace: stackTrace, level: Level.error);
 
   /// Sends an error as an occurrence, with [Level.critical] level.
-  static FutureOr<void> critical(dynamic error, StackTrace stackTrace) =>
-      current._notifier.notify(Event(
-        level: Level.critical,
-        error: error,
-        stackTrace: stackTrace,
-      ));
+  static FutureOr<void> critical(
+    dynamic errorOrMessage, [
+    StackTrace stackTrace = StackTrace.empty,
+  ]) async =>
+      await log(errorOrMessage, stackTrace: stackTrace, level: Level.critical);
 
-  static FutureOr<void> setUser(User? user) {
-    current._notifier.notify(Event(user: user));
+  /// Sets or unsets a user.
+  static FutureOr<void> setUser(User? user) async {
+    await current._sandbox.dispatch(UserEvent(user));
   }
 
   /// Drops a breadcrumb with information about state, a change of state, an
@@ -91,7 +92,7 @@ class Rollbar {
   /// exception or crash.
   ///
   /// - See also: [Breadcrumb].
-  static FutureOr<void> drop(Breadcrumb breadcrumb) {
-    current._notifier.notify(Event(breadcrumb: breadcrumb));
+  static FutureOr<void> drop(Breadcrumb breadcrumb) async {
+    await current._sandbox.dispatch(TelemetryEvent(breadcrumb));
   }
 }
