@@ -74,7 +74,7 @@ class MyHomePageState extends State<MyHomePage> {
       final int level = await platform.batteryLevel;
       batteryLevel = 'Battery at $level%.';
     } on PlatformException catch (e, stackTrace) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
+      batteryLevel = 'Failed to get battery level.';
       Rollbar.drop(
         rollbar.Breadcrumb.error(
             'Non-fatal PlatformException while getting battery level.'),
