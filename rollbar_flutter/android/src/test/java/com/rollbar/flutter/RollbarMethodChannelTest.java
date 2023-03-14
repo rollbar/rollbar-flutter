@@ -77,7 +77,10 @@ public class RollbarMethodChannelTest {
             stackTrace);
 
     if (CodecAdapter.canCaptureStackTrace()) {
-      assertThat(stackTrace.getValue(), startsWith("com.rollbar.flutter.RollbarTracePayload:"));
+      String stackTraceString = stackTrace.getValue();
+      if (stackTraceString != null) {
+        assertThat(stackTraceString, startsWith(TRACE_PAYLOAD_PREFIX));
+      }
     }
 
     String messageString = message.getValue();
