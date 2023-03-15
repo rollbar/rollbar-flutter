@@ -1,6 +1,26 @@
 # Changelog
 
+## 1.3.0
+
+- The log, debug, info, warn, error and critical methods in `Rollbar` now accept any type of object including `Error`, `Exception` and `String`. Dart objects that specialize `toString()` can be also passed and they'll be converted into their string representations.
+
+## 1.2.0
+- Fixed two issues reported by the community:
+  - #91 Unsetting an user causes invalid argument exception, thanks to @rfuerst87 for reporting!
+  - #93 rollbar_flutter: Rollbar interface methods are overridden based on type of error object thanks to @TRemigi for reporting!
+- The way we process event notifications has been refactored. This refactor addresses multiple deficiencies with how we transfer information from our front-end API to our internal Notifier process. This refactor solves multiple bugs, and presents a scalable mechanism to add new functionality in a composable way with the least amount of changes due to a very modularized scheme.
+  - The Notifier used to represent a sandboxed/isolated boundary between the SDK's innards and its API. Now the Notifier is just another switchable self-contained module just like the Transformer, Sender and Marshaller.
+  - A new Sandbox module that represents the aforementioned isolated boundary which offers two flavors: async useful for unit testing, and isolated which leverages Dart's Isolates.
+  - We keep the same level of security by sandboxing our memory, and full thread-enabled concurrency.
+  - This helps remove business logic from the Notifier, which used to handle both the process pipeline and the isolation.
+  - The way the API forwards messages to the Notifier is through Event instances, which is a type-safe way of encoding action and the data associated with such action. This event is dispatched to the Sandbox and the Sandbox sends it to the Isolate stream, and then it's given to the Notifier.
+  - The Notifier encodes the pipeline that processes these Events. There are two types of Events:
+    - Events that modify context (the SDK's state): In this case, the Notifier acts as a simple Reducer that modifies its internal state given the Event's data.
+    - Events that forward data to Rollbar's API: In this case, the event is put through the Marshalling pipeline, the data is transformed if necessary, persisted and then sent.
+  - Wrangler has been renamed to Marshaller.
+
 ## 1.1.0
+
 - A more robust Persistent HTTP Sender error handling strategy allows for better outcomes and recovery in case of server and client errors.
 - The Rollbar SDK will now produce more informative logs when dealing with network, HTTP client and/or server errors.
 - HTTP client has been modularized in order to support mocking and noop clients.

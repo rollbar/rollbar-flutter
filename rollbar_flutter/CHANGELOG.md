@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+- Updated the Rollbar Dart SDK to 1.2.0 which includes fixes to two bugs reported by the community, brought by a general refactor of the event processing mechanism.
+- The example was updated to reflect the API usages that where triggering the issues.
+
 ## 1.2.0
 - Updated internal Rollbar Apple SDK from 1.x to 2.3.4.
 - Using the newest version of the Rollbar Apple SDK will improve the ability for users to catch _native_ errors and fix them while using the Flutter SDK.
