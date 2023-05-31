@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'package:rollbar_dart/rollbar.dart';
 
@@ -30,29 +31,37 @@ class RollbarFlutter {
     Config config,
     RollbarClosure appRunner,
   ) async {
-    WidgetsFlutterBinding.ensureInitialized();
-
-    await Rollbar.run(config.copyWith(
-      framework: 'flutter',
-      persistencePath: await _platform.persistencePath,
-      transformer: (_) => PlatformTransformer(),
-    ));
-
     if (!config.handleUncaughtErrors) {
-      await _platform.initialize(config: config);
-      await appRunner();
+      WidgetsFlutterBinding.ensureInitialized();
+
+      await _run(config, appRunner, null);
+
       return;
     }
 
     await runZonedGuarded(() async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      FlutterError.onError = RollbarFlutterError.onError;
-
-      await _platform.initialize(config: config);
-      await appRunner();
+      await _run(config, appRunner, RollbarFlutterError.onError);
     }, (exception, stackTrace) {
       Rollbar.error(exception, stackTrace);
     });
+  }
+
+  static Future<void> _run(
+    Config config,
+    RollbarClosure appRunner,
+    FlutterExceptionHandler? onError,
+  ) async {
+    await Rollbar.run(config.copyWith(
+      framework: 'flutter',
+      persistencePath: await _platform.persistencePath,
+      transformer: (_) => PlatformTransformer(),
+    ));
+
+    FlutterError.onError ??= onError;
+
+    await _platform.initialize(config: config);
+    await appRunner();
   }
 }
