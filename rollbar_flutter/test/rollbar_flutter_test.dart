@@ -20,7 +20,8 @@ void main() {
     when(sender.send(any)).thenAnswer((_) async => true);
 
     callsReceived = [];
-    channel.setMockMethodCallHandler((methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (methodCall) async {
       callsReceived.add(methodCall);
       return '42';
     });
@@ -28,7 +29,8 @@ void main() {
 
   tearDown(() {
     debugDefaultTargetPlatformOverride = null;
-    channel.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('Initialize platform component when running application', () async {
