@@ -1,6 +1,5 @@
 @import SystemConfiguration;
 @import RollbarNotifier;
-@import RollbarPLCrashReporter;
 
 #import "RollbarFlutterPlugin.h"
 
@@ -19,13 +18,12 @@
 {
     if ([@"initialize" isEqualToString:call.method]) {
         NSDictionary *arguments = call.arguments;
-        RollbarConfig *config = [[RollbarConfig alloc] init];
+        RollbarMutableConfig *config = [[RollbarMutableConfig alloc] init];
         config.destination.accessToken = (NSString *)arguments[@"accessToken"];
         config.destination.environment = (NSString *)arguments[@"environment"];
         config.loggingOptions.codeVersion = (NSString *)arguments[@"codeVersion"];
 
-        id<RollbarCrashCollector> collector = [[RollbarPLCrashCollector alloc] init];
-        [Rollbar initWithConfiguration:config crashCollector:collector];
+        [Rollbar initWithConfiguration:config];
 
         result(nil);
     } else if ([@"persistencePath" isEqualToString:call.method]) {

@@ -16,10 +16,9 @@ Connect your Flutter applications to Rollbar for error reporting.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'RollbarNotifier', '~> 2.3.4'
-  s.dependency 'RollbarPLCrashReporter', '~> 2.3.4'
+  s.dependency 'RollbarNotifier', '~> 3.0.1'
   s.static_framework = true
-  s.platform = :ios, '13.0'
+  s.platform = :ios, '14.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES',
