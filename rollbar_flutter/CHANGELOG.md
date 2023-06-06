@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0
+
+- Updated the Rollbar Apple SDK used by this SDK to handle native-level errors and crashes to the latest 3.x version.
+- For a full list of improvements included in the new Rollbar Apple SDK, check: https://github.com/rollbar/rollbar-apple/releases/tag/3.0.0.
+
 ## 1.3.1
 
 - Fixed an issue with Flutter bindings being initialized in a different zone than the one actually used by the app.
