@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1
+
+- Fixed the SDK not hooking properly to the Flutter framework `onError` callback.
+
 ## 1.4.0
 
 - Updated the Rollbar Apple SDK used by this SDK to handle native-level errors and crashes to the latest 3.x version.
