@@ -59,7 +59,9 @@ class RollbarFlutter {
       transformer: (_) => PlatformTransformer(),
     ));
 
-    FlutterError.onError ??= onError;
+    if (onError != null) {
+      FlutterError.onError = onError;
+    }
 
     await _platform.initialize(config: config);
     await appRunner();
