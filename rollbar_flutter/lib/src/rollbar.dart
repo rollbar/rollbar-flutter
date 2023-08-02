@@ -7,7 +7,9 @@ import 'package:meta/meta.dart';
 
 import 'package:rollbar_dart/rollbar.dart';
 
-import 'flutter_error.dart';
+import 'hooks/hook.dart';
+import 'hooks/flutter_hook.dart';
+import 'hooks/platform_hook.dart';
 import 'platform_transformer.dart';
 
 extension _Methods on MethodChannel {
@@ -22,48 +24,54 @@ extension _Methods on MethodChannel {
 typedef RollbarClosure = FutureOr<void> Function();
 
 @sealed
+@immutable
 class RollbarFlutter {
   static const _platform = MethodChannel('com.rollbar.flutter');
 
-  RollbarFlutter._();
+  const RollbarFlutter._();
 
   static Future<void> run(
     Config config,
     RollbarClosure appRunner,
   ) async {
     if (!config.handleUncaughtErrors) {
-      WidgetsFlutterBinding.ensureInitialized();
-
-      await _run(config, appRunner, null);
-
-      return;
+      await _run(config, appRunner);
+    } else if (requiresCustomZone) {
+      await runZonedGuarded(
+          () async => await _run(config, appRunner, [FlutterHook()]),
+          Rollbar.error);
+    } else {
+      await _run(config, appRunner, [FlutterHook(), PlatformHook()]);
     }
-
-    await runZonedGuarded(() async {
-      WidgetsFlutterBinding.ensureInitialized();
-
-      await _run(config, appRunner, RollbarFlutterError.onError);
-    }, (exception, stackTrace) {
-      Rollbar.error(exception, stackTrace);
-    });
   }
 
   static Future<void> _run(
     Config config,
-    RollbarClosure appRunner,
-    FlutterExceptionHandler? onError,
-  ) async {
+    RollbarClosure appRunner, [
+    List<Hook> hooks = const [],
+  ]) async {
+    WidgetsFlutterBinding.ensureInitialized();
+
     await Rollbar.run(config.copyWith(
       framework: 'flutter',
       persistencePath: await _platform.persistencePath,
       transformer: (_) => PlatformTransformer(),
     ));
 
-    if (onError != null) {
-      FlutterError.onError = onError;
+    for (final hook in hooks) {
+      await hook.install(config);
     }
 
     await _platform.initialize(config: config);
     await appRunner();
+  }
+
+  static bool get requiresCustomZone {
+    try {
+      (PlatformDispatcher.instance as dynamic)?.onError;
+      return false;
+    } on NoSuchMethodError {
+      return true;
+    }
   }
 }
