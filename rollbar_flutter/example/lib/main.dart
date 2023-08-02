@@ -104,13 +104,21 @@ class MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       if (++_counter % 2 == 0) {
-        throw ArgumentError('Unavoidable failure');
+        throw ArgumentError('Failed to increment counter');
       } else {
         Rollbar.drop(
           rollbar.Breadcrumb.log('Counter incremented to $_counter'),
         );
       }
     });
+  }
+
+  void asyncFailure() {
+    _asyncFailure(1).then((n) => log('$n ~/ 0 = ???'));
+  }
+
+  Future<int> _asyncFailure(int num) async {
+    return Future<int>.delayed(Duration(seconds: num), () => num ~/ 0);
   }
 
   void setUser() {
@@ -133,10 +141,10 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void divideByZero() {
-    Rollbar.drop(rollbar.Breadcrumb.log('Tapped divideByZero button'));
-    Rollbar.critical('About to divide by zero, this won\'t work!');
-    1 ~/ 0;
+  void throwError() {
+    Rollbar.drop(rollbar.Breadcrumb.log('Tapped throwError button'));
+    Rollbar.critical('About to throw an error!');
+    throw StateError('A state error occurred');
   }
 
   void crash() {
@@ -157,10 +165,6 @@ class MyHomePageState extends State<MyHomePage> {
         child: const Text('Call Faulty Method'),
       ),
       Text(_faultyMsg),
-      ElevatedButton(
-        onPressed: divideByZero,
-        child: const Text('Divide by zero'),
-      ),
       if (Platform.isIOS)
         ElevatedButton(
           onPressed: crash,
@@ -170,6 +174,15 @@ class MyHomePageState extends State<MyHomePage> {
       ElevatedButton(
         onPressed: setUser,
         child: Text(_setUserText),
+      ),
+      const Divider(),
+      ElevatedButton(
+        onPressed: asyncFailure,
+        child: const Text('Async failure'),
+      ),
+      ElevatedButton(
+        onPressed: throwError,
+        child: const Text('Throw error'),
       ),
       const Divider(),
       const Text('Times you have pushed the plus button:'),

@@ -1,15 +1,17 @@
 import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 
 import 'package:rollbar_common/rollbar_common.dart';
 import 'package:rollbar_dart/rollbar.dart';
 
-import 'extension/diagnostics.dart';
+import '../extension/diagnostics.dart';
+import 'hook.dart';
 
-extension RollbarFlutterError on FlutterError {
-  /// Called whenever the Flutter framework catches an error.
-  ///
-  /// The default behavior is to call [presentError].
-  static void onError(FlutterErrorDetails error) {
+@sealed
+class FlutterHook implements Hook {
+  FlutterExceptionHandler? _originalOnError;
+
+  void onError(FlutterErrorDetails error) {
     if (!error.silent) {
       Rollbar.drop(
         Breadcrumb.error(
@@ -27,6 +29,22 @@ extension RollbarFlutterError on FlutterError {
       Rollbar.error(error.exception, error.stack ?? StackTrace.empty);
     }
 
-    FlutterError.presentError(error);
+    if (_originalOnError != null) {
+      _originalOnError!(error);
+    }
+  }
+
+  @override
+  void install(_) {
+    _originalOnError = FlutterError.onError;
+    FlutterError.onError = onError;
+  }
+
+  @override
+  void uninstall() {
+    if (FlutterError.onError == onError) {
+      FlutterError.onError = _originalOnError;
+      _originalOnError = null;
+    }
   }
 }
