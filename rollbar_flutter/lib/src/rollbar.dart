@@ -10,16 +10,9 @@ import 'package:rollbar_dart/rollbar.dart';
 import 'hooks/hook.dart';
 import 'hooks/flutter_hook.dart';
 import 'hooks/platform_hook.dart';
+import 'hooks/native_hook.dart';
 import 'platform_transformer.dart';
-
-extension _Methods on MethodChannel {
-  Future<void> initialize({required Config config}) async =>
-      await invokeMethod('initialize', config.toMap());
-
-  /// The platform-specific path where we can persist data if needed.
-  Future<String> get persistencePath async =>
-      await invokeMethod('persistencePath');
-}
+import 'method_channel.dart';
 
 typedef RollbarClosure = FutureOr<void> Function();
 
@@ -35,13 +28,20 @@ class RollbarFlutter {
     RollbarClosure appRunner,
   ) async {
     if (!config.handleUncaughtErrors) {
-      await _run(config, appRunner);
-    } else if (requiresCustomZone) {
+      await _run(config, appRunner, [NativeHook()]);
+    } else if (!PlatformHook.isAvailable) {
       await runZonedGuarded(
-          () async => await _run(config, appRunner, [FlutterHook()]),
+          () async => await _run(config, appRunner, [
+                FlutterHook(),
+                NativeHook(),
+              ]),
           Rollbar.error);
     } else {
-      await _run(config, appRunner, [FlutterHook(), PlatformHook()]);
+      await _run(config, appRunner, [
+        FlutterHook(),
+        PlatformHook(),
+        NativeHook(),
+      ]);
     }
   }
 
@@ -62,7 +62,6 @@ class RollbarFlutter {
       await hook.install(config);
     }
 
-    await _platform.initialize(config: config);
     await appRunner();
   }
 
