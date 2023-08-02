@@ -6,6 +6,15 @@ class PlatformHook implements Hook {
   ErrorCallback? _originalOnError;
   PlatformDispatcher? _platformDispatcher;
 
+  static bool get isAvailable {
+    try {
+      (PlatformDispatcher.instance as dynamic)?.onError;
+      return true;
+    } on NoSuchMethodError {
+      return false;
+    }
+  }
+
   bool onError(Object exception, StackTrace stackTrace) {
     Rollbar.error(exception, stackTrace);
 

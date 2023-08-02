@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
@@ -63,14 +62,5 @@ class RollbarFlutter {
     }
 
     await appRunner();
-  }
-
-  static bool get requiresCustomZone {
-    try {
-      (PlatformDispatcher.instance as dynamic)?.onError;
-      return false;
-    } on NoSuchMethodError {
-      return true;
-    }
   }
 }
