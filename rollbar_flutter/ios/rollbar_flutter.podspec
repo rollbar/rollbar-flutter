@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'rollbar_flutter'
-  s.version          = '1.4.1'
+  s.version          = '1.4.2'
   s.summary          = 'Connect your Flutter applications to Rollbar for error reporting.'
   s.description      = <<-DESC
 Connect your Flutter applications to Rollbar for error reporting.
@@ -16,7 +16,7 @@ Connect your Flutter applications to Rollbar for error reporting.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'RollbarNotifier', '~> 3.0.1'
+  s.dependency 'RollbarNotifier', '~> 3.1.0'
   s.static_framework = true
   s.platform = :ios, '14.0'
 
