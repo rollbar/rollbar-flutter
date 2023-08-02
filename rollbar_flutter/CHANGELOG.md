@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.2
+
+- Updated the hooking mechanism to use `PlatformDispatcher` instead of a custom `Zone` when using Flutter 3.3 or above.
+  - The old mechanism will be used when using a pre-3.3 Flutter version.
+  - Not using a custom `Zone` should improve startup performance.
+
 ## 1.4.1
 
 - Fixed the SDK not hooking properly to the Flutter framework `onError` callback.
