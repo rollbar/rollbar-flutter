@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   logging: ^1.0.2
-  rollbar_dart: ^1.1.0
+  rollbar_dart: ^1.3.0
 
 dependency_overrides:
   rollbar_common:

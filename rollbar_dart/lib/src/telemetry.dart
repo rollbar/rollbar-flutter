@@ -26,7 +26,7 @@ class Telemetry with Persistence<BreadcrumbRecord> implements Configurable {
       );
 
   List<Breadcrumb> breadcrumbs() => records
-      .sorted(by: #BreadcrumbRecord.timestamp)
+      .sorted(by: Symbol('${(BreadcrumbRecord).toString()}.timestamp'))
       .map((record) => jsonDecode(record.breadcrumb) as JsonMap)
       .map(Breadcrumb.fromMap)
       .toList();

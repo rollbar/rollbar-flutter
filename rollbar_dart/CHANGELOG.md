@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.1
+
+- Fixed breadcrumbs not being processed in the right order in obfuscated builds.
+
 ## 1.3.0
 
 - The log, debug, info, warn, error and critical methods in `Rollbar` now accept any type of object including `Error`, `Exception` and `String`. Dart objects that specialize `toString()` can be also passed and they'll be converted into their string representations.
