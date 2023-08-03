@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.3
+
+- Bumped version of `connectivity_plus` dependency to `^4.0.0`.
+
 ## 1.4.2
 
 - Updated the hooking mechanism to use `PlatformDispatcher` instead of a custom `Zone` when using Flutter 3.3 or above.
