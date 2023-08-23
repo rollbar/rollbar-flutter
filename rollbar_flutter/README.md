@@ -32,7 +32,7 @@ See the [`example` directory](./example/) for a complete example.
 
 ## Compatibility
 
-- Flutter 2: version **2.8.1** and above
+- Flutter 3: version **3.0.0** and above
 
 Logging version-specific issues, even outside of the supported versions, is welcome and they will be fixed whenever possible.
 
