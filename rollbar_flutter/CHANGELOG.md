@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0
+
+- Updated internal Rollbar Apple SDK to 3.2.0
+- The Flutter SDK now supports all Apple OS versions currently supported by Apple:
+  - The minimum OS requirements are now: iOS 11, iPadOS 11, macOS 10.13 and watchOS 4.0.
+
 ## 1.4.3
 
 - Bumped version of `connectivity_plus` dependency to `^4.0.0`.
