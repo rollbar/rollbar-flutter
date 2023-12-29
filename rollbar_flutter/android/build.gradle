@@ -104,8 +104,8 @@ task checkstyleMain(type: Checkstyle) {
     configFile file("$rootDir/tools/checkstyle/google_checks.xml")
     classpath = files()
     reports {
-        xml.enabled false
-        html.enabled true
+        xml.enabled = false
+        html.enabled = true
     }
 }
 
@@ -121,8 +121,8 @@ def makeCheckstyleTask(sourceSet, config) {
         configFile file("$rootDir/tools/checkstyle/${config}")
         classpath = files()
         reports {
-            xml.enabled false
-            html.enabled true
+            xml.enabled = false
+            html.enabled = true
         }
     }
 
