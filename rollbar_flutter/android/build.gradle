@@ -104,8 +104,8 @@ task checkstyleMain(type: Checkstyle) {
     configFile file("$rootDir/tools/checkstyle/google_checks.xml")
     classpath = files()
     reports {
-        xml.enabled false
-        html.enabled true
+        xml.required = false
+        html.required = true
     }
 }
 
@@ -121,8 +121,8 @@ def makeCheckstyleTask(sourceSet, config) {
         configFile file("$rootDir/tools/checkstyle/${config}")
         classpath = files()
         reports {
-            xml.enabled false
-            html.enabled true
+            xml.required = false
+            html.required = true
         }
     }
 
@@ -159,7 +159,7 @@ task spotbugsMain(type: com.github.spotbugs.snom.SpotBugsTask) {
     release = project.version
     reports {
         html {
-            enabled = true
+            required = true
             destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
             stylesheet = 'fancy-hist.xsl'
         }
