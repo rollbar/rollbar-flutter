@@ -10,6 +10,10 @@
 
 ---
 
+<p> Attention:</p>
+
+<p>As of April 2024, Rollbar will not be actively updating this repository and plans to archive it. We encourage our community to fork this repo if you wish to continue its development. While Rollbar will no longer be engaging in active development, we remain committed to reviewing and merging pull requests, particularly those about security updates. If an actively maintained fork emerges, please let us know, and we will gladly link to it from our documentation.</p>
+
 This repository contains the `rollbar_dart` package and the `rollbar_flutter` plugin.
 
 For `rollbar-dart`, see its [README](rollbar_dart/README.md).
