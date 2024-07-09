@@ -1,6 +1,6 @@
 name: rollbar_dart_example
 description: Demonstrates how to use rollbar-dart
-version: 1.3.0
+version: 2.0.0
 
 publish_to: 'none'
 
@@ -9,9 +9,6 @@ environment:
 
 dependencies:
   logging: ^1.0.2
-  rollbar_dart: ^1.3.0
-
-dependency_overrides:
   rollbar_common:
     path: ../../rollbar_common
   rollbar_dart:
