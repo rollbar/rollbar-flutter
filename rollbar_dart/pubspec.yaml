@@ -15,7 +15,6 @@ dependencies:
   collection: ^1.16.0
   stack_trace: ^1.10.0
   rollbar_common:
-    path: ../rollbar_common
 
 dev_dependencies:
   lints: ^4.0.0

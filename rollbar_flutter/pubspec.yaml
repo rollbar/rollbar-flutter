@@ -4,11 +4,10 @@ version: 2.0.0
 homepage: https://www.rollbar.com
 documentation: https://docs.rollbar.com/docs/flutter#flutter
 repository: https://github.com/rollbar/rollbar-flutter
-publish_to: none
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
-  flutter: '>=3.0.0'
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"
 
 dependencies:
   flutter:
@@ -16,10 +15,8 @@ dependencies:
   meta: ^1.7.0
   connectivity_plus: ^5.0.1
   sqlite3_flutter_libs: ^0.5.12
-  rollbar_common: 
-    path: ../rollbar_common
+  rollbar_common:
   rollbar_dart:
-    path: ../rollbar_dart
 
 dev_dependencies:
   lints: ^4.0.0

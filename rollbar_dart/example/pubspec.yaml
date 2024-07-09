@@ -10,9 +10,7 @@ environment:
 dependencies:
   logging: ^1.0.2
   rollbar_common:
-    path: ../../rollbar_common
   rollbar_dart:
-    path: ..
 
 dev_dependencies:
   lints: ^2.0.0
