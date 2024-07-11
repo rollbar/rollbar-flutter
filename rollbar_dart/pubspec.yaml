@@ -11,7 +11,7 @@ environment:
 dependencies:
   http: '>=0.13.0 <2.0.0'
   meta: ^1.7.0
-  sqlite3: ^2.4.3
+  sqlite3: ^1.11.2
   collection: ^1.16.0
   stack_trace: ^1.10.0
   rollbar_common:
