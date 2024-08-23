@@ -36,6 +36,35 @@ For complete usage instructions and configuration reference, see our [`rollbar-d
 
 See our [Releases](https://github.com/rollbar/rollbar-flutter/releases) page for a list of all releases and changes.
 
+## Vendoring
+
+Since Rollbar will no longer be publishing package updates to pub.dev, it's
+recommended that you "vendor" the Rollbar packages into your project so
+that you can have full control over package versions, pull in fixes from
+the community, etc. For example, the `rollbar_dart` package on pub.dev
+currently has an old `http` dependency, even though this has already been
+updated on the `main` branch.
+
+To vendor this package in your project, it's recommended to add it as a
+`git` submodule. Typically you'll want to fork the repo so that you can
+make changes there, and use your fork for the submodule URL, like so:
+
+```
+git submodule add https://github.com/<YOUR_USERNAME>/rollbar-flutter.git vendor/rollbar-flutter
+```
+
+Next, remove `rollbar_flutter: ^X.X.X` from the `dependencies:` block in
+your `pubspec.yaml`, and add the following:
+
+```yaml
+dependencies:
+  ...
+
+  # vendored packages
+  rollbar_flutter:
+    path: vendor/rollbar-flutter/rollbar_flutter
+```
+
 ## Help / Support
 
 If you run into any issues, please email us at [support@rollbar.com](mailto:support@rollbar.com).
