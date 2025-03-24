@@ -11,18 +11,18 @@ jobs:
     name: Flutter version ${{ matrix.flutter_version }} (Android)
     strategy:
       matrix:
-        flutter_version: ["3.10.2"]
+        flutter_version: ["3.29.2"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-java@v1
         with:
           java-version: "11.x"
-      - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ matrix.flutter_version }}
       - name: Cache Dart and Gradle packages
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -69,13 +69,13 @@ jobs:
       - name: Build rollbar_flutter Android example
         working-directory: ./rollbar_flutter/example/
         run: flutter build apk
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         # We are not supposed to lock our dependencies in packages or plugins, so we'll
         # at least keep track of which ones were used in the build, in case a test fails
         # and we need to reproduce it locally with the same dependencies.
         with:
-          name: dependencies_used_${{ matrix.flutter_version }}
+          name: dependencies_used_${{ runner.os }}_${{ matrix.flutter_version }}_${{ github.run_id }}
           path: |
             rollbar_dart/pubspec.lock
             rollbar_dart/example/pubspec.lock
@@ -87,15 +87,15 @@ jobs:
     name: Flutter version ${{ matrix.flutter_version }} (iOS)
     strategy:
       matrix:
-        flutter_version: ["3.10.2"]
+        flutter_version: ["3.29.2"]
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ matrix.flutter_version }}
       - name: Cache pub packages
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ${{ env.PUB_CACHE }}
@@ -109,11 +109,11 @@ jobs:
       - name: Build rollbar_flutter iOS example
         working-directory: ./rollbar_flutter/example/
         run: flutter build ios --no-codesign
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         # Save dependencies used
         with:
-          name: dependencies_used_${{ matrix.flutter_version }}
+          name: dependencies_used_${{ runner.os }}_${{ matrix.flutter_version }}_${{ github.run_id }}
           path: |
             rollbar_dart/pubspec.lock
             rollbar_dart/example/pubspec.lock

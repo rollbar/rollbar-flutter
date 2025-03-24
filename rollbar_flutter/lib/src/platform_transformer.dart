@@ -61,7 +61,7 @@ extension _Message on Iterable<Trace> {
       (extraTraces.tryFirst?.exception.message)
           .map((message) => 'PlatformException(error, "$message")')
           .map(replaceExceptionMessages)
-          .map(append ? extraTraces.followedBy : identity)
+          .map(append ? extraTraces.followedBy : (x) => x)
           .or(this);
 
   /// Propagates the given [message] as the new exception message, replacing
