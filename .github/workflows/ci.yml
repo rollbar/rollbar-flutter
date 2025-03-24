@@ -75,7 +75,7 @@ jobs:
         # at least keep track of which ones were used in the build, in case a test fails
         # and we need to reproduce it locally with the same dependencies.
         with:
-          name: dependencies_used_${{ matrix.flutter_version }}
+          name: dependencies_used_${{ runner.os }}_${{ matrix.flutter_version }}_${{ github.run_id }}
           path: |
             rollbar_dart/pubspec.lock
             rollbar_dart/example/pubspec.lock
@@ -113,7 +113,7 @@ jobs:
         if: ${{ always() }}
         # Save dependencies used
         with:
-          name: dependencies_used_${{ matrix.flutter_version }}
+          name: dependencies_used_${{ runner.os }}_${{ matrix.flutter_version }}_${{ github.run_id }}
           path: |
             rollbar_dart/pubspec.lock
             rollbar_dart/example/pubspec.lock
