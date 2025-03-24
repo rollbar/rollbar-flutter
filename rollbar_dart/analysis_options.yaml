@@ -17,8 +17,6 @@ linter:
     - prefer_single_quotes
     - sort_child_properties_last
     - unawaited_futures
-    - unsafe_html
-
 # For more information about the core and recommended set of lints, see
 # https://dart.dev/go/core-lints
 
