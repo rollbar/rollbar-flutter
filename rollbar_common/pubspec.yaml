@@ -1,6 +1,6 @@
 name: rollbar_common
 description: Commons package used by the Rollbar Dart and Flutter SDKs for error reporting.
-version: 1.1.0
+version: 1.1.1
 homepage: https://www.rollbar.com
 documentation: https://docs.rollbar.com/docs/flutter#dart
 repository: https://github.com/rollbar/rollbar-flutter

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.2
+
+- Updated http library to '>=0.13.0 <2.0.0'
+- Fixed usage of unsafe_html which was removed in Dart 3.7.0.
+
 ## 1.3.1
 
 - Fixed breadcrumbs not being processed in the right order in obfuscated builds.
@@ -9,6 +14,7 @@
 - The log, debug, info, warn, error and critical methods in `Rollbar` now accept any type of object including `Error`, `Exception` and `String`. Dart objects that specialize `toString()` can be also passed and they'll be converted into their string representations.
 
 ## 1.2.0
+
 - Fixed two issues reported by the community:
   - #91 Unsetting an user causes invalid argument exception, thanks to @rfuerst87 for reporting!
   - #93 rollbar_flutter: Rollbar interface methods are overridden based on type of error object thanks to @TRemigi for reporting!

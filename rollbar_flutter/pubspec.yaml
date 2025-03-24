@@ -1,6 +1,6 @@
 name: rollbar_flutter
 description: Connect your Flutter applications to Rollbar for error reporting.
-version: 1.5.0
+version: 1.5.1
 homepage: https://www.rollbar.com
 documentation: https://docs.rollbar.com/docs/flutter#flutter
 repository: https://github.com/rollbar/rollbar-flutter

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.1
+
+- Updated internal Rollbar Apple SDK to 3.3.3.
+- Deployment iOS target has been set to 14
+- Rollbar Flutter SDK is now able to compile with the latest Xcode versions.
+- Some fixes to the android build gradle.
+- Fixed usage of unsafe_html which was removed in Dart 3.7.0.
+- Fixed issue with the value of 'identity' not being used.
+
 ## 1.5.0
 
 - Updated internal Rollbar Apple SDK to 3.2.0
