@@ -3,6 +3,7 @@
 ## 1.3.2
 
 - Updated http library to '>=0.13.0 <2.0.0'
+- Updated sdk constraint to '>=2.17.0 <4.0.0'
 - Fixed usage of unsafe_html which was removed in Dart 3.7.0.
 
 ## 1.3.1

@@ -6,7 +6,7 @@ documentation: https://docs.rollbar.com/docs/flutter#dart
 repository: https://github.com/rollbar/rollbar-flutter
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=2.17.0 <4.0.0'
 
 dependencies:
   http: '>=0.13.0 <2.0.0'

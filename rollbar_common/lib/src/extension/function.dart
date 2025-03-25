@@ -55,7 +55,7 @@ bool isNotNull<T>(T? x) => x != null;
 /// ```
 /// id := λx.x where x: bool ≡ bool isTrue(bool x) => x;
 /// ```
-const isTrue = identity<bool>;
+bool isTrue(bool x) => x;
 
 /// Tests whether the given boolean argument [x] is false.
 ///
