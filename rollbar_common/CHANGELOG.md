@@ -4,6 +4,8 @@
 
 - Updated http library to '>=0.13.0 <2.0.0'
 - Updated uuid library to '^4.1.0'
+- Updated sdk constraint to '>=2.17.0 <4.0.0'
+- Fixed warnings about the value of 'identity' not being used.
 
 ## 1.1.0
 

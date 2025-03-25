@@ -58,7 +58,7 @@ void main() {
         expect(payloadRecords.length, ++recordsCount);
       }
 
-      for (final record in payloadRecords.map(identity)) {
+      for (final record in payloadRecords.map((x) => x)) {
         expect(payloadRecords.remove(record), isTrue);
         expect(payloadRecords.record(id: record.id), isNull);
         expect(payloadRecords.length, --recordsCount);
@@ -152,7 +152,7 @@ void main() {
       expect(payloadRecords.length, 16);
 
       final transformResult = payloadRecords.map(records.contains);
-      expect(transformResult.all(identity), isTrue);
+      expect(transformResult.all((x) => x), isTrue);
 
       for (final record in payloadRecords) {
         expect(records.contains(record), isTrue);
