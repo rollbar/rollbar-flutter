@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'rollbar_flutter'
-  s.version          = '1.4.2'
+  s.version          = '1.5.2'
   s.summary          = 'Connect your Flutter applications to Rollbar for error reporting.'
   s.description      = <<-DESC
 Connect your Flutter applications to Rollbar for error reporting.
