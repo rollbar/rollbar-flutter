@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.2
+
+### FIX
+- Add missing namespace to support AGP 7.0+.
+
 ## 1.5.1
 
 - Updated internal Rollbar Apple SDK to 3.3.3.
