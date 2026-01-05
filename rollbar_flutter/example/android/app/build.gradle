@@ -37,7 +37,7 @@ android {
     defaultConfig {
         applicationId "com.rollbar.flutter.example"
         minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.compileSdkVersion
+        targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
