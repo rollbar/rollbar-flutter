@@ -3,7 +3,15 @@
 ## 1.5.2
 
 ### FIX
+
 - Add missing namespace to support AGP 7.0+.
+- Add jsr305 annotations to satisfy R8 for javax.annotation.Nullable.
+
+### BUILD
+
+- Update the Android example to AGP 8.11.1, Gradle 8.14.3, and SDK 35.
+- Keep the Android plugin build on AGP 7.1.2 and Gradle 7.4 for compatibility.
+- Remove Flutter 1.x test source set handling in the Android plugin.
 
 ## 1.5.1
 
