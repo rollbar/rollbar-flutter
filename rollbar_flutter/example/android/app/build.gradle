@@ -22,6 +22,7 @@ if (flutterVersionName == null) {
 }
 
 android {
+    namespace "com.rollbar.flutter.example"
     compileSdkVersion flutter.compileSdkVersion
 
     compileOptions {
@@ -35,7 +36,7 @@ android {
 
     defaultConfig {
         applicationId "com.rollbar.flutter.example"
-        minSdkVersion 19
+        minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

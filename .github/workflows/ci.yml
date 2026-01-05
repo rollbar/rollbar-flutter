@@ -11,13 +11,14 @@ jobs:
     name: Flutter version ${{ matrix.flutter_version }} (Android)
     strategy:
       matrix:
-        flutter_version: ["3.29.2"]
+        flutter_version: ["3.29.2", "3.38.5"]
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v4
         with:
-          java-version: "11.x"
+          distribution: "temurin"
+          java-version: "17"
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ matrix.flutter_version }}
@@ -60,12 +61,22 @@ jobs:
       - name: Run rollbar_flutter Pana checks
         working-directory: ./rollbar_flutter
         run: ../build_tools/run-pana ${{ matrix.flutter_version }}
+      - name: Use JDK 11 for plugin Gradle check
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "11"
       - name: Test rollbar_flutter Android plugin
         working-directory: ./rollbar_flutter/android
         run: |
           export FLUTTER_SDK=$(../../build_tools/find-flutter-sdk)
           echo $FLUTTER_SDK
           ./gradlew check
+      - name: Use JDK 17 for example build
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
       - name: Build rollbar_flutter Android example
         working-directory: ./rollbar_flutter/example/
         run: flutter build apk
@@ -87,7 +98,7 @@ jobs:
     name: Flutter version ${{ matrix.flutter_version }} (iOS)
     strategy:
       matrix:
-        flutter_version: ["3.29.2"]
+        flutter_version: ["3.29.2", "3.38.5"]
 
     steps:
       - uses: actions/checkout@v4
