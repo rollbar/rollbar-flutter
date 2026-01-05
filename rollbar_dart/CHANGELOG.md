@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.3
+
+- Fixed notifier reporting incorrect version
+
 ## 1.3.2
 
 - Updated http library to '>=0.13.0 <2.0.0'
