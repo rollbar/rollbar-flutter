@@ -22,6 +22,8 @@ if (flutterVersionName == null) {
 }
 
 android {
+    // NOTE: compileSdkVersion 34 is required for AGP 7 compatibility.
+    // When upgrading to SDK 35+, ensure the Android Gradle Plugin is upgraded accordingly.
     compileSdkVersion 34
 
     compileOptions {
@@ -36,6 +38,8 @@ android {
     defaultConfig {
         applicationId "com.rollbar.flutter.example"
         minSdkVersion 19
+        // NOTE: targetSdkVersion is intentionally pinned for AGP 7 compatibility.
+        // Update only after verifying compatibility with the Android Gradle Plugin and Flutter tooling.
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
