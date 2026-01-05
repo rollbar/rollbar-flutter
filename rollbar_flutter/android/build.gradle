@@ -82,6 +82,7 @@ def flutterVersion = "1.0.0-${engineVersion}"
 dependencies {
     api 'com.rollbar:rollbar-java:1.7.8'
     api 'com.rollbar:rollbar-android:1.7.8@aar'
+    api 'com.google.code.findbugs:jsr305:3.0.2'
     compileOnly "io.flutter:flutter_embedding_debug:${flutterVersion}"
 
     testImplementation "io.flutter:flutter_embedding_debug:${flutterVersion}"
@@ -167,17 +168,7 @@ task spotbugsMain(type: com.github.spotbugs.snom.SpotBugsTask) {
     }
 }
 
-String flutterCompatVersion = Paths
-    .get(flutterRoot, "version")
-    .toFile()
-    .text
-    .trim()
-
-if (flutterCompatVersion.startsWith('1.')) {
-    android.sourceSets.test.java.srcDir file('src/testflutter1/java/')
-} else {
-    android.sourceSets.test.java.srcDir file('src/testflutter/java/')
-}
+android.sourceSets.test.java.srcDir file('src/testflutter/java/')
 
 afterEvaluate {
     if (project.tasks.getByName("check")) {
